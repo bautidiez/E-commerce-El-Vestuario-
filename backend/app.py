@@ -140,40 +140,20 @@ app.register_blueprint(payments_bp, url_prefix='/api/payments')
 # Crear tablas
 with app.app_context():
     db.create_all()
-    # Crear admin por defecto de forma segura
-    from werkzeug.security import generate_password_hash
-    
-    admin = Admin.query.filter_by(username='admin').first()
-    # Usar variable de entorno o contraseña fija de seguridad
-    initial_pass = os.environ.get('ADMIN_INITIAL_PASSWORD', 'ElVestuario2024!Admin')
-    
-    if initial_pass:
-        initial_pass = initial_pass.strip() # Limpiar posibles espacios accidentales
-        if not admin:
-            default_admin = Admin(
-                username='admin',
-                password_hash=generate_password_hash(initial_pass),
-                email='admin@elvestuario.com'
-            )
-            db.session.add(default_admin)
-            db.session.commit()
-            print("✓ Admin inicial 'admin' creado exitosamente.")
-        else:
-            # Solo actualizamos si el password cambió o el hash es inválido para el pass actual
-            from werkzeug.security import check_password_hash
-            print(f"DEBUG STARTUP: Verificando admin con pass de longitud {len(initial_pass)}...")
-            if not check_password_hash(admin.password_hash, initial_pass):
-                admin.password_hash = generate_password_hash(initial_pass)
-                db.session.commit()
-                print(f"✓ Password de admin SINCRONIZADO forzosamente con ENV (Pass empieza con '{initial_pass[:2]}...').")
-            else:
-                print("✓ Password de admin ya está sincronizado y validado.")
-            
-    # Limpiamos imports incorrectos previos
+
 
 
     if 'postgresql' in app.config['SQLALCHEMY_DATABASE_URI']:
         from sqlalchemy import text
+                # Migraciones para Admins
+        try:
+            db.session.execute(text("ALTER TABLE admins ADD COLUMN IF NOT EXISTS email VARCHAR(120)"))
+            db.session.execute(text("UPDATE admins SET email = username || '@elvestuario.com' WHERE email IS NULL"))
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            print(f"Nota: Error en migración admins: {e}")
+
         # Migraciones para Clientes
         try:
             db.session.execute(text("ALTER TABLE clientes ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255)"))
@@ -273,6 +253,36 @@ with app.app_context():
 
         print("✓ Verificación de esquema PostgreSQL completada")
 
+    # Crear admin por defecto de forma segura
+    from werkzeug.security import generate_password_hash
+    
+    admin = Admin.query.filter_by(username='admin').first()
+    # Usar variable de entorno o contraseña fija de seguridad
+    initial_pass = os.environ.get('ADMIN_INITIAL_PASSWORD', 'ElVestuario2024!Admin')
+    
+    if initial_pass:
+        initial_pass = initial_pass.strip() # Limpiar posibles espacios accidentales
+        if not admin:
+            default_admin = Admin(
+                username='admin',
+                password_hash=generate_password_hash(initial_pass),
+                email='admin@elvestuario.com'
+            )
+            db.session.add(default_admin)
+            db.session.commit()
+            print("✓ Admin inicial 'admin' creado exitosamente.")
+        else:
+            # Solo actualizamos si el password cambió o el hash es inválido para el pass actual
+            from werkzeug.security import check_password_hash
+            print(f"DEBUG STARTUP: Verificando admin con pass de longitud {len(initial_pass)}...")
+            if not check_password_hash(admin.password_hash, initial_pass):
+                admin.password_hash = generate_password_hash(initial_pass)
+                db.session.commit()
+                print(f"✓ Password de admin SINCRONIZADO forzosamente con ENV (Pass empieza con '{initial_pass[:2]}...').")
+            else:
+                print("✓ Password de admin ya está sincronizado y validado.")
+            
+    # Limpiamos imports incorrectos previos
 # Health check simple que no usa BD
 # Health check simple que no usa BD
 @app.route('/')
