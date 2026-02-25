@@ -143,7 +143,7 @@ with app.app_context():
 
 
 
-    if 'postgresql' in app.config['SQLALCHEMY_DATABASE_URI']:
+    if 'postgres' in app.config['SQLALCHEMY_DATABASE_URI']:
         from sqlalchemy import text
                 # Migraciones para Admins
         try:
