@@ -96,20 +96,22 @@ from models import *
 # from routes_contacto import *
 # from routes_clientes import *
 
-# Nuevos Blueprints
+# Blueprints
 from blueprints.auth import auth_bp
 from blueprints.store_public import store_public_bp
-from blueprints.store_admin import store_admin_bp
 from blueprints.clients import clients_bp
 from blueprints.payments import payments_bp
 
+# Blueprints de admin — módulos por dominio
+from blueprints.admin import admin_blueprints
+
 app.register_blueprint(auth_bp)
 app.register_blueprint(store_public_bp)
-app.register_blueprint(store_admin_bp)
 app.register_blueprint(clients_bp)
-# app.register_blueprint(shipping_bp) # Deprecated or migrated?
-# app.register_blueprint(orders_bp) # Migrated to public store
 app.register_blueprint(payments_bp, url_prefix='/api/payments')
+
+for bp in admin_blueprints:
+    app.register_blueprint(bp)
 
 # ==================== BACKGROUND SCHEDULER ====================
 # Configurar tareas programadas (auto-limpieza de pedidos expirados)
@@ -251,7 +253,7 @@ with app.app_context():
             db.session.rollback()
             print(f"Nota: Error en migración imágenes: {e}")
 
-        print("✓ Verificación de esquema PostgreSQL completada")
+        print("[OK] Verificacion de esquema PostgreSQL completada")
 
     # Crear admin por defecto de forma segura
     from werkzeug.security import generate_password_hash
@@ -270,7 +272,7 @@ with app.app_context():
             )
             db.session.add(default_admin)
             db.session.commit()
-            print("✓ Admin inicial 'admin' creado exitosamente.")
+            print("[OK] Admin inicial 'admin' creado exitosamente.")
         else:
             # Solo actualizamos si el password cambió o el hash es inválido para el pass actual
             from werkzeug.security import check_password_hash
@@ -278,9 +280,9 @@ with app.app_context():
             if not check_password_hash(admin.password_hash, initial_pass):
                 admin.password_hash = generate_password_hash(initial_pass)
                 db.session.commit()
-                print(f"✓ Password de admin SINCRONIZADO forzosamente con ENV (Pass empieza con '{initial_pass[:2]}...').")
+                print(f"[OK] Password de admin SINCRONIZADO con ENV (Pass empieza con '{initial_pass[:2]}...').") 
             else:
-                print("✓ Password de admin ya está sincronizado y validado.")
+                print("[OK] Password de admin ya esta sincronizado y validado.")
             
     # Limpiamos imports incorrectos previos
 # Health check simple que no usa BD

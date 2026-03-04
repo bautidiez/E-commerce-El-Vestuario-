@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity, decode_token
 from extensions import limiter
 from models import Cliente, Pedido, db

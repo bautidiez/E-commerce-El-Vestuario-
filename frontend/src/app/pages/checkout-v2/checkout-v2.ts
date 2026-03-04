@@ -1,5 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef, NgZone, ApplicationRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { CartItem, EnvioOption, Promocion, CONFIG } from '../../models/interfaces';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CartService } from '../../services/cart.service';
 import { CheckoutService } from '../../services/checkout.service';
@@ -16,7 +17,7 @@ import { AuthService } from '../../services/auth.service';
 })
 export class CheckoutV2Component implements OnInit {
     currentStep = 1;
-    items: any[] = [];
+    items: CartItem[] = [];
     total = 0;
 
     // Forms
@@ -26,11 +27,11 @@ export class CheckoutV2Component implements OnInit {
     couponForm: FormGroup;
 
     // Data from backend
-    shippingOptions: any[] = [];
+    shippingOptions: EnvioOption[] = [];
     transferData: any = null;
     loading = false;
     orderCreated: any = null;
-    appliedCoupon: any = null;
+    appliedCoupon: Promocion | null = null;
     couponError: string = '';
     couponSuccess: string = '';
     validatingCoupon = false;
@@ -125,7 +126,7 @@ export class CheckoutV2Component implements OnInit {
 
     checkIfShort(categoriaId: number): boolean {
         // Fallback for direct ID match (Shorts usually ID 8 or 2) even if map not loaded yet
-        if (categoriaId === 8 || categoriaId === 2) return true;
+        if (CONFIG.CATEGORIAS.IDS_SHORTS.includes(+categoriaId)) return true;
 
         if (this.categoriesMap.size === 0) return false;
 
@@ -133,7 +134,7 @@ export class CheckoutV2Component implements OnInit {
         let attempts = 0;
 
         while (currentId !== null && attempts < 10) {
-            if (currentId === 8 || currentId === 2) return true;
+            if (CONFIG.CATEGORIAS.IDS_SHORTS.includes(currentId)) return true;
 
             const category = this.categoriesMap.get(currentId);
             if (category) {

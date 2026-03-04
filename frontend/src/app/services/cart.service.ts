@@ -4,13 +4,7 @@ import { AuthService } from './auth.service';
 import { ApiService } from './api.service';
 import { ToastService } from './toast.service';
 
-export interface CartItem {
-  producto: any;
-  talle: any;
-  cantidad: number;
-  precio_unitario: number;
-  descuento?: number;
-}
+import { CartItem, Producto, Talle } from '../models/interfaces';
 
 interface CartStorage {
   items: CartItem[];
@@ -208,7 +202,7 @@ export class CartService {
 
     // Validar Stock
     // Use loose comparison for IDs to avoid string/number mismatch
-    const stockEntry = producto.stock_talles?.find((s: any) => s.talle_id == talle.id);
+    const stockEntry = producto.stock_talles?.find((s) => s.talle_id == talle.id);
     const stockDisponible = stockEntry?.cantidad || 0;
 
     console.log('DEBUG CART: Stock disponible:', stockDisponible);

@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { CartItem, EnvioOption } from '../models/interfaces';
 
 @Injectable({
     providedIn: 'root'
@@ -22,8 +23,8 @@ export class CheckoutService {
     }
 
     // Cálculo de Envío
-    calcularEnvio(codigo_postal: string, items: any[] = []): Observable<any[]> {
-        return this.http.post<any[]>(`${this.apiUrl}/envios/calcular`, { codigo_postal, items });
+    calcularEnvio(codigo_postal: string, items: CartItem[] = []): Observable<EnvioOption[]> {
+        return this.http.post<EnvioOption[]>(`${this.apiUrl}/envios/calcular`, { codigo_postal, items });
     }
 
     // Gestión de Pedidos
