@@ -172,6 +172,7 @@ export class ApiService {
 
       // NUEVO: Filtro de stock bajo
       if (params.solo_bajo !== undefined) queryParams.solo_bajo = params.solo_bajo;
+      if (params.solo_agotado !== undefined) queryParams.solo_agotado = params.solo_agotado;
       if (params.umbral !== undefined) queryParams.umbral = params.umbral;
     }
 
