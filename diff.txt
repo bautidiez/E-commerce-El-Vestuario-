@@ -1,0 +1,205 @@
+diff --git a/backend/app.py b/backend/app.py
+index fa767e2..af5d53f 100644
+--- a/backend/app.py
++++ b/backend/app.py
+@@ -140,40 +140,20 @@ app.register_blueprint(payments_bp, url_prefix='/api/payments')
+ # Crear tablas
+ with app.app_context():
+     db.create_all()
+-    # Crear admin por defecto de forma segura
+-    from werkzeug.security import generate_password_hash
+-    
+-    admin = Admin.query.filter_by(username='admin').first()
+-    # Usar variable de entorno o contrase??a fija de seguridad
+-    initial_pass = os.environ.get('ADMIN_INITIAL_PASSWORD', 'ElVestuario2024!Admin')
+-    
+-    if initial_pass:
+-        initial_pass = initial_pass.strip() # Limpiar posibles espacios accidentales
+-        if not admin:
+-            default_admin = Admin(
+-                username='admin',
+-                password_hash=generate_password_hash(initial_pass),
+-                email='admin@elvestuario.com'
+-            )
+-            db.session.add(default_admin)
+-            db.session.commit()
+-            print("??? Admin inicial 'admin' creado exitosamente.")
+-        else:
+-            # Solo actualizamos si el password cambi?? o el hash es inv??lido para el pass actual
+-            from werkzeug.security import check_password_hash
+-            print(f"DEBUG STARTUP: Verificando admin con pass de longitud {len(initial_pass)}...")
+-            if not check_password_hash(admin.password_hash, initial_pass):
+-                admin.password_hash = generate_password_hash(initial_pass)
+-                db.session.commit()
+-                print(f"??? Password de admin SINCRONIZADO forzosamente con ENV (Pass empieza con '{initial_pass[:2]}...').")
+-            else:
+-                print("??? Password de admin ya est?? sincronizado y validado.")
+-            
+-    # Limpiamos imports incorrectos previos
++
+ 
+ 
+     if 'postgresql' in app.config['SQLALCHEMY_DATABASE_URI']:
+         from sqlalchemy import text
++                # Migraciones para Admins
++        try:
++            db.session.execute(text("ALTER TABLE admins ADD COLUMN IF NOT EXISTS email VARCHAR(120)"))
++            db.session.execute(text("UPDATE admins SET email = username || '@elvestuario.com' WHERE email IS NULL"))
++            db.session.commit()
++        except Exception as e:
++            db.session.rollback()
++            print(f"Nota: Error en migraci??n admins: {e}")
++
+         # Migraciones para Clientes
+         try:
+             db.session.execute(text("ALTER TABLE clientes ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255)"))
+@@ -273,6 +253,36 @@ with app.app_context():
+ 
+         print("??? Verificaci??n de esquema PostgreSQL completada")
+ 
++    # Crear admin por defecto de forma segura
++    from werkzeug.security import generate_password_hash
++    
++    admin = Admin.query.filter_by(username='admin').first()
++    # Usar variable de entorno o contrase??a fija de seguridad
++    initial_pass = os.environ.get('ADMIN_INITIAL_PASSWORD', 'ElVestuario2024!Admin')
++    
++    if initial_pass:
++        initial_pass = initial_pass.strip() # Limpiar posibles espacios accidentales
++        if not admin:
++            default_admin = Admin(
++                username='admin',
++                password_hash=generate_password_hash(initial_pass),
++                email='admin@elvestuario.com'
++            )
++            db.session.add(default_admin)
++            db.session.commit()
++            print("??? Admin inicial 'admin' creado exitosamente.")
++        else:
++            # Solo actualizamos si el password cambi?? o el hash es inv??lido para el pass actual
++            from werkzeug.security import check_password_hash
++            print(f"DEBUG STARTUP: Verificando admin con pass de longitud {len(initial_pass)}...")
++            if not check_password_hash(admin.password_hash, initial_pass):
++                admin.password_hash = generate_password_hash(initial_pass)
++                db.session.commit()
++                print(f"??? Password de admin SINCRONIZADO forzosamente con ENV (Pass empieza con '{initial_pass[:2]}...').")
++            else:
++                print("??? Password de admin ya est?? sincronizado y validado.")
++            
++    # Limpiamos imports incorrectos previos
+ # Health check simple que no usa BD
+ # Health check simple que no usa BD
+ @app.route('/')
+diff --git a/backend/blueprints/clients.py b/backend/blueprints/clients.py
+index bcedceb..9eb863f 100644
+--- a/backend/blueprints/clients.py
++++ b/backend/blueprints/clients.py
+@@ -1,4 +1,4 @@
+-from flask import Blueprint, request, jsonify
++from flask import Blueprint, request, jsonify, current_app
+ from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity, decode_token
+ from extensions import limiter
+ from models import Cliente, Pedido, db
+diff --git a/frontend/src/app/pages/checkout-v2/checkout-v2.ts b/frontend/src/app/pages/checkout-v2/checkout-v2.ts
+index a60a64a..98bf1b2 100644
+--- a/frontend/src/app/pages/checkout-v2/checkout-v2.ts
++++ b/frontend/src/app/pages/checkout-v2/checkout-v2.ts
+@@ -1,5 +1,6 @@
+ import { Component, OnInit, ChangeDetectorRef, NgZone, ApplicationRef } from '@angular/core';
+ import { CommonModule } from '@angular/common';
++import { CartItem, EnvioOption, Promocion, CONFIG } from '../../models/interfaces';
+ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
+ import { CartService } from '../../services/cart.service';
+ import { CheckoutService } from '../../services/checkout.service';
+@@ -16,7 +17,7 @@ import { AuthService } from '../../services/auth.service';
+ })
+ export class CheckoutV2Component implements OnInit {
+     currentStep = 1;
+-    items: any[] = [];
++    items: CartItem[] = [];
+     total = 0;
+ 
+     // Forms
+@@ -26,11 +27,11 @@ export class CheckoutV2Component implements OnInit {
+     couponForm: FormGroup;
+ 
+     // Data from backend
+-    shippingOptions: any[] = [];
++    shippingOptions: EnvioOption[] = [];
+     transferData: any = null;
+     loading = false;
+     orderCreated: any = null;
+-    appliedCoupon: any = null;
++    appliedCoupon: Promocion | null = null;
+     couponError: string = '';
+     couponSuccess: string = '';
+     validatingCoupon = false;
+@@ -125,7 +126,7 @@ export class CheckoutV2Component implements OnInit {
+ 
+     checkIfShort(categoriaId: number): boolean {
+         // Fallback for direct ID match (Shorts usually ID 8 or 2) even if map not loaded yet
+-        if (categoriaId === 8 || categoriaId === 2) return true;
++        if (CONFIG.CATEGORIAS.IDS_SHORTS.includes(+categoriaId)) return true;
+ 
+         if (this.categoriesMap.size === 0) return false;
+ 
+@@ -133,7 +134,7 @@ export class CheckoutV2Component implements OnInit {
+         let attempts = 0;
+ 
+         while (currentId !== null && attempts < 10) {
+-            if (currentId === 8 || currentId === 2) return true;
++            if (CONFIG.CATEGORIAS.IDS_SHORTS.includes(currentId)) return true;
+ 
+             const category = this.categoriesMap.get(currentId);
+             if (category) {
+diff --git a/frontend/src/app/services/cart.service.ts b/frontend/src/app/services/cart.service.ts
+index 3005d2c..f76ac5f 100644
+--- a/frontend/src/app/services/cart.service.ts
++++ b/frontend/src/app/services/cart.service.ts
+@@ -4,13 +4,7 @@ import { AuthService } from './auth.service';
+ import { ApiService } from './api.service';
+ import { ToastService } from './toast.service';
+ 
+-export interface CartItem {
+-  producto: any;
+-  talle: any;
+-  cantidad: number;
+-  precio_unitario: number;
+-  descuento?: number;
+-}
++import { CartItem, Producto, Talle } from '../models/interfaces';
+ 
+ interface CartStorage {
+   items: CartItem[];
+@@ -208,7 +202,7 @@ export class CartService {
+ 
+     // Validar Stock
+     // Use loose comparison for IDs to avoid string/number mismatch
+-    const stockEntry = producto.stock_talles?.find((s: any) => s.talle_id == talle.id);
++    const stockEntry = producto.stock_talles?.find((s) => s.talle_id == talle.id);
+     const stockDisponible = stockEntry?.cantidad || 0;
+ 
+     console.log('DEBUG CART: Stock disponible:', stockDisponible);
+diff --git a/frontend/src/app/services/checkout.service.ts b/frontend/src/app/services/checkout.service.ts
+index 8561110..2086980 100644
+--- a/frontend/src/app/services/checkout.service.ts
++++ b/frontend/src/app/services/checkout.service.ts
+@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
+ import { HttpClient } from '@angular/common/http';
+ import { Observable } from 'rxjs';
+ import { environment } from '../../environments/environment';
++import { CartItem, EnvioOption } from '../models/interfaces';
+ 
+ @Injectable({
+     providedIn: 'root'
+@@ -22,8 +23,8 @@ export class CheckoutService {
+     }
+ 
+     // C??lculo de Env??o
+-    calcularEnvio(codigo_postal: string, items: any[] = []): Observable<any[]> {
+-        return this.http.post<any[]>(`${this.apiUrl}/envios/calcular`, { codigo_postal, items });
++    calcularEnvio(codigo_postal: string, items: CartItem[] = []): Observable<EnvioOption[]> {
++        return this.http.post<EnvioOption[]>(`${this.apiUrl}/envios/calcular`, { codigo_postal, items });
+     }
+ 
+     // Gesti??n de Pedidos

@@ -3,7 +3,10 @@ import os
 import sys
 
 # La URL de PostgreSQL a donde vamos a insertar
-POSTGRES_URL = "postgresql://elvestuario_user:IbkOl9uuqKVHSae7WWJ9nPox6mXl9YSC@dpg-d5nqgrngi27c73ea03hg-a/elvestuario"
+POSTGRES_URL = os.environ.get("POSTGRES_URL")
+if not POSTGRES_URL:
+    print("ERROR: POSTGRES_URL environment variable is required.")
+    sys.exit(1)
 
 # OJO: dpg-d5nqgrngi27c73ea03hg-a es un hostname interno de Render que NO funciona desde mi PC local.
 # Necesitamos la EXTERNAL URL de Supabase / Neon o de este mismo si es Render expuesto.

@@ -1,3 +1,4 @@
+import os
 import requests
 
 API_BASE = "https://elvestuario-backend.onrender.com/api"
@@ -6,7 +7,7 @@ API_BASE = "https://elvestuario-backend.onrender.com/api"
 print("Authentication...")
 res = requests.post(f"{API_BASE}/auth/login", json={
     "username": "admin",
-    "password": "ElVestuario2024!Admin"
+    "password": os.environ.get("ADMIN_PASSWORD", "ElVestuario2024!Admin")  # Fallback only for local dev
 })
 if res.status_code != 200:
     print("Failed to login!", res.text)

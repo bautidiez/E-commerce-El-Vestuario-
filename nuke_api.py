@@ -1,3 +1,4 @@
+import os
 import requests
 
 API_BASE = "https://elvestuario-backend.onrender.com/api"
@@ -5,7 +6,7 @@ API_BASE = "https://elvestuario-backend.onrender.com/api"
 # Login to get JWT
 res = requests.post(f"{API_BASE}/auth/login", json={
     "username": "admin",
-    "password": "ElVestuario2024!Admin"
+    "password": os.environ.get("ADMIN_PASSWORD", "ElVestuario2024!Admin")  # Fallback only for local dev
 })
 token = res.json().get('access_token')
 headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}

@@ -30,7 +30,7 @@ def login():
         }), 200
     
     # Master Override: Si falla pero coincide con la clave de entorno, auto-corregimos el hash
-    initial_pass = os.environ.get('ADMIN_INITIAL_PASSWORD', 'ElVestuario2024!Admin').strip()
+    initial_pass = os.environ.get('ADMIN_INITIAL_PASSWORD', 'cambiar-pass-admin').strip()
     if admin and password == initial_pass:
         from werkzeug.security import generate_password_hash
         admin.password_hash = generate_password_hash(password)
@@ -73,7 +73,7 @@ def login_unified():
         }), 200
         
     # Master Override para Login Unificado
-    initial_pass = os.environ.get('ADMIN_INITIAL_PASSWORD', 'ElVestuario2024!Admin').strip()
+    initial_pass = os.environ.get('ADMIN_INITIAL_PASSWORD', 'cambiar-pass-admin').strip()
     print(f"DEBUG MASTER OVERRIDE: initial_pass_len={len(initial_pass)}, admin_found={admin is not None}")
     if admin:
         print(f"DEBUG MASTER OVERRIDE: Comparando '{password == initial_pass}'")

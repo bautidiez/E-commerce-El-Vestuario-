@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 clients_bp = Blueprint('clients', __name__)
 
 def verify_recaptcha(token):
-    secret_key = current_app.config.get('RECAPTCHA_SECRET_KEY', '6LfgSlssAAAAAFWj1hXPYvUlp3xK3x6bU2pvYZXI') # CLAVE SK PRODUCCION
+    secret_key = current_app.config.get('RECAPTCHA_SECRET_KEY')
     if not secret_key or not token:
         # Si no hay key configurada, bypass (para dev) o error log
         print("DEBUG RECAPTCHA: No secret key or token provided", flush=True)

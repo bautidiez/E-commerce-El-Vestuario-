@@ -12,7 +12,7 @@ LOCAL_UPLOADS = r"c:\Bau\PagLauri\backend\static\uploads"
 def login():
     res = requests.post(f"{API_BASE}/auth/login", json={
         "username": "admin",
-        "password": "ElVestuario2024!Admin"
+        "password": os.environ.get("ADMIN_PASSWORD", "admin")
     })
     if res.status_code == 200:
         return res.json().get('access_token')

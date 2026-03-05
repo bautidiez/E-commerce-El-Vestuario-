@@ -1,4 +1,5 @@
 import sqlite3
+import os
 import requests
 import os
 import sys
@@ -8,7 +9,7 @@ LOCAL_DB = r"c:\Bau\PagLauri\backend\instance\elvestuario.db"
 LOCAL_UPLOADS = r"c:\Bau\PagLauri\backend\static\uploads"
 
 # 1. Login to get JWT
-res = requests.post(f"{API_BASE}/auth/login", json={"username": "admin", "password": "ElVestuario2024!Admin"})
+res = requests.post(f"{API_BASE}/auth/login", json={"username": "admin", "password": os.environ.get("ADMIN_PASSWORD", "admin")})
 token = res.json().get('access_token')
 headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
 

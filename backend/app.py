@@ -260,7 +260,7 @@ with app.app_context():
     
     admin = Admin.query.filter_by(username='admin').first()
     # Usar variable de entorno o contraseña fija de seguridad
-    initial_pass = os.environ.get('ADMIN_INITIAL_PASSWORD', 'ElVestuario2024!Admin')
+    initial_pass = os.environ.get('ADMIN_INITIAL_PASSWORD', 'cambiar-pass-admin')
     
     if initial_pass:
         initial_pass = initial_pass.strip() # Limpiar posibles espacios accidentales
