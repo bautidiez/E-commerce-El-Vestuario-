@@ -11,7 +11,7 @@
       <div class="cart-items">
         <div class="cart-item" *ngFor="let item of items; let i = index">
           <div class="item-image">
-            <img [src]="getFormattedImageUrl(item.producto.imagenes[0]?.url)" [alt]="item.producto.nombre">
+            <img [src]="getFormattedImageUrl(item.producto.imagenes?.[0]?.url)" [alt]="item.producto.nombre">
           </div>
           <div class="item-info">
             <h3>{{ item.producto.nombre }}</h3>

@@ -202,7 +202,7 @@ export class CartService {
 
     // Validar Stock
     // Use loose comparison for IDs to avoid string/number mismatch
-    const stockEntry = producto.stock_talles?.find((s) => s.talle_id == talle.id);
+    const stockEntry = producto.stock_talles?.find((s: any) => s.talle_id == talle.id);
     const stockDisponible = stockEntry?.cantidad || 0;
 
     console.log('DEBUG CART: Stock disponible:', stockDisponible);
@@ -351,7 +351,7 @@ export class CartService {
     // 3. Calcular items con promoción DINÁMICA agrupada
     Object.values(itemsPorPromocion).forEach(group => {
       // Assuming all items in group have same promo type
-      const promo = group[0].producto.promociones[0];
+      const promo = group[0].producto.promociones![0];
       const tipo = (promo.tipo_promocion_nombre || '').toLowerCase();
       const valor = promo.valor || 0;
 
