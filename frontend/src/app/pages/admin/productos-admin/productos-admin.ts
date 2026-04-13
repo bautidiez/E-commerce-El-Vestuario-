@@ -587,26 +587,29 @@ export class ProductosAdminComponent implements OnInit {
       if (result.isConfirmed) {
         // --- UI OPTIMISTA: Borrar de la lista local inmediatamente ---
         const index = this.productos.findIndex(p => p.id === producto.id);
-        const productoCopia = { ...this.productos[index] }; // Guardar copia por si falla
-        this.productos.splice(index, 1);
-        this.totalProductos--;
-        this.cdr.detectChanges();
+        if (index > -1) {
+          const productoCopia = { ...this.productos[index] };
+          this.productos.splice(index, 1);
+          this.totalProductos--;
+          this.cdr.detectChanges();
 
-        this.apiService.deleteProducto(producto.id).subscribe({
-          next: () => {
-            Swal.fire({
-              title: 'Eliminado',
-              text: `Producto "${producto.nombre}" eliminado exitosamente`,
-              icon: 'success',
-              timer: 1500,
-              showConfirmButton: false
-            });
-          },
-          error: (error) => {
-            // --- ROLLBACK: Si falla, lo devolvemos a la lista ---
-            this.productos.splice(index, 0, productoCopia);
-            this.totalProductos++;
-            this.cdr.detectChanges();
+          this.apiService.deleteProducto(producto.id).subscribe({
+            next: () => {
+              Swal.fire({
+                title: 'Eliminado',
+                text: `Producto "${producto.nombre}" eliminado exitosamente`,
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+              });
+              // Recargar para sincronizar paginado y totales exactamente
+              this.loadProductos();
+            },
+            error: (error) => {
+              // --- ROLLBACK: Si falla, lo devolvemos a la lista ---
+              this.productos.splice(index, 0, productoCopia);
+              this.totalProductos++;
+              this.cdr.detectChanges();
 
             const errorData = error.error;
             if (errorData && errorData.suggestion === 'desactivar') {
@@ -637,8 +640,9 @@ export class ProductosAdminComponent implements OnInit {
           }
         });
       }
-    });
-  }
+    }
+  });
+}
 
   // --- MÉTODOS DE SELECCIÓN MÚLTIPLE ---
   
