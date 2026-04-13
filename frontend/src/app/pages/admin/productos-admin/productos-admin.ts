@@ -5,6 +5,7 @@ import { RouterModule, Router } from '@angular/router';
 import { ApiService } from '../../../services/api.service';
 import { AuthService } from '../../../services/auth.service';
 import { ColorPickerComponent } from '../../../components/color-picker/color-picker.component';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-productos-admin',
@@ -29,6 +30,10 @@ export class ProductosAdminComponent implements OnInit {
   public busquedaProductoRelacionado: string = '';
   public productosRelacionadosFiltrados: any[] = [];
   public productosRelacionadosSeleccionados: any[] = []; // Lista de productos seleccionados
+
+  // Selección múltiple
+  productosSeleccionados: number[] = [];
+  procesandoBulk = false;
 
   loading = true;
   mostrarFormulario = false;
@@ -568,43 +573,138 @@ export class ProductosAdminComponent implements OnInit {
   }
 
   eliminar(producto: any) {
-    if (confirm(`¿Estás seguro de eliminar "${producto.nombre}"?`)) {
-      this.apiService.deleteProducto(producto.id).subscribe({
-        next: () => {
-          this.loadProductos();
-          alert(`Producto "${producto.nombre}" eliminado exitosamente`);
-        },
-        error: (error) => {
-          const errorData = error.error;
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: `Vas a eliminar "${producto.nombre}". Esta acción no siempre se puede deshacer.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      reverseButtons: true
+    }).then((result) => {
+      if (result.isConfirmed) {
+        // --- UI OPTIMISTA: Borrar de la lista local inmediatamente ---
+        const index = this.productos.findIndex(p => p.id === producto.id);
+        const productoCopia = { ...this.productos[index] }; // Guardar copia por si falla
+        this.productos.splice(index, 1);
+        this.totalProductos--;
+        this.cdr.detectChanges();
 
-          // Si el backend sugiere desactivar en lugar de eliminar
-          if (errorData && errorData.suggestion === 'desactivar') {
-            const mensaje = `${errorData.error}\n\n¿Quieres DESACTIVAR el producto en su lugar?\n\n(El producto dejará de mostrarse en la tienda pero se mantendrá el historial)`;
-            const desactivar = confirm(mensaje);
+        this.apiService.deleteProducto(producto.id).subscribe({
+          next: () => {
+            Swal.fire({
+              title: 'Eliminado',
+              text: `Producto "${producto.nombre}" eliminado exitosamente`,
+              icon: 'success',
+              timer: 1500,
+              showConfirmButton: false
+            });
+          },
+          error: (error) => {
+            // --- ROLLBACK: Si falla, lo devolvemos a la lista ---
+            this.productos.splice(index, 0, productoCopia);
+            this.totalProductos++;
+            this.cdr.detectChanges();
 
-            if (desactivar) {
-              // Desactivar el producto
-              this.apiService.updateProducto(producto.id, { activo: false }).subscribe({
-                next: () => {
-                  this.loadProductos();
-                  alert(`Producto "${producto.nombre}" desactivado exitosamente`);
-                },
-                error: (err) => {
-                  alert('Error al desactivar producto');
-                  console.error(err);
+            const errorData = error.error;
+            if (errorData && errorData.suggestion === 'desactivar') {
+              Swal.fire({
+                title: 'No se puede eliminar',
+                text: `${errorData.error}`,
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonText: 'Desactivar producto',
+                cancelButtonText: 'Entendido'
+              }).then((res) => {
+                if (res.isConfirmed) {
+                  this.apiService.updateProducto(producto.id, { activo: false }).subscribe({
+                    next: () => {
+                      producto.activo = false;
+                      Swal.fire('Desactivado', 'El producto ha sido desactivado.', 'success');
+                      this.loadProductos();
+                    },
+                    error: (err) => {
+                      Swal.fire('Error', 'No se pudo desactivar el producto.', 'error');
+                    }
+                  });
                 }
               });
+            } else {
+              Swal.fire('Error', errorData?.error || 'No se pudo eliminar el producto.', 'error');
             }
-          } else {
-            // Mostrar error genérico
-            const mensajeError = errorData?.error || error.message || 'Error al eliminar producto';
-            alert(mensajeError);
           }
+        });
+      }
+    });
+  }
 
-          console.error('Error completo:', error);
-        }
-      });
+  // --- MÉTODOS DE SELECCIÓN MÚLTIPLE ---
+  
+  toggleSeleccion(id: number) {
+    const index = this.productosSeleccionados.indexOf(id);
+    if (index > -1) {
+      this.productosSeleccionados.splice(index, 1);
+    } else {
+      this.productosSeleccionados.push(id);
     }
+  }
+
+  isSeleccionado(id: number): boolean {
+    return this.productosSeleccionados.includes(id);
+  }
+
+  toggleTodos() {
+    if (this.productosSeleccionados.length === this.productos.length) {
+      this.productosSeleccionados = [];
+    } else {
+      this.productosSeleccionados = this.productos.map(p => p.id);
+    }
+  }
+
+  eliminarSeleccionados() {
+    if (this.productosSeleccionados.length === 0) return;
+
+    Swal.fire({
+      title: '¿Eliminar seleccionados?',
+      text: `Vas a eliminar ${this.productosSeleccionados.length} productos. Los que tengan pedidos asociados no serán borrados por seguridad.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      confirmButtonText: 'Sí, eliminar todos',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.procesandoBulk = true;
+        const idsABorrar = [...this.productosSeleccionados];
+        
+        // UI OPTIMISTA: Borrar localmente
+        const backupProductos = [...this.productos];
+        this.productos = this.productos.filter(p => !idsABorrar.includes(p.id));
+        this.productosSeleccionados = [];
+        this.cdr.detectChanges();
+
+        this.apiService.deleteProductosBulk(idsABorrar).subscribe({
+          next: (res) => {
+            this.procesandoBulk = false;
+            let msg = `Se eliminaron ${res.eliminados.length} productos.`;
+            if (res.errores.length > 0) {
+              msg += `\n${res.errores.length} no pudieron borrarse por tener dependencias.`;
+            }
+            
+            Swal.fire('Proceso completado', msg, res.errores.length > 0 ? 'info' : 'success');
+            this.loadProductos(); // Recargar para sincronizar exacto
+          },
+          error: (err) => {
+            this.procesandoBulk = false;
+            this.productos = backupProductos; // Rollback
+            Swal.fire('Error', 'Hubo un fallo al procesar la eliminación masiva.', 'error');
+            this.cdr.detectChanges();
+          }
+        });
+      }
+    });
   }
 
   cancelar() {

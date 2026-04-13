@@ -9,7 +9,18 @@ LOCAL_DB = r"c:\Bau\PagLauri\backend\instance\elvestuario.db"
 LOCAL_UPLOADS = r"c:\Bau\PagLauri\backend\static\uploads"
 
 # 1. Login to get JWT
-res = requests.post(f"{API_BASE}/auth/login", json={"username": "admin", "password": os.environ.get("ADMIN_PASSWORD", "admin")})
+pwd = os.environ.get("ADMIN_PASSWORD", "cambiar-pass-admin")
+print(f"Trying to login with password: {pwd}")
+res = requests.post(f"{API_BASE}/auth/login", json={"username": "admin", "password": pwd})
+if res.status_code != 200:
+    print(f"Fallback to 'admin' password...")
+    pwd = "admin"
+    res = requests.post(f"{API_BASE}/auth/login", json={"username": "admin", "password": pwd})
+
+if res.status_code != 200:
+    print(f"Login failed! Status: {res.status_code}, Body: {res.text}")
+    sys.exit(1)
+
 token = res.json().get('access_token')
 headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
 

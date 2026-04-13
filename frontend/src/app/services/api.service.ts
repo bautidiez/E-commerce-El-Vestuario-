@@ -137,6 +137,14 @@ export class ApiService {
     return this.http.delete(`${this.apiUrl}/admin/productos/${id}`, { headers: this.getHeaders() });
   }
 
+  deleteProductosBulk(ids: number[]): Observable<any> {
+    const options = {
+      headers: this.getHeaders(),
+      body: { ids }
+    };
+    return this.http.delete(`${this.apiUrl}/admin/productos/bulk`, options);
+  }
+
   // Productos Mini - Versión ligera para dropdowns
   getProductosMini(search?: string, page: number = 1, limit: number = 100): Observable<any> {
     let url = `${this.apiUrl}/admin/productos/mini`;

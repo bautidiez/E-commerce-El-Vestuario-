@@ -53,11 +53,11 @@ def migrate(pg_url, data):
         pg_url += '&sslmode=require'
         
     conn = psycopg2.connect(pg_url)
-    conn.autocommit = False
+    conn.autocommit = True
     cur = conn.cursor()
 
     # Desactivar FK checks temporalmente
-    cur.execute("SET session_replication_role = replica;")
+    # Desactivar FK checks temporalmente (skip for Neon)
 
     COLUMN_MAP = {
         # Columnas que existen en SQLite pero pueden no estar en Postgres tal cual
@@ -111,7 +111,12 @@ def migrate(pg_url, data):
             values = []
             for pg_col in pg_cols:
                 if pg_col in col_indices:
-                    values.append(row[col_indices[pg_col]])
+                    val = row[col_indices[pg_col]]
+                    # Convert SQLite integers (1/0) to Python bools for PostgreSQL BOOLEAN columns
+                    bool_columns = ['activa', 'activo', 'destacado', 'es_cupon', 'envio_gratis', 'es_principal']
+                    if pg_col in bool_columns and val is not None:
+                        val = bool(val)
+                    values.append(val)
                 else:
                     values.append(None)
 
@@ -124,7 +129,9 @@ def migrate(pg_url, data):
             except Exception as e:
                 errors += 1
                 if errors <= 3:
-                    print(f"    ERROR en fila de {table}: {e}")
+                    import traceback
+                    traceback.print_exc()
+                    print(f"    ERROR en fila de {table}: {repr(e)}")
 
         print(f"  {table}: {inserted} insertadas, {errors} errores")
 
@@ -134,8 +141,7 @@ def migrate(pg_url, data):
         except:
             pass  # Tabla sin secuencia o sin columna id
 
-    # Reactivar FK checks
-    cur.execute("SET session_replication_role = DEFAULT;")
+    # Reactivar FK checks (skip for Neon)
     conn.commit()
     cur.close()
     conn.close()

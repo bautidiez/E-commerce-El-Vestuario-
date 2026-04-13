@@ -1,0 +1,86 @@
+Leyendo datos de SQLite: c:\Bau\PagLauri\backend\instance\elvestuario.db
+  admins: 1 filas
+  tipos_promocion: 5 filas
+  metodos_pago: 3 filas
+  categorias: 41 filas
+  talles: 6 filas
+  colores: vacia
+  productos: 76 filas
+  stock_talles: 450 filas
+  imagenes_productos: vacia
+  promociones_productos: vacia
+  ventas_externas: ERROR - no such table: ventas_externas
+
+Migrando a PostgreSQL: postgresql://neondb_owner:npg_IPHgp2Wx3i...
+  admins: 1 insertadas, 0 errores
+  tipos_promocion: 5 insertadas, 0 errores
+    ERROR en fila de metodos_pago: column "activo" is of type boolean but expression is of type integer
+LINE 1: ...ES (1, 'transferencia', 'Transferencia bancaria', 1) ON CONF...
+                                                             ^
+HINT:  You will need to rewrite or cast the expression.
+
+    ERROR en fila de metodos_pago: column "activo" is of type boolean but expression is of type integer
+LINE 1: ...VALUES (2, 'tarjeta_debito', 'Tarjeta de débito', 1) ON CONF...
+                                                             ^
+HINT:  You will need to rewrite or cast the expression.
+
+    ERROR en fila de metodos_pago: column "activo" is of type boolean but expression is of type integer
+LINE 1: ...LUES (3, 'tarjeta_credito', 'Tarjeta de crédito', 1) ON CONF...
+                                                             ^
+HINT:  You will need to rewrite or cast the expression.
+
+  metodos_pago: 0 insertadas, 3 errores
+    ERROR en fila de categorias: column "activa" is of type boolean but expression is of type integer
+LINE 1: ...ALUES (1, 'Remeras', 'Camisetas de fútbol', NULL, 1, '2026-0...
+                                                             ^
+HINT:  You will need to rewrite or cast the expression.
+
+    ERROR en fila de categorias: column "activa" is of type boolean but expression is of type integer
+LINE 1: ...) VALUES (2, 'Shorts', 'Shorts deportivos', NULL, 1, '2026-0...
+                                                             ^
+HINT:  You will need to rewrite or cast the expression.
+
+    ERROR en fila de categorias: column "activa" is of type boolean but expression is of type integer
+LINE 1: ... orden) VALUES (4, 'Retro', 'Camisetas retro', 1, 1, '2026-0...
+                                                             ^
+HINT:  You will need to rewrite or cast the expression.
+
+  categorias: 0 insertadas, 41 errores
+  talles: 6 insertadas, 0 errores
+  SKIP colores (sin datos)
+    ERROR en fila de productos: column "activo" is of type boolean but expression is of type integer
+LINE 1: ...calidad, cómoda y resistente.', 15100.0, NULL, 1, 1, 1, NULL...
+                                                             ^
+HINT:  You will need to rewrite or cast the expression.
+
+    ERROR en fila de productos: column "activo" is of type boolean but expression is of type integer
+LINE 1: ...calidad, cómoda y resistente.', 15200.0, NULL, 1, 1, 1, NULL...
+                                                             ^
+HINT:  You will need to rewrite or cast the expression.
+
+    ERROR en fila de productos: column "activo" is of type boolean but expression is of type integer
+LINE 1: ...calidad, cómoda y resistente.', 15300.0, NULL, 1, 1, 1, NULL...
+                                                             ^
+HINT:  You will need to rewrite or cast the expression.
+
+  productos: 0 insertadas, 76 errores
+    ERROR en fila de stock_talles: insert or update on table "stock_talles" violates foreign key constraint "stock_talles_producto_id_fkey"
+DETAIL:  Key (producto_id)=(1) is not present in table "productos".
+
+    ERROR en fila de stock_talles: insert or update on table "stock_talles" violates foreign key constraint "stock_talles_producto_id_fkey"
+DETAIL:  Key (producto_id)=(1) is not present in table "productos".
+
+    ERROR en fila de stock_talles: insert or update on table "stock_talles" violates foreign key constraint "stock_talles_producto_id_fkey"
+DETAIL:  Key (producto_id)=(1) is not present in table "productos".
+
+Traceback (most recent call last):
+  File "C:\Bau\PagLauri\migrate_to_prod.py", line 155, in <module>
+    data = get_sqlite_data()
+    ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Bau\PagLauri\migrate_to_prod.py", line 122, in migrate
+    cur.execute(sql, values)
+  File "C:\Program Files\Python312\Lib\encodings\utf_8.py", line 15, in decode
+    def decode(input, errors='strict'):
+    
+KeyboardInterrupt
+^C

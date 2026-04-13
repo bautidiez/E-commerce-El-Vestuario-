@@ -91,6 +91,59 @@ def create_producto():
             return jsonify({'error': err_str}), 500
 
 
+@productos_bp.route('/api/admin/productos/bulk', methods=['DELETE'])
+@jwt_required()
+def bulk_delete_productos():
+    from models import ItemPedido, VentaExterna
+    data = request.get_json()
+    ids = data.get('ids', [])
+    if not ids:
+        return jsonify({'error': 'No se proporcionaron IDs'}), 400
+    
+    resultados = {
+        'eliminados': [],
+        'errores': []
+    }
+    
+    for id in ids:
+        try:
+            producto = Producto.query.get(id)
+            if not producto:
+                resultados['errores'].append({'id': id, 'error': 'Producto no encontrado'})
+                continue
+                
+            # Verificar dependencias
+            pedidos_count = ItemPedido.query.filter_by(producto_id=id).count()
+            if pedidos_count > 0:
+                resultados['errores'].append({'id': id, 'nombre': producto.nombre, 'error': f'Tiene {pedidos_count} pedido(s) asociado(s)'})
+                continue
+                
+            ventas_count = VentaExterna.query.filter_by(producto_id=id).count()
+            if ventas_count > 0:
+                resultados['errores'].append({'id': id, 'nombre': producto.nombre, 'error': f'Tiene {ventas_count} venta(s) asociada(s)'})
+                continue
+                
+            # Si tiene promociones, removerlo
+            if hasattr(producto, 'promociones'):
+                for promo in producto.promociones:
+                    promo.productos.remove(producto)
+            
+            nombre_prod = producto.nombre
+            db.session.delete(producto)
+            resultados['eliminados'].append({'id': id, 'nombre': nombre_prod})
+        except Exception as e:
+            resultados['errores'].append({'id': id, 'error': str(e)})
+            
+    try:
+        db.session.commit()
+        invalidate_cache(pattern='productos')
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Error al confirmar cambios: {str(e)}'}), 500
+        
+    return jsonify(resultados), 200
+
+
 @productos_bp.route('/api/admin/productos/<int:id>', methods=['PUT', 'DELETE'])
 @jwt_required()
 def manage_product(id):
