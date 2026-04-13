@@ -456,12 +456,17 @@ export class ProductosAdminComponent implements OnInit {
     }
 
     if (!this.nuevoProducto.nombre || !this.nuevoProducto.precio_base || this.nuevoProducto.precio_base <= 0 || !this.nuevoProducto.categoria_id) {
-      alert('Por favor completa todos los campos requeridos (Nombre, Precio Base y Categoría)');
+      Swal.fire({
+        title: 'Campos incompletos',
+        text: 'Por favor completa todos los campos requeridos (Nombre, Precio Base y Categoría)',
+        icon: 'warning'
+      });
       return;
     }
 
     if (this.productoEditando) {
       // Actualizar producto
+      Swal.fire({ title: 'Actualizando producto...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
       this.apiService.updateProducto(this.productoEditando.id, this.nuevoProducto).subscribe({
         next: (productoActualizado) => {
           // Subir imágenes si hay nuevas
@@ -470,17 +475,18 @@ export class ProductosAdminComponent implements OnInit {
           } else {
             this.loadProductos();
             this.cancelar();
-            alert('Producto actualizado exitosamente');
+            Swal.fire('¡Éxito!', 'Producto actualizado exitosamente', 'success');
           }
         },
         error: (error) => {
           const mensaje = error.error?.error || error.message || 'Error al actualizar producto';
-          alert('Error al actualizar producto: ' + mensaje);
+          Swal.fire('Error', mensaje, 'error');
           console.error('Error completo:', error);
         }
       });
     } else {
       // Crear nuevo producto
+      Swal.fire({ title: 'Creando producto...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
       this.apiService.createProducto(this.nuevoProducto).subscribe({
         next: (nuevoProducto) => {
           // Subir imágenes si hay
@@ -489,12 +495,12 @@ export class ProductosAdminComponent implements OnInit {
           } else {
             this.loadProductos();
             this.cancelar();
-            alert('Producto creado exitosamente');
+            Swal.fire('¡Éxito!', 'Producto creado exitosamente', 'success');
           }
         },
         error: (error) => {
           const mensaje = error.error?.error || error.message || 'Error desconocido';
-          alert('Error al crear producto: ' + mensaje);
+          Swal.fire('Error', mensaje, 'error');
           console.error('Error completo:', error);
         }
       });
@@ -519,7 +525,7 @@ export class ProductosAdminComponent implements OnInit {
           if (imagenesSubidas === totalImagenes) {
             this.loadProductos();
             this.cancelar();
-            alert('Producto ' + (this.productoEditando ? 'actualizado' : 'creado') + ' e imágenes subidas exitosamente');
+            Swal.fire('¡Hecho!', 'Producto ' + (this.productoEditando ? 'actualizado' : 'creado') + ' e imágenes subidas correctamente', 'success');
           }
         },
         error: (error) => {
@@ -528,7 +534,7 @@ export class ProductosAdminComponent implements OnInit {
           if (imagenesSubidas === totalImagenes) {
             this.loadProductos();
             this.cancelar();
-            alert('Producto ' + (this.productoEditando ? 'actualizado' : 'creado') + ' pero hubo errores al subir algunas imágenes');
+            Swal.fire('Aviso', 'Producto ' + (this.productoEditando ? 'actualizado' : 'creado') + ' pero hubo errores al cargar algunas imágenes', 'info');
           }
         }
       });
@@ -689,21 +695,36 @@ export class ProductosAdminComponent implements OnInit {
         this.productosSeleccionados = [];
         this.cdr.detectChanges();
 
+        // Mostrar cargando inmediato mientras se procesa el bulk
+        Swal.fire({
+          title: 'Eliminando productos...',
+          text: 'Por favor espera un momento',
+          allowOutsideClick: false,
+          didOpen: () => {
+            Swal.showLoading();
+          }
+        });
+
         this.apiService.deleteProductosBulk(idsABorrar).subscribe({
           next: (res) => {
             this.procesandoBulk = false;
-            let msg = `Se eliminaron ${res.eliminados.length} productos.`;
+            let msg = `Se eliminaron ${res.eliminados.length} productos. `;
             if (res.errores.length > 0) {
-              msg += `\n${res.errores.length} no pudieron borrarse por tener dependencias.`;
+              msg += `${res.errores.length} fallaron por tener dependencias.`;
             }
             
-            Swal.fire('Proceso completado', msg, res.errores.length > 0 ? 'info' : 'success');
+            Swal.fire({
+              title: '¡Operación finalizada!',
+              text: msg,
+              icon: res.errores.length > 0 ? 'info' : 'success',
+              confirmButtonText: 'Genial'
+            });
             this.loadProductos(); // Recargar para sincronizar exacto
           },
           error: (err) => {
             this.procesandoBulk = false;
             this.productos = backupProductos; // Rollback
-            Swal.fire('Error', 'Hubo un fallo al procesar la eliminación masiva.', 'error');
+            Swal.fire('Error', 'Hubo un fallo crítico al procesar la eliminación.', 'error');
             this.cdr.detectChanges();
           }
         });
