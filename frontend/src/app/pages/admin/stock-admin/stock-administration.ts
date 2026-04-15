@@ -54,6 +54,7 @@ export class StockAdminComponent implements OnInit, OnDestroy {
   ordenarPor = 'alfabetico';
   mostrarSoloStockBajo = false;
   mostrarSoloAgotado = false;
+  talleFiltro: string | null = null;
   umbralStockBajo = 3;
 
   // Formulario
@@ -140,7 +141,8 @@ export class StockAdminComponent implements OnInit, OnDestroy {
       solo_bajo: this.mostrarSoloStockBajo,
       solo_agotado: this.mostrarSoloAgotado,
       umbral: this.umbralStockBajo,
-      ordenar_por: this.ordenarPor
+      ordenar_por: this.ordenarPor,
+      talle_nombre: this.talleFiltro
     };
 
     if (this.categoriaFiltro) {
@@ -371,6 +373,7 @@ export class StockAdminComponent implements OnInit, OnDestroy {
     this.categoriaFiltro = null;
     this.mostrarSoloStockBajo = false;
     this.mostrarSoloAgotado = false;
+    this.talleFiltro = null;
 
     // Limpiar también el filtro de producto único si existe
     if (this.productoPreseleccionadoId) {

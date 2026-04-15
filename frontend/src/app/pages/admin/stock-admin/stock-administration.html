@@ -49,13 +49,16 @@
       </select>
 
       <select [(ngModel)]="ordenarPor" (change)="cambiarOrdenamiento()" class="filter-select">
-        <option value="alfabetico">A-Z</option>
-        <option value="alfabetico_desc">Z-A</option>
-        <option value="S">S</option>
-        <option value="M">M</option>
-        <option value="L">L</option>
-        <option value="XL">XL</option>
-        <option value="XXL">XXL</option>
+        <option value="alfabetico">Nombre (A-Z)</option>
+        <option value="alfabetico_desc">Nombre (Z-A)</option>
+        <option value="stock_asc">Menor Stock</option>
+        <option value="stock_desc">Mayor Stock</option>
+        <option value="talle">Por Talle (Orden)</option>
+      </select>
+
+      <select [(ngModel)]="talleFiltro" (change)="filtrarPorProducto()" class="filter-select">
+        <option [ngValue]="null">Todos los talles</option>
+        <option *ngFor="let talle of talles" [value]="talle.nombre">{{ talle.nombre }}</option>
       </select>
 
       <label class="checkbox-label">
