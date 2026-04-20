@@ -395,7 +395,8 @@ export class PromocionesAdminComponent implements OnInit {
 
   getTipoPromocionNombre(tipoId: number): string {
     const tipo = this.tiposPromocion.find(t => t.id === tipoId);
-    return tipo ? tipo.descripcion : 'N/A';
+    if (!tipo) return 'N/A';
+    return tipo.descripcion || (tipo.nombre ? tipo.nombre.toUpperCase() : 'N/A');
   }
 
   getTipoSeleccionado(): any {

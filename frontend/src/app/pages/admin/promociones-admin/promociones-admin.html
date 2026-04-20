@@ -128,7 +128,7 @@
                 <select [(ngModel)]="nuevaPromocion.tipo_promocion_id" class="form-control">
                   <option [ngValue]="null">Seleccionar tipo...</option>
                   <option *ngFor="let tipo of tiposPromocion" [ngValue]="tipo.id">
-                    {{ tipo.descripcion }}
+                    {{ tipo.descripcion || tipo.nombre | uppercase }}
                   </option>
                 </select>
               </div>
