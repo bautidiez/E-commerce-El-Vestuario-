@@ -268,7 +268,7 @@ export class MisPedidosComponent implements OnInit {
 
     getWhatsAppUrl(order: any, numberIndex: 1 | 2 = 1): string {
         if (!order) return '';
-        const phoneNumber = numberIndex === 1 ? '5493585164402' : '5493584825640';
+        const phoneNumber = '5493584171716';
         let msg = '';
 
         if (this.isPaymentMethod(order, 'efectivo_local')) {

@@ -57,7 +57,7 @@ export class OrderSuccessComponent implements OnInit {
 
     getWhatsAppUrl(numberIndex: 1 | 2 = 1): string {
         if (!this.order) return '';
-        const phoneNumber = numberIndex === 1 ? '5493585164402' : '5493584825640';
+        const phoneNumber = '5493584171716';
 
         let msg = `Hola! Hice el pedido #${this.order.numero_pedido}. Adjunto comprobante. Total: $${this.order.total}`;
 
