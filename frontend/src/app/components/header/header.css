@@ -806,8 +806,8 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
+  right: 0;
+  bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 99990;
   opacity: 0;
@@ -832,7 +832,6 @@
   left: -320px;
   width: 320px;
   bottom: 0;
-  height: 100%;
   background: #ffffff;
   z-index: 99995;
   display: flex;
@@ -978,7 +977,6 @@
   top: 0;
   right: -400px;
   width: 400px;
-  height: 100%;
   bottom: 0;
   background: #ffffff;
   z-index: 99999;
