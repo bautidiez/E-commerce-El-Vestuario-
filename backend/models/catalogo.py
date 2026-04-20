@@ -282,7 +282,7 @@ class Producto(db.Model):
             'tiene_stock': self.tiene_stock(),
             'tiene_stock_bajo': self.tiene_stock_bajo(),
             'esta_agotado': self.esta_agotado(),
-            'imagenes': [img.to_dict() for img in self.imagenes],
+            'imagenes': [img.to_dict() for img in sorted(self.imagenes, key=lambda x: x.orden or 0)],
             'promociones': [p.to_dict() for p in self.get_promociones_activas()],
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None

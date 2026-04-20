@@ -419,7 +419,7 @@ export class ProductosAdminComponent implements OnInit {
 
         this.imagenesSeleccionadas = [];
         this.imagenesPreview = [];
-        this.imagenesExistentes = productoFrescos.imagenes || [];
+        this.imagenesExistentes = (productoFrescos.imagenes || []).sort((a: any, b: any) => (a.orden || 0) - (b.orden || 0));
         this.mostrarFormulario = true;
         this.cdr.detectChanges(); // Forzar actualización de vista
       },
@@ -608,6 +608,44 @@ export class ProductosAdminComponent implements OnInit {
   eliminarImagenPreview(index: number) {
     this.imagenesPreview.splice(index, 1);
     this.imagenesSeleccionadas.splice(index, 1);
+  }
+
+  setImagenPrincipal(imagen: any) {
+    if (imagen.es_principal) return;
+
+    this.apiService.updateImagen(imagen.id, { es_principal: true }).subscribe({
+      next: () => {
+        this.imagenesExistentes.forEach(img => img.es_principal = (img.id === imagen.id));
+        this.loadProductos();
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        Swal.fire('Error', 'No se pudo establecer como imagen principal.', 'error');
+      }
+    });
+  }
+
+  moverImagenExistente(index: number, direction: number) {
+    const newIndex = index + direction;
+    if (newIndex >= 0 && newIndex < this.imagenesExistentes.length) {
+      const imgTarget = this.imagenesExistentes[index];
+      const imgSwap = this.imagenesExistentes[newIndex];
+
+      // Swap orden
+      const oldOrden = imgTarget.orden || 0;
+      imgTarget.orden = imgSwap.orden || 0;
+      imgSwap.orden = oldOrden;
+
+      // Swap in array
+      this.imagenesExistentes[index] = imgSwap;
+      this.imagenesExistentes[newIndex] = imgTarget;
+
+      // Sync backend
+      this.apiService.updateImagen(imgTarget.id, { orden: imgTarget.orden }).subscribe();
+      this.apiService.updateImagen(imgSwap.id, { orden: imgSwap.orden }).subscribe();
+
+      this.cdr.detectChanges();
+    }
   }
 
   eliminarImagenExistente(imagenId: number) {

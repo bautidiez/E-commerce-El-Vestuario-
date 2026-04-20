@@ -249,6 +249,11 @@ export class ApiService {
     return this.http.delete(url, { headers: this.getHeaders(url) });
   }
 
+  updateImagen(id: number, data: any): Observable<any> {
+    const url = `${this.apiUrl}/admin/imagenes/${id}`;
+    return this.http.put(url, data, { headers: this.getHeaders(url) });
+  }
+
   // Categorías
   getCategorias(incluirSubcategorias: boolean = true, categoriaPadreId?: number, flat: boolean = false): Observable<any> {
     const params = new URLSearchParams();

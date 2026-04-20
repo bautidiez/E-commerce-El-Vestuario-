@@ -236,10 +236,33 @@ def upload_imagen(producto_id):
     return jsonify({'error': 'Invalid file'}), 400
 
 
-@productos_bp.route('/api/admin/imagenes/<int:imagen_id>', methods=['DELETE'])
+@productos_bp.route('/api/admin/imagenes/<int:imagen_id>', methods=['PUT', 'DELETE'])
 @jwt_required()
-def delete_imagen(imagen_id):
+def manage_imagen(imagen_id):
     imagen = ImagenProducto.query.get_or_404(imagen_id)
-    db.session.delete(imagen)
-    db.session.commit()
-    return jsonify({'message': 'Deleted'}), 200
+    
+    if request.method == 'DELETE':
+        db.session.delete(imagen)
+        db.session.commit()
+        invalidate_cache(pattern='productos')
+        return jsonify({'message': 'Deleted'}), 200
+
+    data = request.get_json()
+    try:
+        if 'es_principal' in data:
+            nuevo_valor = data['es_principal']
+            if nuevo_valor == True:
+                # Ponemos todas las otras a False primero
+                ImagenProducto.query.filter_by(producto_id=imagen.producto_id).update({'es_principal': False})
+            imagen.es_principal = nuevo_valor
+
+        if 'orden' in data:
+            imagen.orden = int(data['orden'])
+
+        db.session.commit()
+        invalidate_cache(pattern='productos')
+        return jsonify(imagen.to_dict()), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+

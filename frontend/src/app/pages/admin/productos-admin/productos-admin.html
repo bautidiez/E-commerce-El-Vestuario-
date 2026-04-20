@@ -265,9 +265,17 @@
           <div *ngIf="productoEditando && imagenesExistentes.length > 0" class="imagenes-existentes">
             <h4>Imágenes Actuales:</h4>
             <div class="imagenes-grid">
-              <div *ngFor="let img of imagenesExistentes" class="imagen-item">
+              <div *ngFor="let img of imagenesExistentes; let i = index" class="imagen-item" [class.principal]="img.es_principal">
                 <img [src]="getFormattedImageUrl(img.url)" [alt]="nuevoProducto.nombre">
                 <div class="imagen-badge" *ngIf="img.es_principal">Principal</div>
+                
+                <div class="imagen-overlay">
+                  <button type="button" class="btn-set-main" *ngIf="!img.es_principal" (click)="setImagenPrincipal(img)" title="Marcar como principal">⭐ Portada</button>
+                  <div class="reorder-btns">
+                    <button type="button" class="btn-nav" (click)="moverImagenExistente(i, -1)" [disabled]="i === 0">←</button>
+                    <button type="button" class="btn-nav" (click)="moverImagenExistente(i, 1)" [disabled]="i === imagenesExistentes.length - 1">→</button>
+                  </div>
+                </div>
                 <button type="button" class="btn-eliminar-imagen" (click)="eliminarImagenExistente(img.id)">✕</button>
               </div>
             </div>
