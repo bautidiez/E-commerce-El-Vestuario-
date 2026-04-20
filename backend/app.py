@@ -338,6 +338,15 @@ def register_hooks(app):
     @app.after_request
     def log_request(response):
         from flask import g, request
+        
+        # Headers de Seguridad endurecidos
+        response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+        response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+        response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains; preload'
+        response.headers['Content-Security-Policy'] = "frame-ancestors 'none'; base-uri 'self'; object-src 'none';"
+        response.headers['X-XSS-Protection'] = '1; mode=block'
+
         if hasattr(g, 'start_time') and request.path != '/api/health':
             duration = (time.time() - g.start_time) * 1000
             print(f"DEBUG OUT: {request.method} {request.path} - {duration:.1f}ms", flush=True)
