@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Subject, of } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { ApiService } from '../../../services/api.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-add-stock-form',
@@ -201,7 +202,14 @@ export class AddStockFormComponent {
 
   submitStock() {
     if (!this.selectedProduct) {
-      alert('Por favor selecciona un producto');
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'warning',
+        title: 'Selecciona un producto',
+        showConfirmButton: false,
+        timer: 2000
+      });
       return;
     }
 
@@ -214,19 +222,32 @@ export class AddStockFormComponent {
     });
 
     if (Object.keys(increments).length === 0) {
-      alert('Por favor ingresa al menos una cantidad mayor a 0');
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'warning',
+        title: 'Ingresa al menos una cantidad',
+        showConfirmButton: false,
+        timer: 2000
+      });
       return;
     }
 
     this.submitting = true;
     this.apiService.addStockBySizes(this.selectedProduct.id, increments).subscribe({
       next: (response) => {
-        alert(`Stock agregado exitosamente para ${Object.keys(increments).length} talles`);
+        Swal.fire({
+          icon: 'success',
+          title: 'Stock actualizado',
+          text: `Se agregó stock correctamente para ${Object.keys(increments).length} talles`,
+          timer: 2000,
+          showConfirmButton: false
+        });
         this.stockAdded.emit();
       },
       error: (error) => {
         console.error('Error adding stock:', error);
-        alert('Error al agregar stock. Por favor intenta nuevamente.');
+        Swal.fire('Error', 'No se pudo agregar el stock', 'error');
         this.submitting = false;
       }
     });

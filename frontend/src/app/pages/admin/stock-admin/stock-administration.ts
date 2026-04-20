@@ -8,6 +8,7 @@ import { AddStockFormComponent } from './add-stock-form.component';
 import { VentasExternasAdminComponent } from '../ventas-externas-admin/ventas-externas-admin';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import Swal from 'sweetalert2';
 
 interface StockItem {
   id: number;
@@ -269,7 +270,7 @@ export class StockAdminComponent implements OnInit, OnDestroy {
       },
       error: (error: any) => {
         console.error('Error actualizando stock:', error);
-        alert('Error al actualizar stock');
+        Swal.fire('Error', 'No se pudo actualizar el stock', 'error');
       }
     });
   }
@@ -292,7 +293,7 @@ export class StockAdminComponent implements OnInit, OnDestroy {
 
   guardar() {
     if (!this.nuevoStock.producto_id || !this.nuevoStock.talle_id) {
-      alert('Por favor selecciona producto y talle');
+      Swal.fire('Requerido', 'Por favor selecciona producto y talle', 'warning');
       return;
     }
 
@@ -300,27 +301,39 @@ export class StockAdminComponent implements OnInit, OnDestroy {
       next: () => {
         this.loadStock();
         this.cancelar();
-        alert('Stock agregado exitosamente');
+        Swal.fire('¡Éxito!', 'Stock agregado exitosamente', 'success');
       },
       error: (error: any) => {
-        alert('Error al guardar stock');
+        Swal.fire('Error', 'No se pudo guardar el stock', 'error');
         console.error(error);
       }
     });
   }
 
   eliminar(stockId: number) {
-    if (confirm('¿Estás seguro de eliminar este registro de stock?')) {
-      this.apiService.deleteStock(stockId).subscribe({
-        next: () => {
-          this.loadStock();
-        },
-        error: (error: any) => {
-          alert('Error al eliminar stock');
-          console.error(error);
-        }
-      });
-    }
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: "Vas a eliminar este registro de stock",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#2563eb',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.apiService.deleteStock(stockId).subscribe({
+          next: () => {
+            this.loadStock();
+            Swal.fire('Eliminado', 'El registro de stock ha sido eliminado', 'success');
+          },
+          error: (error: any) => {
+            Swal.fire('Error', 'No se pudo eliminar el stock', 'error');
+            console.error(error);
+          }
+        });
+      }
+    });
   }
 
   cancelar() {

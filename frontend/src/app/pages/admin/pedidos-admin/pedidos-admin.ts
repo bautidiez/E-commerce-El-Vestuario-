@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../../services/api.service';
 import { AuthService } from '../../../services/auth.service';
+import Swal from 'sweetalert2';
 
 interface NotaPedido {
   id: number;
@@ -141,7 +142,14 @@ export class PedidosAdminComponent implements OnInit {
     if (this.currentPage < this.totalPages) {
       this.cambiarPagina(this.currentPage + 1);
     } else {
-      alert('No hay más páginas');
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'info',
+        title: 'No hay más páginas',
+        showConfirmButton: false,
+        timer: 1500
+      });
     }
   }
 
@@ -183,7 +191,7 @@ export class PedidosAdminComponent implements OnInit {
       },
       error: (error: any) => {
         console.error('Error cargando detalle:', error);
-        alert('Error al cargar detalle del pedido');
+        Swal.fire('Error', 'No se pudo cargar el detalle del pedido', 'error');
         this.cdr.detectChanges();
       }
     });
@@ -214,30 +222,51 @@ export class PedidosAdminComponent implements OnInit {
       contenido: this.nuevaNota
     }).subscribe({
       next: (nota: NotaPedido) => {
-        this.notasInternas.unshift(nota); // Agregar al inicio
+        this.notasInternas.unshift(nota);
         this.nuevaNota = '';
-        alert('Nota agregada exitosamente');
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'success',
+          title: 'Nota agregada',
+          showConfirmButton: false,
+          timer: 1500
+        });
       },
       error: (error: any) => {
         console.error('Error agregando nota:', error);
-        alert('Error al agregar nota');
+        Swal.fire('Error', 'No se pudo agregar la nota', 'error');
       }
     });
   }
 
-  eliminarNota(notaId: number) {
-    if (!confirm('¿Eliminar esta nota?')) {
-      return;
-    }
+  async eliminarNota(notaId: number) {
+    const result = await Swal.fire({
+      title: '¿Eliminar esta nota?',
+      text: 'Esta acción no se puede deshacer',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (!result.isConfirmed) return;
 
     this.apiService.delete(`/admin/notas/${notaId}`).subscribe({
       next: () => {
         this.notasInternas = this.notasInternas.filter(n => n.id !== notaId);
-        alert('Nota eliminada');
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'success',
+          title: 'Nota eliminada',
+          showConfirmButton: false,
+          timer: 1500
+        });
       },
       error: (error: any) => {
         console.error('Error eliminando nota:', error);
-        alert('Error al eliminar nota');
+        Swal.fire('Error', 'No se pudo eliminar la nota', 'error');
       }
     });
   }
@@ -251,14 +280,21 @@ export class PedidosAdminComponent implements OnInit {
 
     this.apiService.updatePedido(this.pedidoSeleccionado.id, actualizacion).subscribe({
       next: () => {
-        alert('Estado actualizado exitosamente');
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'success',
+          title: 'Estado actualizado',
+          showConfirmButton: false,
+          timer: 2000
+        });
         this.loadPedidos();
         if (this.pedidoSeleccionado) {
           this.pedidoSeleccionado.estado = this.nuevoEstado;
         }
       },
       error: (error: any) => {
-        alert('Error al actualizar estado');
+        Swal.fire('Error', 'No se pudo actualizar el estado', 'error');
         console.error(error);
       }
     });
@@ -270,14 +306,21 @@ export class PedidosAdminComponent implements OnInit {
     this.nuevaNota = '';
   }
 
-  aprobarPedido(pedido: Pedido) {
-    if (!confirm(`¿Aprobar el pedido ${pedido.numero_pedido}?\n\nEsto reducirá el stock y procesará el pedido.`)) {
-      return;
-    }
+  async aprobarPedido(pedido: Pedido) {
+    const result = await Swal.fire({
+      title: '¿Aprobar pedido?',
+      text: `Se aprobará el pedido ${pedido.numero_pedido}. Esto reducirá el stock y procesará la orden.`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, aprobar',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (!result.isConfirmed) return;
 
     this.apiService.aprobarPedido(pedido.id).subscribe({
       next: (response: any) => {
-        alert('✅ ' + response.message);
+        Swal.fire('¡Éxito!', response.message, 'success');
         this.loadPedidos();
         if (this.pedidoSeleccionado && this.pedidoSeleccionado.id === pedido.id) {
           this.pedidoSeleccionado = response.pedido;
@@ -285,22 +328,28 @@ export class PedidosAdminComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: (error: any) => {
-        alert('❌ Error: ' + (error.error?.error || 'No se pudo aprobar el pedido'));
+        Swal.fire('Error', error.error?.error || 'No se pudo aprobar el pedido', 'error');
         console.error(error);
       }
     });
   }
 
-  cancelarPedido(pedido: Pedido) {
-    const mensaje = `¿Cancelar el pedido ${pedido.numero_pedido}?\n\nEl cliente verá este pedido como "Cancelado".\n\nEsta acción NO se puede deshacer.`;
+  async cancelarPedido(pedido: Pedido) {
+    const result = await Swal.fire({
+      title: '¿Cancelar pedido?',
+      text: `Se cancelará el pedido ${pedido.numero_pedido}. El cliente verá este pedido como "Cancelado". Esta acción NO se puede deshacer.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      confirmButtonText: 'Sí, cancelar pedido',
+      cancelButtonText: 'Volver'
+    });
 
-    if (!confirm(mensaje)) {
-      return;
-    }
+    if (!result.isConfirmed) return;
 
     this.apiService.updatePedido(pedido.id, { estado: 'cancelado' }).subscribe({
       next: () => {
-        alert('✅ Pedido cancelado exitosamente');
+        Swal.fire('Cancelado', 'El pedido ha sido cancelado exitosamente', 'success');
         this.loadPedidos();
         if (this.pedidoSeleccionado && this.pedidoSeleccionado.id === pedido.id) {
           this.pedidoSeleccionado.estado = 'cancelado';
@@ -308,7 +357,7 @@ export class PedidosAdminComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: (error: any) => {
-        alert('❌ Error al cancelar pedido: ' + (error.error?.error || 'Error desconocido'));
+        Swal.fire('Error', error.error?.error || 'No se pudo cancelar el pedido', 'error');
         console.error(error);
       }
     });

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { ApiService } from '../../../services/api.service';
 import { AuthService } from '../../../services/auth.service';
+import Swal from 'sweetalert2';
 
 interface Categoria {
     id?: number;
@@ -95,7 +96,7 @@ export class CategoriasAdminComponent implements OnInit {
             },
             error: (error: any) => {
                 console.error('Error al cargar categorías:', error);
-                alert('Error al cargar categorías');
+                Swal.fire('Error', 'No se pudieron cargar las categorías', 'error');
                 this.cargandoCategorias = false;
                 this.cdr.detectChanges();
             }
@@ -160,7 +161,14 @@ export class CategoriasAdminComponent implements OnInit {
 
     guardar() {
         if (!this.categoriaActual.nombre.trim()) {
-            alert('El nombre es requerido');
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'warning',
+                title: 'El nombre es requerido',
+                showConfirmButton: false,
+                timer: 2000
+            });
             return;
         }
 
@@ -184,38 +192,68 @@ export class CategoriasAdminComponent implements OnInit {
 
         request.subscribe({
             next: (data: any) => {
-                alert(this.modoEdicion ? 'Categoría actualizada' : 'Categoría creada exitosamente');
+                Swal.fire({
+                    icon: 'success',
+                    title: this.modoEdicion ? 'Actualizada' : 'Creada',
+                    text: this.modoEdicion ? 'La categoría se ha actualizado correctamente' : 'La categoría se ha creado exitosamente',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
                 this.cancelar();
                 this.loadCategorias();
                 this.loadArbolCategorias();
             },
             error: (error: any) => {
                 console.error('Error al guardar:', error);
-                alert(error.error?.error || 'Error al guardar categoría');
+                Swal.fire('Error', error.error?.error || 'No se pudo guardar la categoría', 'error');
             }
         });
     }
 
-    eliminar(categoria: Categoria) {
-        if (!confirm(`¿Eliminar categoría "${categoria.nombre}"?`)) {
-            return;
-        }
+    async eliminar(categoria: Categoria) {
+        const result = await Swal.fire({
+            title: '¿Eliminar categoría?',
+            text: `¿Estás seguro de que deseas eliminar "${categoria.nombre}"?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        });
+
+        if (!result.isConfirmed) return;
 
         this.apiService.deleteCategoria(categoria.id!).subscribe({
             next: () => {
-                alert('Categoría eliminada');
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Categoría eliminada',
+                    showConfirmButton: false,
+                    timer: 2000
+                });
                 this.loadCategorias();
                 this.loadArbolCategorias();
             },
-            error: (error: any) => {
-                // Check if it's the "has products" error
+            error: async (error: any) => {
                 if (error.status === 400 && error.error?.error?.includes('producto(s) asociado(s)')) {
-                    if (confirm(`⚠️ ${error.error.error}\n\n¿Deseas ELIMINAR TODO (categoría + productos) permanentemente?`)) {
+                    const result = await Swal.fire({
+                        title: 'Categoría con productos',
+                        text: `${error.error.error}. ¿Deseas ELIMINAR TODO (categoría y sus productos) permanentemente?`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        confirmButtonText: 'Sí, ELIMINAR TODO',
+                        cancelButtonText: 'Cancelar'
+                    });
+                    
+                    if (result.isConfirmed) {
                         this.forceDelete(categoria.id!);
                     }
                 } else {
                     console.error('Error al eliminar:', error);
-                    alert(error.error?.error || 'Error al eliminar categoría');
+                    Swal.fire('Error', error.error?.error || 'No se pudo eliminar la categoría', 'error');
                 }
             }
         });
@@ -224,13 +262,13 @@ export class CategoriasAdminComponent implements OnInit {
     forceDelete(id: number) {
         this.apiService.deleteCategoria(id, true).subscribe({
             next: (response: any) => {
-                alert(response.message || 'Categoría y productos eliminados correctamente');
+                Swal.fire('Eliminado', response.message || 'La categoría y sus productos han sido eliminados', 'success');
                 this.loadCategorias();
                 this.loadArbolCategorias();
             },
             error: (error: any) => {
                 console.error('Error al forzar eliminación:', error);
-                alert('Error crítico al eliminar');
+                Swal.fire('Error', 'Error crítico al intentar eliminar todo', 'error');
             }
         });
     }
@@ -302,18 +340,27 @@ export class CategoriasAdminComponent implements OnInit {
         this.router.navigate(['/admin/gestion']);
     }
 
-    fixSequences() {
-        if (confirm('¿Deseas sincronizar los IDs de la base de datos? Esto debería solucionar el error de "ID duplicado" al crear categorías.')) {
-            this.apiService.fixSequences().subscribe({
-                next: (res) => {
-                    alert('Sincronización completada con éxito. Ya puedes intentar crear la categoría de nuevo.');
-                    this.loadCategorias();
-                },
-                error: (err) => {
-                    console.error('Error al sincronizar:', err);
-                    alert('Hubo un error al intentar sincronizar: ' + (err.error?.error || err.message));
-                }
-            });
-        }
+    async fixSequences() {
+        const result = await Swal.fire({
+            title: 'Sincronizar IDs',
+            text: '¿Deseas sincronizar los IDs de la base de datos? Esto soluciona el error de "ID duplicado" al crear categorías.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, sincronizar',
+            cancelButtonText: 'Cancelar'
+        });
+
+        if (!result.isConfirmed) return;
+
+        this.apiService.fixSequences().subscribe({
+            next: (res) => {
+                Swal.fire('Sincronizado', 'Sincronización completada con éxito. Ya puedes intentar crear la categoría.', 'success');
+                this.loadCategorias();
+            },
+            error: (err) => {
+                console.error('Error al sincronizar:', err);
+                Swal.fire('Error', 'Hubo un error al sincronizar: ' + (err.error?.error || err.message), 'error');
+            }
+        });
     }
 }

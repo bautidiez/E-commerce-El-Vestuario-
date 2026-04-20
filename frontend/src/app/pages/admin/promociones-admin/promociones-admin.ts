@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { ApiService } from '../../../services/api.service';
 import { AuthService } from '../../../services/auth.service';
+import Swal from 'sweetalert2';
 
 interface Promocion {
   id: number;
@@ -148,10 +149,21 @@ export class PromocionesAdminComponent implements OnInit {
   loadTiposPromocion() {
     this.apiService.getTiposPromocion().subscribe({
       next: (data: any) => {
+        console.log('DEBUG: Tipos de promoción recibidos:', data);
+        console.log('DEBUG: Cantidad de tipos:', data?.length);
         this.tiposPromocion = data;
+        
+        if (!data || data.length === 0) {
+          console.warn('DEBUG: La lista de tipos de promoción está VACÍA');
+        }
       },
       error: (error: any) => {
-        console.error('Error cargando tipos de promoción:', error);
+        console.error('DEBUG: Error cargando tipos de promoción:', error);
+        Swal.fire({
+          title: 'Error de Conexión',
+          text: `No se pudieron cargar los tipos de promoción. Status: ${error.status} - ${error.message}`,
+          icon: 'error'
+        });
       }
     });
   }
@@ -250,23 +262,23 @@ export class PromocionesAdminComponent implements OnInit {
   siguientePaso() {
     if (this.pasoActual === 1) {
       if (this.nuevaPromocion.alcance === 'producto' && this.productosSeleccionados.length === 0) {
-        alert('Por favor selecciona al menos un producto');
+        Swal.fire({ title: 'Requerido', text: 'Por favor selecciona al menos un producto', icon: 'warning' });
         return;
       }
       if (this.nuevaPromocion.alcance === 'categoria' && this.categoriasSeleccionadas.length === 0) {
-        alert('Por favor selecciona al menos una categoría');
+        Swal.fire({ title: 'Requerido', text: 'Por favor selecciona al menos una categoría', icon: 'warning' });
         return;
       }
       if (!this.nuevaPromocion.tipo_promocion_id) {
-        alert('Por favor selecciona el tipo de promoción');
+        Swal.fire({ title: 'Requerido', text: 'Por favor selecciona el tipo de promoción', icon: 'warning' });
         return;
       }
       if (this.mostrarCampoValor() && !this.nuevaPromocion.valor) {
-        alert('Por favor ingresa el valor de la promoción');
+        Swal.fire({ title: 'Requerido', text: 'Por favor ingresa el valor de la promoción', icon: 'warning' });
         return;
       }
       if (this.nuevaPromocion.es_cupon && !this.nuevaPromocion.codigo) {
-        alert('Por favor ingresa el código del cupón');
+        Swal.fire({ title: 'Requerido', text: 'Por favor ingresa el código del cupón', icon: 'warning' });
         return;
       }
     }
@@ -283,7 +295,7 @@ export class PromocionesAdminComponent implements OnInit {
 
   guardar() {
     if (!this.validarFechas()) {
-      alert('La fecha de fin debe ser posterior a la fecha de inicio');
+      Swal.fire({ title: 'Fechas Inválidas', text: 'La fecha de fin debe ser posterior a la fecha de inicio', icon: 'error' });
       return;
     }
 
@@ -294,8 +306,8 @@ export class PromocionesAdminComponent implements OnInit {
     const promocionData = {
       ...this.nuevaPromocion,
       valor: this.nuevaPromocion.valor || 0,
-      fecha_inicio: new Date(this.nuevaPromocion.fecha_inicio + 'T00:00:00').toISOString(),
-      fecha_fin: new Date(this.nuevaPromocion.fecha_fin + 'T23:59:59').toISOString()
+      fecha_inicio: new Date(this.nuevaPromocion.fecha_inicio + 'T00:00:00.000Z').toISOString(),
+      fecha_fin: new Date(this.nuevaPromocion.fecha_fin + 'T23:59:59.999Z').toISOString()
     };
 
     const request = this.modoEdicion
@@ -304,31 +316,48 @@ export class PromocionesAdminComponent implements OnInit {
 
     request.subscribe({
       next: () => {
-        alert(this.modoEdicion ? 'Promoción actualizada' : 'Promoción creada exitosamente');
+        Swal.fire({
+          title: this.modoEdicion ? 'Actualizado' : 'Creado',
+          text: this.modoEdicion ? 'Promoción actualizada correctamente' : 'Promoción creada exitosamente',
+          icon: 'success',
+          timer: 2000,
+          showConfirmButton: false
+        });
         this.loadPromociones();
         this.cancelar();
       },
       error: (error: any) => {
         const errorMsg = error.error?.error || 'Error desconocido';
-        alert('Error al guardar promoción: ' + errorMsg);
+        Swal.fire('Error', 'Error al guardar promoción: ' + errorMsg, 'error');
         console.error(error);
       }
     });
   }
 
   eliminar(promocionId: number) {
-    if (confirm('¿Estás seguro de eliminar esta promoción?')) {
-      this.apiService.deletePromocion(promocionId).subscribe({
-        next: () => {
-          this.loadPromociones();
-          alert('Promoción eliminada');
-        },
-        error: (error: any) => {
-          alert('Error al eliminar promoción');
-          console.error(error);
-        }
-      });
-    }
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: "Esta acción no se puede deshacer",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#2563eb',
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.apiService.deletePromocion(promocionId).subscribe({
+          next: () => {
+            this.loadPromociones();
+            Swal.fire('Eliminado', 'La promoción ha sido eliminada', 'success');
+          },
+          error: (error: any) => {
+            Swal.fire('Error', 'No se pudo eliminar la promoción', 'error');
+            console.error(error);
+          }
+        });
+      }
+    });
   }
 
   cancelar() {
@@ -444,7 +473,7 @@ export class PromocionesAdminComponent implements OnInit {
     });
   }
 
-  selectProduct(product: any) {
+  addProducto(product: any) {
     if (!this.productosSeleccionados.some(p => p.id === product.id)) {
       this.productosSeleccionados.push(product);
     }
@@ -452,7 +481,7 @@ export class PromocionesAdminComponent implements OnInit {
     this.searchResults = [];
   }
 
-  removeProduct(productId: number) {
+  removeProducto(productId: number) {
     this.productosSeleccionados = this.productosSeleccionados.filter(p => p.id !== productId);
   }
 

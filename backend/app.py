@@ -113,6 +113,20 @@ app.register_blueprint(payments_bp, url_prefix='/api/payments')
 for bp in admin_blueprints:
     app.register_blueprint(bp)
 
+# ==================== DEBUG ROUTES ====================
+@app.route('/api/public/debug-promotions', methods=['GET'])
+def debug_promotions():
+    try:
+        from models import TipoPromocion
+        tipos = TipoPromocion.query.all()
+        return jsonify({
+            'status': 'success',
+            'count': len(tipos),
+            'data': [t.to_dict() for t in tipos]
+        }), 200
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)}), 500
+
 # ==================== BACKGROUND SCHEDULER ====================
 # Configurar tareas programadas (auto-limpieza de pedidos expirados)
 # TEMPORARILY DISABLED - Install apscheduler if you need this feature: pip install apscheduler

@@ -153,30 +153,108 @@
     </div>
   </div>
 
-  <nav class="nav-mobile" [class.open]="menuOpen">
-    <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}"
-      (click)="menuOpen = false">Inicio</a>
-    <a routerLink="/productos" routerLinkActive="active" (click)="menuOpen = false">Productos</a>
-    <a routerLink="/productos" [queryParams]="{ofertas: 'true'}" (click)="menuOpen = false">🔥 OFERTAS</a>
+  <!-- Overlay oscuro para menús laterales -->
+  <div class="offcanvas-overlay" [class.show]="menuOpen || isCartOpen" (click)="menuOpen = false; closeCart()"></div>
 
-    <!-- Categorías dinámicas -->
-    <ng-container *ngFor="let cat of categoriasTree">
-      <a [routerLink]="['/categoria', cat.slug || cat.id]" (click)="menuOpen = false; $event.stopPropagation()">
-        {{ cat.nombre }}
-      </a>
-      <!-- Subcategorías (si existen) -->
-      <a *ngFor="let sub of cat.subcategorias" [routerLink]="['/categoria', cat.slug || cat.id, sub.slug || sub.id]"
-        (click)="menuOpen = false; $event.stopPropagation()" class="subcategoria-mobile">
-        &nbsp;&nbsp;› {{ sub.nombre }}
-      </a>
-    </ng-container>
+  <!-- Menú lateral izquierdo (Navegación Móvil) -->
+  <nav class="nav-mobile-sidebar" [class.open]="menuOpen">
+    <div class="nav-mobile-header">
+      <img src="/assets/logo.png" alt="elvestuario" class="logo-img-mobile">
+      <button class="close-btn" (click)="menuOpen = false">✕</button>
+    </div>
+    
+    <div class="nav-mobile-body">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="menuOpen = false">Inicio</a>
+      <a routerLink="/productos" routerLinkActive="active" (click)="menuOpen = false">Productos</a>
+      <a routerLink="/productos" [queryParams]="{ofertas: 'true'}" class="ofertas-link" (click)="menuOpen = false">🔥 OFERTAS</a>
 
-    <a routerLink="/contacto" routerLinkActive="active" (click)="menuOpen = false">Contacto</a>
-    <a routerLink="/encargo-especial" routerLinkActive="active" (click)="menuOpen = false">Encargo personalizado</a>
-    <a routerLink="/politica-cambio" routerLinkActive="active" (click)="menuOpen = false">Política de cambio</a>
-    <a routerLink="/guia-talles" routerLinkActive="active" (click)="menuOpen = false">Guía de talles</a>
-    <a *ngIf="isCliente || isAdmin" routerLink="/mis-pedidos" (click)="menuOpen = false">Mi Cuenta</a>
-    <a *ngIf="isAdmin" routerLink="/admin" (click)="menuOpen = false">Panel Admin</a>
-    <a *ngIf="isAdmin || isCliente" (click)="logout(); menuOpen = false">Cerrar sesión</a>
+      <!-- Categorías dinámicas en acordeón -->
+      <div class="mobile-accordion">
+        <ng-container *ngFor="let cat of categoriasTree">
+          <div class="accordion-item">
+            <!-- Si tiene subcategorías, mostramos nombre y chevron para expandir -->
+            <div class="accordion-header" *ngIf="cat.subcategorias && cat.subcategorias.length > 0; else noSub">
+              <a [routerLink]="['/categoria', cat.slug || cat.id]" (click)="menuOpen = false; $event.stopPropagation()">
+                {{ cat.nombre }}
+              </a>
+              <span class="accordion-toggle" (click)="toggleSubcategory($event, cat.id)">
+                <span class="chevron" [class.expanded]="expandedCategories[cat.id]">+</span>
+              </span>
+            </div>
+            
+            <!-- Si no tiene subcategorías, solo el enlace -->
+            <ng-template #noSub>
+              <div class="accordion-header">
+                <a [routerLink]="['/categoria', cat.slug || cat.id]" (click)="menuOpen = false; $event.stopPropagation()">
+                  {{ cat.nombre }}
+                </a>
+              </div>
+            </ng-template>
+
+            <!-- Subcategorías (Desplegables) -->
+            <div class="accordion-content" [class.expanded]="expandedCategories[cat.id]" *ngIf="cat.subcategorias && cat.subcategorias.length > 0">
+              <a *ngFor="let sub of cat.subcategorias" [routerLink]="['/categoria', cat.slug || cat.id, sub.slug || sub.id]"
+                (click)="menuOpen = false; $event.stopPropagation()" class="subcategoria-mobile">
+                {{ sub.nombre }}
+              </a>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+
+      <hr class="mobile-divider">
+
+      <a routerLink="/contacto" routerLinkActive="active" (click)="menuOpen = false">Contacto</a>
+      <a routerLink="/encargo-especial" routerLinkActive="active" (click)="menuOpen = false">Encargo personalizado</a>
+      <a routerLink="/politica-cambio" routerLinkActive="active" (click)="menuOpen = false">Política de cambio</a>
+      <a routerLink="/guia-talles" routerLinkActive="active" (click)="menuOpen = false">Guía de talles</a>
+      
+      <hr class="mobile-divider">
+      
+      <a *ngIf="isCliente || isAdmin" routerLink="/mis-pedidos" (click)="menuOpen = false" class="account-link">Mi Cuenta</a>
+      <a *ngIf="isAdmin" routerLink="/admin" (click)="menuOpen = false" class="account-link">Panel Admin</a>
+      <a *ngIf="isAdmin || isCliente" (click)="logout(); menuOpen = false" class="logout-link">Cerrar sesión</a>
+    </div>
   </nav>
+
+  <!-- Carrito Lateral Izquierdo (Offcanvas) -->
+  <div class="cart-offcanvas" [class.open]="isCartOpen">
+    <div class="cart-offcanvas-header">
+      <h2>Tu Carrito ({{ cartItemCount }})</h2>
+      <button class="close-btn" (click)="closeCart()">✕</button>
+    </div>
+    
+    <div class="cart-offcanvas-body">
+      <ng-container *ngIf="(cartItems$ | async) as cartItems">
+        <div *ngIf="cartItems.length === 0" class="empty-cart">
+          <p>Tu carrito está vacío.</p>
+          <button class="continue-shopping-btn" (click)="closeCart()">Seguir comprando</button>
+        </div>
+
+        <div class="cart-items" *ngIf="cartItems.length > 0">
+          <div *ngFor="let item of cartItems; let i = index" class="cart-item-offcanvas">
+            <img [src]="apiService.getFormattedImageUrl(item.producto.imagenes?.[0]?.url)" [alt]="item.producto.nombre" class="cart-item-img">
+            <div class="cart-item-details">
+              <h4 class="cart-item-title">{{ item.producto.nombre }}</h4>
+              <p class="cart-item-variant">Talle: {{ item.talle.nombre }}</p>
+              <div class="cart-item-price-row">
+                <span class="cart-item-qty">{{ item.cantidad }} x</span>
+                <span class="cart-item-price">{{ item.precio_final || item.precio_unitario | currency:'ARS':'symbol-narrow':'1.0-0' }}</span>
+              </div>
+            </div>
+            <button class="remove-item-btn" (click)="removeItem(i)">🗑️</button>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+    
+    <div class="cart-offcanvas-footer">
+      <div class="cart-total-row">
+        <span>Total:</span>
+        <span class="total-price">{{ (cartTotal$ | async) | currency:'ARS':'symbol-narrow':'1.0-0' }}</span>
+      </div>
+      <button class="checkout-btn" (click)="goToFullCart()">Ir al Carrito</button>
+    </div>
+  </div>
+
 </header>

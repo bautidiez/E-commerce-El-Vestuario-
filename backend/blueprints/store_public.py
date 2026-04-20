@@ -22,10 +22,10 @@ store_public_bp = Blueprint('store_public', __name__)
 @store_public_bp.route('/api/productos', methods=['GET'])
 def get_productos():
     """Obtener productos con filtros y paginación (público) - REFACTORIZADO"""
-    # CACHE DESACTIVADO TEMPORALMENTE PARA ORDENAMIENTO DE STOCK
-    # cache_key = f"productos:{request.query_string.decode()}"
-    # cached_result = cache.get(cache_key)
-    # if cached_result: return jsonify(cached_result), 200
+    # CACHE ACTIVADO
+    cache_key = f"productos:{request.query_string.decode()}"
+    cached_result = cache.get(cache_key)
+    if cached_result: return jsonify(cached_result), 200
 
     page = request.args.get('page', 1, type=int)
     page_size = request.args.get('page_size', 12, type=int)
@@ -41,7 +41,7 @@ def get_productos():
         'pages': pagination.pages
     }
     
-    # cache.set(cache_key, result, ttl_seconds=300)
+    cache.set(cache_key, result, ttl_seconds=300)
     return jsonify(result), 200
 
 @store_public_bp.route('/api/productos/<int:id>', methods=['GET'])

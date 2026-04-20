@@ -1,9 +1,11 @@
 from models import Producto, Categoria, Color, StockTalle, db
 from sqlalchemy import or_, case, select, exists, and_
 from extensions import limiter
+from cache_utils import cached
 
 class ProductService:
     @staticmethod
+    @cached(ttl_seconds=300) # Cache por 5 minutos
     def get_catalog(filters: dict, page: int = 1, page_size: int = 12):
         """
         Lógica centralizada para obtener productos con filtros complejos.
@@ -23,16 +25,26 @@ class ProductService:
                 Producto.descripcion.ilike(search_term)
             ))
             
-        # Categorías (Recursivo)
+        # Categorías (Recursivo - Optimizado)
         categoria_id = filters.get('categoria_id')
         if categoria_id:
-            def get_cat_ids(cat_id):
-                ids = [int(cat_id)]
-                subs = Categoria.query.filter_by(categoria_padre_id=cat_id).all()
-                for s in subs:
-                    ids.extend(get_cat_ids(s.id))
-                return ids
-            query = query.filter(Producto.categoria_id.in_(get_cat_ids(categoria_id)))
+            # Obtener todas las categorías una sola vez para evitar recursión en DB
+            todas_categorias = Categoria.query.all()
+            cat_map = {}
+            for c in todas_categorias:
+                if c.categoria_padre_id not in cat_map:
+                    cat_map[c.categoria_padre_id] = []
+                cat_map[c.categoria_padre_id].append(c.id)
+            
+            def get_all_child_ids(p_id):
+                results = [p_id]
+                if p_id in cat_map:
+                    for child_id in cat_map[p_id]:
+                        results.extend(get_all_child_ids(child_id))
+                return results
+            
+            child_ids = get_all_child_ids(int(categoria_id))
+            query = query.filter(Producto.categoria_id.in_(child_ids))
             
         # Otros filtros...
         if filters.get('destacados') == 'true':
@@ -50,27 +62,24 @@ class ProductService:
                 (Producto.precio_descuento > 0)
             )
             
+            # Subconsulta para promociones activas
+            active_promos_query = db.session.query(PromocionProducto.id).filter(
+                PromocionProducto.activa == True,
+                PromocionProducto.fecha_inicio <= ahora,
+                PromocionProducto.fecha_fin >= ahora
+            ).subquery()
+
             # Opción 2: Productos con promociones activas (directas)
             tiene_promo_directa = Producto.id.in_(
-                db.session.query(promocion_productos_link.c.producto_id).join(
-                    PromocionProducto,
-                    PromocionProducto.id == promocion_productos_link.c.promocion_id
-                ).filter(
-                    PromocionProducto.activa == True,
-                    PromocionProducto.fecha_inicio <= ahora,
-                    PromocionProducto.fecha_fin >= ahora
+                db.session.query(promocion_productos_link.c.producto_id).filter(
+                    promocion_productos_link.c.promocion_id.in_(active_promos_query)
                 )
             )
             
             # Opción 3: Productos cuya categoría tiene promociones activas
             tiene_promo_categoria = Producto.categoria_id.in_(
-                db.session.query(promocion_categorias_link.c.categoria_id).join(
-                    PromocionProducto,
-                    PromocionProducto.id == promocion_categorias_link.c.promocion_id
-                ).filter(
-                    PromocionProducto.activa == True,
-                    PromocionProducto.fecha_inicio <= ahora,
-                    PromocionProducto.fecha_fin >= ahora
+                db.session.query(promocion_categorias_link.c.categoria_id).filter(
+                    promocion_categorias_link.c.promocion_id.in_(active_promos_query)
                 )
             )
             
@@ -82,26 +91,22 @@ class ProductService:
         if filters.get('precio_max'):
             query = query.filter(Producto.precio_base <= float(filters['precio_max']))
 
-        # Filtro de estado de stock
+        # Filtro de estado de stock (Optimizado)
         estado_stock = filters.get('estado_stock')
         if estado_stock:
             if estado_stock == 'disponible':
-                # Productos con stock >= 4 en al menos un talle
-                query = query.join(StockTalle).filter(StockTalle.cantidad >= 4).distinct()
+                query = query.filter(Producto.id.in_(
+                    db.session.query(StockTalle.producto_id).filter(StockTalle.cantidad >= 4)
+                ))
             elif estado_stock == 'bajo':
-                # Productos con stock entre 1 y 3 (y sin stock >= 4)
-                productos_stock_alto = db.session.query(StockTalle.producto_id).filter(
-                    StockTalle.cantidad >= 4
-                ).distinct()
-                query = query.join(StockTalle).filter(
-                    StockTalle.cantidad.between(1, 3),
-                    ~Producto.id.in_(productos_stock_alto)
-                ).distinct()
+                # Productos que tienen algún stock entre 1-3 Y NINGUNO >= 4
+                productos_alto = db.session.query(StockTalle.producto_id).filter(StockTalle.cantidad >= 4)
+                query = query.filter(
+                    Producto.id.in_(db.session.query(StockTalle.producto_id).filter(StockTalle.cantidad.between(1, 3))),
+                    ~Producto.id.in_(productos_alto)
+                )
             elif estado_stock == 'no_disponible':
-                # Productos donde TODO el stock es 0
-                productos_con_stock = db.session.query(StockTalle.producto_id).filter(
-                    StockTalle.cantidad > 0
-                ).distinct()
+                productos_con_stock = db.session.query(StockTalle.producto_id).filter(StockTalle.cantidad > 0)
                 query = query.filter(~Producto.id.in_(productos_con_stock))
 
         # Filtro de versión

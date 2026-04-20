@@ -28,6 +28,13 @@ export class HeaderComponent implements OnInit {
   activeCategory: any | null = null;
   busqueda = '';
 
+  // Carrito Offcanvas
+  isCartOpen = false;
+  cartItems$: Observable<any[]>;
+
+  // Acordeón Móvil
+  expandedCategories: { [key: number]: boolean } = {};
+
   // Autocomplete
   private searchTerms = new Subject<string>();
   searchResults: any[] = [];
@@ -45,6 +52,7 @@ export class HeaderComponent implements OnInit {
     private cdr: ChangeDetectorRef
   ) {
     this.cartTotal$ = this.cartService.total$;
+    this.cartItems$ = this.cartService.cart$;
   }
 
   ngOnInit() {
@@ -161,6 +169,21 @@ export class HeaderComponent implements OnInit {
   }
 
   goToCart() {
+    this.isCartOpen = true;
+  }
+
+  closeCart() {
+    this.isCartOpen = false;
+  }
+
+  toggleSubcategory(event: Event, catId: number) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.expandedCategories[catId] = !this.expandedCategories[catId];
+  }
+
+  goToFullCart() {
+    this.isCartOpen = false;
     this.router.navigate(['/carrito']);
   }
 
@@ -216,5 +239,9 @@ export class HeaderComponent implements OnInit {
       this.clearActiveCategory();
       this.showSearchResults = false;
     }
+  }
+
+  removeItem(index: number) {
+    this.cartService.removeFromCart(index);
   }
 }

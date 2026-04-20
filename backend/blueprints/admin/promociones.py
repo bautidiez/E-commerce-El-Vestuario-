@@ -14,7 +14,9 @@ promociones_bp = Blueprint('admin_promociones', __name__)
 @promociones_bp.route('/api/admin/tipos-promocion', methods=['GET'])
 @jwt_required()
 def get_tipos_promocion():
+    print("DEBUG: Entrando a get_tipos_promocion en modular blueprint")
     tipos = TipoPromocion.query.all()
+    print(f"DEBUG: Encontrados {len(tipos)} tipos en modular blueprint")
     return jsonify([t.to_dict() for t in tipos]), 200
 
 

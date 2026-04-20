@@ -21,8 +21,16 @@ export class ApiService {
     return `${apiBase}${url}`;
   }
 
-  private getHeaders(): HttpHeaders {
-    const token = localStorage.getItem('token');
+  private getHeaders(url: string = ''): HttpHeaders {
+    let token = localStorage.getItem('token'); // default fallback
+    
+    // Si la URL apunta al panel de administración, priorizar token de admin
+    if (url.includes('/admin/') || url.includes('/auth/verify')) {
+      token = localStorage.getItem('auth_token_admin') || token;
+    } else if (url.includes('/clientes/') || url.includes('/cart')) {
+      token = localStorage.getItem('auth_token_cliente') || token;
+    }
+
     let headers = new HttpHeaders({
       'Content-Type': 'application/json'
     });
@@ -46,11 +54,13 @@ export class ApiService {
   }
 
   verifyToken(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/auth/verify`, { headers: this.getHeaders() });
+    const url = `${this.apiUrl}/auth/verify`;
+    return this.http.get(url, { headers: this.getHeaders(url) });
   }
 
   verifyTokenCliente(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/clientes/verify`, { headers: this.getHeaders() });
+    const url = `${this.apiUrl}/clientes/verify`;
+    return this.http.get(url, { headers: this.getHeaders(url) });
   }
 
   // Productos
@@ -119,31 +129,27 @@ export class ApiService {
       productoLimpio.dorsal = producto.dorsal;
     }
 
-    if (producto.numero !== null && producto.numero !== undefined && producto.numero !== '') {
-      productoLimpio.numero = parseInt(producto.numero);
-    }
-
-    if (producto.version) {
-      productoLimpio.version = producto.version;
-    }
-
-    return this.http.post(`${this.apiUrl}/admin/productos`, productoLimpio, { headers: this.getHeaders() });
+    const url = `${this.apiUrl}/admin/productos`;
+    return this.http.post(url, productoLimpio, { headers: this.getHeaders(url) });
   }
 
   updateProducto(id: number, producto: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/admin/productos/${id}`, producto, { headers: this.getHeaders() });
+    const url = `${this.apiUrl}/admin/productos/${id}`;
+    return this.http.put(url, producto, { headers: this.getHeaders(url) });
   }
 
   deleteProducto(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/admin/productos/${id}`, { headers: this.getHeaders() });
+    const url = `${this.apiUrl}/admin/productos/${id}`;
+    return this.http.delete(url, { headers: this.getHeaders(url) });
   }
 
   deleteProductosBulk(ids: number[]): Observable<any> {
+    const url = `${this.apiUrl}/admin/productos/bulk`;
     const options = {
-      headers: this.getHeaders(),
+      headers: this.getHeaders(url),
       body: { ids }
     };
-    return this.http.delete(`${this.apiUrl}/admin/productos/bulk`, options);
+    return this.http.delete(url, options);
   }
 
   // Productos Mini - Versión ligera para dropdowns
@@ -158,7 +164,7 @@ export class ApiService {
     const queryString = Object.keys(params).map(key => `${key}=${encodeURIComponent(params[key])}`).join('&');
     if (queryString) url += `?${queryString}`;
 
-    return this.http.get(url, { headers: this.getHeaders() });
+    return this.http.get(url, { headers: this.getHeaders(url) });
   }
 
   // Stock
@@ -188,38 +194,39 @@ export class ApiService {
     const queryString = Object.keys(queryParams).map(key => `${key}=${encodeURIComponent(queryParams[key])}`).join('&');
     if (queryString) url += `?${queryString}`;
 
-    return this.http.get(url, { headers: this.getHeaders() });
+    return this.http.get(url, { headers: this.getHeaders(url) });
   }
 
-  // Search products for autocomplete
   searchProducts(query: string): Observable<any> {
-    return this.http.get(
-      `${this.apiUrl}/admin/products/search?q=${encodeURIComponent(query)}`,
-      { headers: this.getHeaders() }
-    );
+    const url = `${this.apiUrl}/admin/products/search?q=${encodeURIComponent(query)}`;
+    return this.http.get(url, { headers: this.getHeaders(url) });
   }
 
 
 
   // Add stock by sizes (increments existing stock)
   addStockBySizes(productId: number, increments: { [size: string]: number }): Observable<any> {
+    const url = `${this.apiUrl}/admin/stock/add`;
     return this.http.post(
-      `${this.apiUrl}/admin/stock/add`,
+      url,
       { product_id: productId, increments },
-      { headers: this.getHeaders() }
+      { headers: this.getHeaders(url) }
     );
   }
 
   createStock(stock: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/admin/stock`, stock, { headers: this.getHeaders() });
+    const url = `${this.apiUrl}/admin/stock`;
+    return this.http.post(url, stock, { headers: this.getHeaders(url) });
   }
 
   updateStock(id: number, cantidad: number): Observable<any> {
-    return this.http.put(`${this.apiUrl}/admin/stock/${id}`, { cantidad }, { headers: this.getHeaders() });
+    const url = `${this.apiUrl}/admin/stock/${id}`;
+    return this.http.put(url, { cantidad }, { headers: this.getHeaders(url) });
   }
 
   deleteStock(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/admin/stock/${id}`, { headers: this.getHeaders() });
+    const url = `${this.apiUrl}/admin/stock/${id}`;
+    return this.http.delete(url, { headers: this.getHeaders(url) });
   }
 
   // Imágenes
@@ -229,7 +236,7 @@ export class ApiService {
     formData.append('es_principal', esPrincipal.toString());
     formData.append('orden', orden.toString());
 
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('auth_token_admin') || localStorage.getItem('token');
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
@@ -238,7 +245,8 @@ export class ApiService {
   }
 
   deleteImagen(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/admin/imagenes/${id}`, { headers: this.getHeaders() });
+    const url = `${this.apiUrl}/admin/imagenes/${id}`;
+    return this.http.delete(url, { headers: this.getHeaders(url) });
   }
 
   // Categorías
@@ -262,19 +270,22 @@ export class ApiService {
     }
 
     const url = `${this.apiUrl}/categorias?${params.toString()}`;
-    return this.http.get(url, { headers: this.getHeaders() });
+    return this.http.get(url, { headers: this.getHeaders(url) });
   }
 
   getCategoriasTree(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/categorias/tree`, { headers: this.getHeaders() });
+    const url = `${this.apiUrl}/categorias/tree`;
+    return this.http.get(url, { headers: this.getHeaders(url) });
   }
 
   createCategoria(categoria: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/admin/categorias`, categoria, { headers: this.getHeaders() });
+    const url = `${this.apiUrl}/admin/categorias`;
+    return this.http.post(url, categoria, { headers: this.getHeaders(url) });
   }
 
   updateCategoria(id: number, categoria: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/admin/categorias/${id}`, categoria, { headers: this.getHeaders() });
+    const url = `${this.apiUrl}/admin/categorias/${id}`;
+    return this.http.put(url, categoria, { headers: this.getHeaders(url) });
   }
 
   deleteCategoria(id: number, force: boolean = false): Observable<any> {
@@ -282,28 +293,28 @@ export class ApiService {
     if (force) {
       url += '?force=true';
     }
-    return this.http.delete(url, { headers: this.getHeaders() });
+    return this.http.delete(url, { headers: this.getHeaders(url) });
   }
 
   // Métodos genéricos para llamadas HTTP
   get(endpoint: string): Observable<any> {
     const url = endpoint.startsWith('http') ? endpoint : `${this.apiUrl}${endpoint}`;
-    return this.http.get(url, { headers: this.getHeaders() });
+    return this.http.get(url, { headers: this.getHeaders(url) });
   }
 
   post(endpoint: string, data: any): Observable<any> {
     const url = endpoint.startsWith('http') ? endpoint : `${this.apiUrl}${endpoint}`;
-    return this.http.post(url, data, { headers: this.getHeaders() });
+    return this.http.post(url, data, { headers: this.getHeaders(url) });
   }
 
   put(endpoint: string, data: any): Observable<any> {
     const url = endpoint.startsWith('http') ? endpoint : `${this.apiUrl}${endpoint}`;
-    return this.http.put(url, data, { headers: this.getHeaders() });
+    return this.http.put(url, data, { headers: this.getHeaders(url) });
   }
 
   delete(endpoint: string): Observable<any> {
     const url = endpoint.startsWith('http') ? endpoint : `${this.apiUrl}${endpoint}`;
-    return this.http.delete(url, { headers: this.getHeaders() });
+    return this.http.delete(url, { headers: this.getHeaders(url) });
   }
 
   // Talles
@@ -344,19 +355,23 @@ export class ApiService {
   }
 
   getTiposPromocion(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/admin/tipos-promocion`, { headers: this.getHeaders() });
+    const url = `${this.apiUrl}/admin/tipos-promocion`;
+    return this.http.get(url, { headers: this.getHeaders(url) });
   }
 
   createPromocion(promocion: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/admin/promociones`, promocion, { headers: this.getHeaders() });
+    const url = `${this.apiUrl}/admin/promociones`;
+    return this.http.post(url, promocion, { headers: this.getHeaders(url) });
   }
 
   updatePromocion(id: number, promocion: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/admin/promociones/${id}`, promocion, { headers: this.getHeaders() });
+    const url = `${this.apiUrl}/admin/promociones/${id}`;
+    return this.http.put(url, promocion, { headers: this.getHeaders(url) });
   }
 
   deletePromocion(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/admin/promociones/${id}`, { headers: this.getHeaders() });
+    const url = `${this.apiUrl}/admin/promociones/${id}`;
+    return this.http.delete(url, { headers: this.getHeaders(url) });
   }
 
   // Pedidos
@@ -367,20 +382,23 @@ export class ApiService {
   getPedidos(estado?: string, page: number = 1, pageSize: number = 20, search?: string): Observable<any> {
     let url = `${this.apiUrl}/admin/pedidos?page=${page}&page_size=${pageSize}`;
     if (estado) url += `&estado=${estado}`;
-    if (search) url += `&q=${encodeURIComponent(search)}`; // If backend supports search (not yet fully implemented in get_all_pedidos but good to have)
-    return this.http.get(url, { headers: this.getHeaders() });
+    if (search) url += `&q=${encodeURIComponent(search)}`;
+    return this.http.get(url, { headers: this.getHeaders(url) });
   }
 
   getPedido(id: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/admin/pedidos/${id}`, { headers: this.getHeaders() });
+    const url = `${this.apiUrl}/admin/pedidos/${id}`;
+    return this.http.get(url, { headers: this.getHeaders(url) });
   }
 
   updatePedido(id: number, pedido: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/admin/pedidos/${id}`, pedido, { headers: this.getHeaders() });
+    const url = `${this.apiUrl}/admin/pedidos/${id}`;
+    return this.http.put(url, pedido, { headers: this.getHeaders(url) });
   }
 
   aprobarPedido(pedidoId: number): Observable<any> {
-    return this.http.post(`${this.apiUrl}/admin/pedidos/${pedidoId}/aprobar`, {}, { headers: this.getHeaders() });
+    const url = `${this.apiUrl}/admin/pedidos/${pedidoId}/aprobar`;
+    return this.http.post(url, {}, { headers: this.getHeaders(url) });
   }
 
   // Envíos
@@ -399,7 +417,8 @@ export class ApiService {
 
   // Estadísticas
   getEstadisticas(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/admin/estadisticas`, { headers: this.getHeaders() });
+    const url = `${this.apiUrl}/admin/estadisticas`;
+    return this.http.get(url, { headers: this.getHeaders(url) });
   }
 
   getEstadisticasVentas(periodo: string, semanaOffset?: number, anio?: number, fechaReferencia?: string): Observable<any> {
@@ -438,6 +457,7 @@ export class ApiService {
   }
 
   getVentasExternas(params?: any): Observable<any> {
+    let url = `${this.apiUrl}/admin/ventas-externas`;
     let queryParams = '';
     if (params) {
       const keyValuePairs = Object.keys(params)
@@ -447,19 +467,23 @@ export class ApiService {
         queryParams = '?' + keyValuePairs.join('&');
       }
     }
-    return this.http.get(`${this.apiUrl}/admin/ventas-externas${queryParams}`, { headers: this.getHeaders() });
+    const urlCompleta = `${url}${queryParams}`;
+    return this.http.get(urlCompleta, { headers: this.getHeaders(urlCompleta) });
   }
 
   eliminarVentaExterna(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/admin/ventas-externas/${id}`, { headers: this.getHeaders() });
+    const url = `${this.apiUrl}/admin/ventas-externas/${id}`;
+    return this.http.delete(url, { headers: this.getHeaders(url) });
   }
 
   getStockByProducto(productoId: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/admin/stock?producto_id=${productoId}`, { headers: this.getHeaders() });
+    const url = `${this.apiUrl}/admin/stock?producto_id=${productoId}`;
+    return this.http.get(url, { headers: this.getHeaders(url) });
   }
 
   fixSequences(): Observable<any> {
-    return this.http.post(`${this.apiUrl}/admin/db/fix-sequences`, {}, { headers: this.getHeaders() });
+    const url = `${this.apiUrl}/admin/db/fix-sequences`;
+    return this.http.post(url, {}, { headers: this.getHeaders(url) });
   }
 
   // Newsletter
@@ -469,11 +493,13 @@ export class ApiService {
 
   // Carrito
   getCart(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/cart`, { headers: this.getHeaders() });
+    const url = `${this.apiUrl}/cart`;
+    return this.http.get(url, { headers: this.getHeaders(url) });
   }
 
   syncCart(items: any[]): Observable<any> {
-    return this.http.post(`${this.apiUrl}/cart`, { items }, { headers: this.getHeaders() });
+    const url = `${this.apiUrl}/cart`;
+    return this.http.post(url, { items }, { headers: this.getHeaders(url) });
   }
 
 }

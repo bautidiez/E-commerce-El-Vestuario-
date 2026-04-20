@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { ApiService } from './api.service';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
+import Swal from 'sweetalert2';
 
 @Injectable({
   providedIn: 'root'
@@ -59,15 +60,17 @@ export class AuthService {
   }
 
   setSession(response: any, type: 'admin' | 'cliente'): void {
+    const tokenKey = type === 'admin' ? 'auth_token_admin' : 'auth_token_cliente';
+    localStorage.setItem(tokenKey, response.access_token);
+    
+    // Mantener compatibilidad temporal con 'token' para componentes que aún lo usen directamente
     localStorage.setItem('token', response.access_token);
     localStorage.setItem('lastActivity', Date.now().toString());
 
     if (type === 'admin') {
-      localStorage.setItem('admin', JSON.stringify(response.admin || response.cliente)); // fallback if needed
-      localStorage.removeItem('cliente');
+      localStorage.setItem('admin', JSON.stringify(response.admin || response.cliente));
     } else {
       localStorage.setItem('cliente', JSON.stringify(response.cliente));
-      localStorage.removeItem('admin');
     }
 
     this.isAuthenticatedSubject.next(true);
@@ -82,6 +85,9 @@ export class AuthService {
   }
 
   logout(): void {
+    // Si queremos un logout total
+    localStorage.removeItem('auth_token_admin');
+    localStorage.removeItem('auth_token_cliente');
     localStorage.removeItem('token');
     localStorage.removeItem('admin');
     localStorage.removeItem('cliente');
@@ -91,11 +97,33 @@ export class AuthService {
     this.router.navigate(['/']);
   }
 
+  logoutAdmin(): void {
+    localStorage.removeItem('auth_token_admin');
+    localStorage.removeItem('admin');
+    if (!localStorage.getItem('auth_token_cliente')) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('lastActivity');
+      this.isAuthenticatedSubject.next(false);
+    }
+  }
+
+  logoutCliente(): void {
+    localStorage.removeItem('auth_token_cliente');
+    localStorage.removeItem('cliente');
+    if (!localStorage.getItem('auth_token_admin')) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('lastActivity');
+      this.isAuthenticatedSubject.next(false);
+    }
+  }
+
   isLoggedIn(): boolean {
     return !!localStorage.getItem('token');
   }
 
-  getToken(): string | null {
+  getToken(type?: 'admin' | 'cliente'): string | null {
+    if (type === 'admin') return localStorage.getItem('auth_token_admin');
+    if (type === 'cliente') return localStorage.getItem('auth_token_cliente');
     return localStorage.getItem('token');
   }
 
@@ -194,7 +222,12 @@ export class AuthService {
         if (lastActivity) {
           const timeSinceActivity = Date.now() - parseInt(lastActivity);
           if (timeSinceActivity >= this.INACTIVITY_TIMEOUT) {
-            alert('Tu sesión ha expirado por inactividad.');
+            Swal.fire({
+              title: 'Sesión expirada',
+              text: 'Tu sesión ha expirado por inactividad.',
+              icon: 'info',
+              confirmButtonText: 'Entendido'
+            });
             this.logout();
           }
         }

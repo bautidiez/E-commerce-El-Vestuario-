@@ -65,101 +65,97 @@
 
       <div class="wizard-body">
         <!-- PASO 1: Producto y Tipo -->
-        <div *ngIf="pasoActual === 1" class="wizard-content">
-          <div class="form-group">
-            <label>Alcance de la Promoción *</label>
+        <div class="wizard-content" *ngIf="pasoActual === 1">
+          <div class="form-section-modern">
+            <label class="section-label">1. ¿Qué quieres promocionar?</label>
             <div class="scope-selector">
-              <button type="button" class="scope-btn" [class.active]="nuevaPromocion.alcance === 'producto'"
-                (click)="nuevaPromocion.alcance = 'producto'">📦 Productos</button>
-              <button type="button" class="scope-btn" [class.active]="nuevaPromocion.alcance === 'categoria'"
-                (click)="nuevaPromocion.alcance = 'categoria'">📁 Categorías</button>
-              <button type="button" class="scope-btn" [class.active]="nuevaPromocion.alcance === 'tienda'"
-                (click)="nuevaPromocion.alcance = 'tienda'">🏪 Toda la tienda</button>
+              <button class="scope-btn" [class.active]="nuevaPromocion.alcance === 'producto'" (click)="nuevaPromocion.alcance = 'producto'">
+                <span class="scope-icon">📦</span>
+                <span class="scope-name">Productos</span>
+              </button>
+              <button class="scope-btn" [class.active]="nuevaPromocion.alcance === 'categoria'" (click)="nuevaPromocion.alcance = 'categoria'">
+                <span class="scope-icon">📁</span>
+                <span class="scope-name">Categorías</span>
+              </button>
+              <button class="scope-btn" [class.active]="nuevaPromocion.alcance === 'tienda'" (click)="nuevaPromocion.alcance = 'tienda'">
+                <span class="scope-icon">🏪</span>
+                <span class="scope-name">Toda la tienda</span>
+              </button>
             </div>
           </div>
 
-          <!-- SELECTOR DE PRODUCTOS (Autocomplete) -->
-          <div class="form-group" *ngIf="nuevaPromocion.alcance === 'producto'">
-            <label>Seleccionar Producto(s) *</label>
-            <div class="autocomplete-container">
-              <input type="text" [(ngModel)]="searchQuery" (input)="onSearchInput()"
-                placeholder="🔍 Escribe para buscar productos..." class="form-control">
-              <div class="autocomplete-results" *ngIf="searchResults.length > 0">
-                <div *ngFor="let res of searchResults" (click)="selectProduct(res)" class="result-item">
-                  {{ res.nombre }}
+          <div class="form-grid-2-cols" style="margin-top: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+            <!-- Left Column: Selection -->
+            <div class="selection-column">
+              <div class="form-group" *ngIf="nuevaPromocion.alcance === 'producto'">
+                <label>Seleccionar Producto(s) *</label>
+                <div class="autocomplete-container">
+                  <input type="text" [(ngModel)]="searchQuery" (input)="onSearchInput()" class="form-control" placeholder="🔍 Escribe para buscar...">
+                  <div class="autocomplete-results" *ngIf="searchResults.length > 0">
+                    <div *ngFor="let prod of searchResults" class="result-item" (click)="addProducto(prod)">
+                      {{ prod.nombre }}
+                    </div>
+                  </div>
+                </div>
+                <div class="selected-items">
+                  <span *ngFor="let item of productosSeleccionados" class="selected-badge">
+                    {{ item.nombre }}
+                    <span class="remove" (click)="removeProducto(item.id)">×</span>
+                  </span>
                 </div>
               </div>
-              <div class="autocomplete-results" *ngIf="searching">
-                <div class="result-item">Buscando...</div>
-              </div>
-            </div>
 
-            <div class="selected-items" *ngIf="productosSeleccionados.length > 0">
-              <div *ngFor="let p of productosSeleccionados" class="selected-badge">
-                {{ p.nombre }}
-                <span class="remove" (click)="removeProduct(p.id)">✕</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- SELECTOR DE CATEGORÍAS (Multi-select) -->
-          <div class="form-group" *ngIf="nuevaPromocion.alcance === 'categoria'">
-            <label>Seleccionar Categoría(s) *</label>
-            <div class="category-grid">
-              <div *ngFor="let cat of categorias" class="category-group">
-                <div class="category-header" (click)="toggleCategoria(cat.id)"
-                  [class.selected]="isCategoriaSelected(cat.id)">
-                  <input type="checkbox" [checked]="isCategoriaSelected(cat.id)" readonly>
-                  <strong>{{ cat.nombre }}</strong>
-                </div>
-                <!-- Subcategorías -->
-                <div class="subcategory-list" *ngIf="cat.subcategorias">
-                  <div *ngFor="let sub of cat.subcategorias" class="subcategory-item" (click)="toggleCategoria(sub.id)"
-                    [class.selected]="isCategoriaSelected(sub.id)">
-                    <input type="checkbox" [checked]="isCategoriaSelected(sub.id)" readonly>
-                    <span>{{ sub.nombre }}</span>
+              <div class="form-group" *ngIf="nuevaPromocion.alcance === 'categoria'">
+                <label>Categorías Seleccionadas: {{ categoriasSeleccionadas.length }}</label>
+                <div class="category-grid-compact">
+                  <div *ngFor="let cat of categorias" class="cat-item-minimal" 
+                       [class.selected]="isCategoriaSelected(cat.id)" (click)="toggleCategoria(cat.id)">
+                    <input type="checkbox" [checked]="isCategoriaSelected(cat.id)" (click)="$event.stopPropagation()">
+                    {{ cat.nombre }}
                   </div>
                 </div>
               </div>
+
+              <div class="info-box-tienda" *ngIf="nuevaPromocion.alcance === 'tienda'">
+                <p>✨ La promoción se aplicará automáticamente a <strong>todos</strong> los productos de la tienda.</p>
+              </div>
             </div>
-          </div>
 
-          <div class="form-group">
-            <label>Tipo de Promoción *</label>
-            <select [(ngModel)]="nuevaPromocion.tipo_promocion_id" class="form-control">
-              <option [ngValue]="null">Seleccionar tipo...</option>
-              <option *ngFor="let tipo of tiposPromocion" [ngValue]="tipo.id">
-                {{ tipo.descripcion }}
-              </option>
-            </select>
-          </div>
+            <!-- Right Column: Type & Value -->
+            <div class="logic-column">
+              <div class="form-group">
+                <label>Tipo de Promoción *</label>
+                <select [(ngModel)]="nuevaPromocion.tipo_promocion_id" class="form-control">
+                  <option [ngValue]="null">Seleccionar tipo...</option>
+                  <option *ngFor="let tipo of tiposPromocion" [ngValue]="tipo.id">
+                    {{ tipo.descripcion }}
+                  </option>
+                </select>
+              </div>
 
-          <div class="form-group">
-            <label class="checkbox-label">
-              <input type="checkbox" [(ngModel)]="nuevaPromocion.envio_gratis">
-              🎁 Envío Gratis
-            </label>
-          </div>
+              <div class="form-row-compact" style="display: flex; gap: 1rem; align-items: flex-start;">
+                <div class="form-group" style="flex: 1;" *ngIf="mostrarCampoValor()">
+                  <label>Valor Descuento *</label>
+                  <input type="number" [(ngModel)]="nuevaPromocion.valor" class="form-control" [placeholder]="getPlaceholderValor()">
+                </div>
+                
+                <div class="form-group checkboxes-premium" style="flex: 1; padding-top: 2rem;">
+                  <label class="checkbox-label">
+                    <input type="checkbox" [(ngModel)]="nuevaPromocion.envio_gratis">
+                    🎁 Envío Gratis
+                  </label>
+                  <label class="checkbox-label" style="display: block; margin-top: 0.5rem;">
+                    <input type="checkbox" [(ngModel)]="nuevaPromocion.es_cupon">
+                    🎟️ Es un cupón
+                  </label>
+                </div>
+              </div>
 
-          <div class="form-group">
-            <label class="checkbox-label">
-              <input type="checkbox" [(ngModel)]="nuevaPromocion.es_cupon">
-              🎟️ Es un cupón de descuento
-            </label>
-          </div>
-
-          <div class="form-group" *ngIf="nuevaPromocion.es_cupon">
-            <label>Código del Cupón *</label>
-            <input type="text" [(ngModel)]="nuevaPromocion.codigo" class="form-control" placeholder="Ej: VERANO2026"
-              style="text-transform: uppercase;">
-            <small class="help-text">El código que el cliente deberá ingresar.</small>
-          </div>
-
-          <div class="form-group" *ngIf="mostrarCampoValor()">
-            <label>Valor *</label>
-            <input type="number" [(ngModel)]="nuevaPromocion.valor" [placeholder]="getPlaceholderValor()"
-              class=" form-control" min="0">
-            <small class="help-text">{{ getPlaceholderValor() }}</small>
+              <div class="form-group" *ngIf="nuevaPromocion.es_cupon">
+                <label>Código del Cupón *</label>
+                <input type="text" [(ngModel)]="nuevaPromocion.codigo" class="form-control" placeholder="Ej: VERANO2026" style="text-transform: uppercase;">
+              </div>
+            </div>
           </div>
         </div>
 

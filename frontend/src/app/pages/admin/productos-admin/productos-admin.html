@@ -275,20 +275,26 @@
 
           <!-- Subir nuevas imágenes -->
           <div class="imagenes-upload">
-            <input type="file" id="imagenes-input" multiple accept="image/*" (change)="onFileSelected($event)"
-              style="display: none;">
-            <label for="imagenes-input" class="btn-upload">
-              📷 Seleccionar Imágenes
-            </label>
+            <div class="drop-zone" [class.dragging]="isDragging" (dragover)="onDragOver($event)"
+              (dragleave)="onDragLeave($event)" (drop)="onFileDropped($event)" (click)="fileInput.click()">
+              <i>📷</i>
+              <p>Arrastra tus imágenes aquí o haz clic para seleccionar</p>
+              <input type="file" #fileInput multiple accept="image/*" (change)="onFileSelected($event)"
+                style="display: none;">
+            </div>
 
             <!-- Preview de imágenes seleccionadas -->
             <div *ngIf="imagenesPreview.length > 0" class="imagenes-preview">
-              <h4>Nuevas Imágenes:</h4>
+              <h4>Nuevas Imágenes (Se subirán al guardar):</h4>
               <div class="imagenes-grid">
                 <div *ngFor="let preview of imagenesPreview; let i = index" class="imagen-item">
                   <img [src]="preview" [alt]="'Preview ' + (i + 1)">
-                  <button type="button" class="btn-eliminar-imagen" (click)="eliminarImagenPreview(i)">✕</button>
                   <div class="imagen-badge" *ngIf="i === 0">Principal</div>
+                  <div class="imagen-controls">
+                    <button type="button" class="btn-control" (click)="moverImagenPreview(i, -1)" *ngIf="i > 0">←</button>
+                    <button type="button" class="btn-control" (click)="moverImagenPreview(i, 1)" *ngIf="i < imagenesPreview.length - 1">→</button>
+                  </div>
+                  <button type="button" class="btn-eliminar-imagen" (click)="eliminarImagenPreview(i)">✕</button>
                 </div>
               </div>
             </div>

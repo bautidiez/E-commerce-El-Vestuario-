@@ -78,6 +78,14 @@ class PromocionProducto(db.Model):
                 return precio_unitario * ((cantidad // lleva) * (lleva - paga))
         return 0
 
+    def _format_datetime(self, dt):
+        if not dt:
+            return None
+        iso = dt.isoformat()
+        if not dt.tzinfo and not iso.endswith('Z') and '+' not in iso:
+            return iso + 'Z'
+        return iso
+
     def to_dict(self):
         return {
             'id': self.id,
@@ -87,8 +95,8 @@ class PromocionProducto(db.Model):
             'valor': self.valor,
             'activa': self.activa,
             'esta_activa': self.esta_activa(),
-            'fecha_inicio': self.fecha_inicio.isoformat() if self.fecha_inicio else None,
-            'fecha_fin': self.fecha_fin.isoformat() if self.fecha_fin else None,
+            'fecha_inicio': self._format_datetime(self.fecha_inicio),
+            'fecha_fin': self._format_datetime(self.fecha_fin),
             'productos_ids': [p.id for p in self.productos],
             'productos_nombres': [p.nombre for p in self.productos],
             'categorias_ids': [c.id for c in self.categorias],

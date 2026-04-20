@@ -78,6 +78,7 @@ export class ProductosAdminComponent implements OnInit {
   imagenesSeleccionadas: File[] = [];
   imagenesPreview: string[] = [];
   imagenesExistentes: any[] = [];
+  isDragging = false;
 
   constructor(
     private apiService: ApiService,
@@ -424,7 +425,7 @@ export class ProductosAdminComponent implements OnInit {
       },
       error: (err) => {
         this.loading = false;
-        alert('Error cargando los detalles del producto.');
+        Swal.fire('Error', 'No se pudieron cargar los detalles del producto.', 'error');
         console.error(err);
       }
     });
@@ -543,10 +544,39 @@ export class ProductosAdminComponent implements OnInit {
 
   onFileSelected(event: any) {
     const files = Array.from(event.target.files) as File[];
-    this.imagenesSeleccionadas = [...this.imagenesSeleccionadas, ...files];
+    this.procesarArchivos(files);
+  }
 
-    // Crear previews
-    files.forEach(file => {
+  onDragOver(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = true;
+  }
+
+  onDragLeave(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = false;
+  }
+
+  onFileDropped(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    this.isDragging = false;
+
+    if (event.dataTransfer && event.dataTransfer.files.length > 0) {
+      const files = Array.from(event.dataTransfer.files) as File[];
+      this.procesarArchivos(files);
+    }
+  }
+
+  procesarArchivos(files: File[]) {
+    // Filtrar solo imágenes
+    const imageFiles = files.filter(file => file.type.startsWith('image/'));
+    
+    this.imagenesSeleccionadas = [...this.imagenesSeleccionadas, ...imageFiles];
+
+    imageFiles.forEach(file => {
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.zone.run(() => {
@@ -558,24 +588,51 @@ export class ProductosAdminComponent implements OnInit {
     });
   }
 
+  moverImagenPreview(index: number, direction: number) {
+    const newIndex = index + direction;
+    if (newIndex >= 0 && newIndex < this.imagenesPreview.length) {
+      // Intercambiar en previews
+      const tempPreview = this.imagenesPreview[index];
+      this.imagenesPreview[index] = this.imagenesPreview[newIndex];
+      this.imagenesPreview[newIndex] = tempPreview;
+
+      // Intercambiar en archivos
+      const tempFile = this.imagenesSeleccionadas[index];
+      this.imagenesSeleccionadas[index] = this.imagenesSeleccionadas[newIndex];
+      this.imagenesSeleccionadas[newIndex] = tempFile;
+
+      this.cdr.detectChanges();
+    }
+  }
+
   eliminarImagenPreview(index: number) {
     this.imagenesPreview.splice(index, 1);
     this.imagenesSeleccionadas.splice(index, 1);
   }
 
   eliminarImagenExistente(imagenId: number) {
-    if (confirm('¿Estás seguro de eliminar esta imagen?')) {
-      this.apiService.deleteImagen(imagenId).subscribe({
-        next: () => {
-          this.imagenesExistentes = this.imagenesExistentes.filter(img => img.id !== imagenId);
-          this.loadProductos();
-        },
-        error: (error) => {
-          alert('Error al eliminar imagen');
-          console.error(error);
-        }
-      });
-    }
+    Swal.fire({
+      title: '¿Eliminar imagen?',
+      text: 'Esta acción no se puede deshacer',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.apiService.deleteImagen(imagenId).subscribe({
+          next: () => {
+            this.imagenesExistentes = this.imagenesExistentes.filter(img => img.id !== imagenId);
+            this.loadProductos();
+            Swal.fire('Eliminada', 'La imagen ha sido eliminada', 'success');
+          },
+          error: (error) => {
+            Swal.fire('Error', 'No se pudo eliminar la imagen', 'error');
+            console.error(error);
+          }
+        });
+      }
+    });
   }
 
   eliminar(producto: any) {
