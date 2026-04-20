@@ -242,6 +242,6 @@ export class HeaderComponent implements OnInit {
   }
 
   removeItem(index: number) {
-    this.cartService.removeFromCart(index);
+    this.cartService.removeItem(index);
   }
 }
