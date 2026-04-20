@@ -168,7 +168,7 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding: 2rem;
+  padding: 1rem;
 }
 
 .modal-wizard {
@@ -176,8 +176,10 @@
   border-radius: 12px;
   max-width: 1100px;
   width: 98%;
-  max-height: 95vh;
-  overflow-y: auto;
+  max-height: 98vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }
 
@@ -185,6 +187,7 @@
   padding: 1.5rem;
   border-bottom: 2px solid #e2e8f0;
   position: relative;
+  flex-shrink: 0;
 }
 
 .wizard-header h2 {
@@ -248,7 +251,9 @@
 }
 
 .wizard-body {
-  padding: 2rem;
+  padding: 1.5rem 2rem;
+  overflow-y: auto;
+  flex: 1;
 }
 
 .wizard-content {
@@ -260,6 +265,7 @@
   border-top: 2px solid #e2e8f0;
   display: flex;
   justify-content: space-between;
+  flex-shrink: 0;
 }
 
 .footer-right {
