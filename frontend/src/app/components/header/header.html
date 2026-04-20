@@ -152,9 +152,10 @@
       </div>
     </div>
   </div>
+</header>
 
-  <!-- Overlay oscuro para menús laterales -->
-  <div class="offcanvas-overlay" [class.show]="menuOpen || isCartOpen" (click)="menuOpen = false; closeCart()"></div>
+<!-- Overlay oscuro para menús laterales -->
+<div class="offcanvas-overlay" [class.show]="menuOpen || isCartOpen" (click)="menuOpen = false; closeCart()"></div>
 
   <!-- Menú lateral izquierdo (Navegación Móvil) -->
   <nav class="nav-mobile-sidebar" [class.open]="menuOpen">
@@ -256,5 +257,3 @@
       <button class="checkout-btn" (click)="goToFullCart()">Ir al Carrito</button>
     </div>
   </div>
-
-</header>
