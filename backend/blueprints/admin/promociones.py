@@ -14,9 +14,20 @@ promociones_bp = Blueprint('admin_promociones', __name__)
 @promociones_bp.route('/api/admin/tipos-promocion', methods=['GET'])
 @jwt_required()
 def get_tipos_promocion():
-    print("DEBUG: Entrando a get_tipos_promocion en modular blueprint")
     tipos = TipoPromocion.query.all()
-    print(f"DEBUG: Encontrados {len(tipos)} tipos en modular blueprint")
+    if not tipos:
+        # Autoseed si está vacío
+        tipos_default = [
+            {'nombre': 'descuento_porcentaje', 'descripcion': 'Descuento por porcentaje (ej: 10%)'},
+            {'nombre': 'descuento_fijo', 'descripcion': 'Descuento de monto fijo (ej: $500)'},
+            {'nombre': '2x1', 'descripcion': 'Llevas 2 pagas 1'},
+            {'nombre': '3x2', 'descripcion': 'Llevas 3 pagas 2'}
+        ]
+        for t in tipos_default:
+            db.session.add(TipoPromocion(nombre=t['nombre'], descripcion=t['descripcion']))
+        db.session.commit()
+        tipos = TipoPromocion.query.all()
+        
     return jsonify([t.to_dict() for t in tipos]), 200
 
 
