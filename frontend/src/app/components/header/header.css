@@ -975,7 +975,7 @@
 .cart-offcanvas {
   position: fixed;
   top: 0;
-  left: -400px;
+  right: -400px;
   width: 400px;
   height: 100vh;
   background: #ffffff;
@@ -983,11 +983,11 @@
   display: flex;
   flex-direction: column;
   transition: transform 0.4s cubic-bezier(0.77, 0, 0.175, 1);
-  box-shadow: 5px 0 25px rgba(0, 0, 0, 0.15);
+  box-shadow: -5px 0 25px rgba(0, 0, 0, 0.15);
 }
 
 .cart-offcanvas.open {
-  transform: translateX(400px);
+  transform: translateX(-400px);
 }
 
 .cart-offcanvas-header {
