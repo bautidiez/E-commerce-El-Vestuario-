@@ -809,7 +809,7 @@
   width: 100vw;
   height: 100vh;
   background-color: rgba(0, 0, 0, 0.5);
-  z-index: 1010;
+  z-index: 99990;
   opacity: 0;
   visibility: hidden;
   transition: all 0.3s ease;
@@ -831,9 +831,10 @@
   top: 0;
   left: -320px;
   width: 320px;
-  height: 100vh;
+  bottom: 0;
+  height: 100%;
   background: #ffffff;
-  z-index: 1020;
+  z-index: 99995;
   display: flex;
   flex-direction: column;
   transition: transform 0.4s cubic-bezier(0.77, 0, 0.175, 1);
@@ -977,9 +978,10 @@
   top: 0;
   right: -400px;
   width: 400px;
-  height: 100vh;
+  height: 100%;
+  bottom: 0;
   background: #ffffff;
-  z-index: 1030;
+  z-index: 99999;
   display: flex;
   flex-direction: column;
   transition: transform 0.4s cubic-bezier(0.77, 0, 0.175, 1);
