@@ -200,6 +200,8 @@ with app.app_context():
             db.session.execute(text("ALTER TABLE promociones_productos ADD COLUMN IF NOT EXISTS max_usos INTEGER"))
             db.session.execute(text("ALTER TABLE promociones_productos ADD COLUMN IF NOT EXISTS usos_actuales INTEGER DEFAULT 0"))
             db.session.execute(text("ALTER TABLE promociones_productos ADD COLUMN IF NOT EXISTS alcance VARCHAR(20) DEFAULT 'producto'"))
+            # Asegurar que fecha_fin sea nullable (para promociones indefinidas)
+            db.session.execute(text("ALTER TABLE promociones_productos ALTER COLUMN fecha_fin DROP NOT NULL"))
             db.session.commit()
         except Exception as e:
             db.session.rollback()
