@@ -55,7 +55,7 @@ def create_promocion():
             valor=float(data.get('valor', 0)),
             activa=data.get('activa', True),
             fecha_inicio=datetime.fromisoformat(data['fecha_inicio'].replace('Z', '+00:00')),
-            fecha_fin=datetime.fromisoformat(data['fecha_fin'].replace('Z', '+00:00')),
+            fecha_fin=datetime.fromisoformat(data['fecha_fin'].replace('Z', '+00:00')) if data.get('fecha_fin') else None,
             es_cupon=data.get('es_cupon', False),
             codigo=codigo,
             envio_gratis=data.get('envio_gratis', False),
@@ -97,7 +97,10 @@ def manage_promocion(id):
         if 'fecha_inicio' in data:
             promocion.fecha_inicio = datetime.fromisoformat(data['fecha_inicio'].replace('Z', '+00:00'))
         if 'fecha_fin' in data:
-            promocion.fecha_fin = datetime.fromisoformat(data['fecha_fin'].replace('Z', '+00:00'))
+            if data['fecha_fin']:
+                promocion.fecha_fin = datetime.fromisoformat(data['fecha_fin'].replace('Z', '+00:00'))
+            else:
+                promocion.fecha_fin = None
         if 'es_cupon' in data: promocion.es_cupon = data['es_cupon']
         if 'codigo' in data:
             codigo = data['codigo']

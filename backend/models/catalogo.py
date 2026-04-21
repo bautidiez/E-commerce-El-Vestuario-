@@ -1,4 +1,5 @@
 from datetime import datetime
+from sqlalchemy import or_
 from .base import db
 
 # Tabla de asociación para productos relacionados (Many-to-Many)
@@ -238,14 +239,14 @@ class Producto(db.Model):
         promociones_cat = PromocionProducto.query.filter(
             PromocionProducto.activa == True,
             PromocionProducto.fecha_inicio <= ahora,
-            PromocionProducto.fecha_fin >= ahora,
+            or_(PromocionProducto.fecha_fin >= ahora, PromocionProducto.fecha_fin == None),
             PromocionProducto.categorias.any(id=self.categoria_id)
         ).all()
         promociones_global = PromocionProducto.query.filter(
             PromocionProducto.alcance == 'tienda',
             PromocionProducto.activa == True,
             PromocionProducto.fecha_inicio <= ahora,
-            PromocionProducto.fecha_fin >= ahora
+            or_(PromocionProducto.fecha_fin >= ahora, PromocionProducto.fecha_fin == None)
         ).all()
         todas = {p.id: p for p in (promociones + promociones_cat + promociones_global)}
         return list(todas.values())

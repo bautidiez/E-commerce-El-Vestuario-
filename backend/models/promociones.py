@@ -44,7 +44,7 @@ class PromocionProducto(db.Model):
     envio_gratis = db.Column(db.Boolean, default=False)
     activa = db.Column(db.Boolean, default=True)
     fecha_inicio = db.Column(db.DateTime, nullable=False)
-    fecha_fin = db.Column(db.DateTime, nullable=False)
+    fecha_fin = db.Column(db.DateTime, nullable=True) # None para indefinida
     compra_minima = db.Column(db.Float, default=0.0)
     max_usos = db.Column(db.Integer, nullable=True)
     usos_actuales = db.Column(db.Integer, default=0)
@@ -56,7 +56,14 @@ class PromocionProducto(db.Model):
 
     def esta_activa(self):
         ahora = datetime.utcnow()
-        return self.activa and self.fecha_inicio <= ahora <= self.fecha_fin
+        if not self.activa:
+            return False
+        if self.fecha_inicio > ahora:
+            return False
+        # Si fecha_fin es None, es indefinida
+        if self.fecha_fin is None:
+            return True
+        return ahora <= self.fecha_fin
 
     def calcular_descuento(self, cantidad, precio_unitario):
         if not self.esta_activa():
