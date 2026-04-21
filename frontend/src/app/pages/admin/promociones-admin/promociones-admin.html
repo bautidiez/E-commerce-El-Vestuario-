@@ -84,7 +84,7 @@
             </div>
           </div>
 
-          <div class="form-grid-2-cols" style="margin-top: 1.5rem; display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+          <div class="form-grid-2-cols">
             <!-- Left Column: Selection -->
             <div class="selection-column">
               <div class="form-group" *ngIf="nuevaPromocion.alcance === 'producto'">
@@ -133,13 +133,13 @@
                 </select>
               </div>
 
-              <div class="form-row-compact" style="display: flex; gap: 1rem; align-items: flex-start;">
+              <div class="form-row-compact">
                 <div class="form-group" style="flex: 1;" *ngIf="mostrarCampoValor()">
                   <label>Valor Descuento *</label>
                   <input type="number" [(ngModel)]="nuevaPromocion.valor" class="form-control" [placeholder]="getPlaceholderValor()">
                 </div>
                 
-                <div class="form-group checkboxes-premium" style="flex: 1; padding-top: 2rem;">
+                <div class="checkboxes-wrapper">
                   <label class="checkbox-label">
                     <input type="checkbox" [(ngModel)]="nuevaPromocion.envio_gratis">
                     🎁 Envío Gratis
