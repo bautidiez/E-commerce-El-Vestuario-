@@ -259,10 +259,27 @@ export class CartService {
   }
 
   updateQuantity(index: number, cantidad: number): void {
-    if (cantidad > 0) {
-      this.cartItems[index].cantidad = cantidad;
-      this.saveCart();
+    if (cantidad <= 0) {
+      this.removeItem(index);
+      return;
     }
+
+    const item = this.cartItems[index];
+    if (!item) return;
+
+    // Si queremos incrementar, validamos stock
+    if (cantidad > item.cantidad) {
+      const stockEntry = item.producto.stock_talles?.find((s: any) => s.talle_id == item.talle.id);
+      const stockDisponible = stockEntry?.cantidad || 0;
+
+      if (cantidad > stockDisponible) {
+        this.toastService.show(`Solo hay ${stockDisponible} unidades disponibles de este talle.`, 'error');
+        return;
+      }
+    }
+
+    this.cartItems[index].cantidad = cantidad;
+    this.saveCart();
   }
 
   clearCart(): void {

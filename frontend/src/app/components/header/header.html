@@ -239,7 +239,11 @@
               <h4 class="cart-item-title">{{ item.producto.nombre }}</h4>
               <p class="cart-item-variant">Talle: {{ item.talle.nombre }}</p>
               <div class="cart-item-price-row">
-                <span class="cart-item-qty">{{ item.cantidad }} x</span>
+                <div class="mini-qty-control">
+                  <button (click)="updateQuantity(i, item.cantidad - 1)">-</button>
+                  <span class="qty-val">{{ item.cantidad }}</span>
+                  <button (click)="updateQuantity(i, item.cantidad + 1)">+</button>
+                </div>
                 <span class="cart-item-price">{{ item.precio_final || item.precio_unitario | currency:'ARS':'symbol-narrow':'1.0-0' }}</span>
               </div>
             </div>

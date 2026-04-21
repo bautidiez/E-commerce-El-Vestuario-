@@ -501,6 +501,9 @@ export class CheckoutV2Component implements OnInit {
                 this.zone.run(() => {
                     this.loading = false;
                     this.orderCreated = order;
+                    
+                    // Limpiar el carrito tras compra exitosa
+                    this.cartService.clearCart();
 
                     // CRITICAL FIX: Override payment method string with what user actually selected
                     // This ensures UI shows the correct flow even if backend maps it to default ID 1 (Transferencia)
