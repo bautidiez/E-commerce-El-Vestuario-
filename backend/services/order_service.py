@@ -11,16 +11,35 @@ class OrderService:
         metodo_pago_val = data.get('metodo_pago') or data.get('metodo_pago_id')
         metodo_pago_id = None
         
+        # Mapeo de nombres del frontend a backend
+        mapeo_frontend = {
+            'mercadopago_card': 'mercadopago',
+            'efectivo_local': 'efectivo_local',
+            'transferencia': 'transferencia',
+            'efectivo': 'efectivo',
+        }
+        
         if isinstance(metodo_pago_val, str) and not metodo_pago_val.isdigit():
+            search_name = mapeo_frontend.get(metodo_pago_val, metodo_pago_val)
             # Buscar ID por nombre
-            metodo = MetodoPago.query.filter(MetodoPago.nombre.ilike(f"%{metodo_pago_val}%")).first()
+            metodo = MetodoPago.query.filter(MetodoPago.nombre.ilike(f"%{search_name}%")).first()
             if metodo:
                 metodo_pago_id = metodo.id
             else:
-                # Fallback o asignar uno por defecto si no existe
-                metodo_pago_id = 1
+                # Fallback dinámico: busca el primero activo si no hay match
+                metodo_fallback = MetodoPago.query.filter_by(activo=True).first()
+                metodo_pago_id = metodo_fallback.id if metodo_fallback else 1
         else:
-            metodo_pago_id = int(metodo_pago_val) if metodo_pago_val else 1
+            # Si es ID numérico, verificar que exista
+            try:
+                provided_id = int(metodo_pago_val) if metodo_pago_val else None
+                if provided_id and MetodoPago.query.get(provided_id):
+                    metodo_pago_id = provided_id
+                else:
+                    metodo_fallback = MetodoPago.query.filter_by(nombre='transferencia').first() or MetodoPago.query.first()
+                    metodo_pago_id = metodo_fallback.id if metodo_fallback else 1
+            except:
+                metodo_pago_id = 1
 
         # 1. Validar Stock y Preparar Items
         items_procesados = []

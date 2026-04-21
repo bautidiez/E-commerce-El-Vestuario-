@@ -248,6 +248,40 @@ with app.app_context():
             db.session.commit()
         except Exception as e:
             db.session.rollback()
+            print(f"Nota: Error en migración stock_talles: {e}")
+
+        # Seeding de Métodos de Pago
+        try:
+            from models import MetodoPago
+            # Verificar si existe ID 1
+            id1 = db.session.execute(text("SELECT id FROM metodos_pago WHERE id = 1")).fetchone()
+            if not id1:
+                # Insertar transferencia como ID 1 manualmente para resolver la FK
+                db.session.execute(text("""
+                    INSERT INTO metodos_pago (id, nombre, descripcion, activo) 
+                    VALUES (1, 'transferencia', 'Transferencia bancaria', true)
+                    ON CONFLICT (id) DO NOTHING
+                """))
+                # Sincronizar secuencia
+                db.session.execute(text("SELECT setval('metodos_pago_id_seq', (SELECT max(id) FROM metodos_pago))"))
+                db.session.commit()
+                print("[OK] Método de pago ID 1 restaurado.")
+            
+            # Asegurar existencia de otros métodos básicos
+            metodos_basicos = [
+                ('mercadopago', 'Mercado Pago (Tarjeta)'),
+                ('efectivo_local', 'Efectivo en el Local (15% OFF)'),
+                ('efectivo', 'Efectivo / Rapipago / Pago Fácil')
+            ]
+            for nombre, desc in metodos_basicos:
+                exists = MetodoPago.query.filter_by(nombre=nombre).first()
+                if not exists:
+                    new_m = MetodoPago(nombre=nombre, descripcion=desc, activo=True)
+                    db.session.add(new_m)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            print(f"Nota: Error en seeding metodos_pago: {e}")
             print(f"Nota: Error en migración stock: {e}")
 
         # Constraints (en bloques separados por si ya existen)
