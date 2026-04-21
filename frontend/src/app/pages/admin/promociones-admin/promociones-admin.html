@@ -140,13 +140,13 @@
                 </div>
                 
                 <div class="checkboxes-wrapper">
-                  <label class="checkbox-label">
+                  <label class="checkbox-label-premium">
+                    <span>🎁 Envío Gratis</span>
                     <input type="checkbox" [(ngModel)]="nuevaPromocion.envio_gratis">
-                    🎁 Envío Gratis
                   </label>
-                  <label class="checkbox-label" style="display: block; margin-top: 0.5rem;">
+                  <label class="checkbox-label-premium">
+                    <span>🎟️ Es un cupón</span>
                     <input type="checkbox" [(ngModel)]="nuevaPromocion.es_cupon">
-                    🎟️ Es un cupón
                   </label>
                 </div>
               </div>
@@ -169,17 +169,19 @@
             <div class="form-group">
               <label>Fecha de Fin *</label>
               <input type="date" [(ngModel)]="nuevaPromocion.fecha_fin" class="form-control" [disabled]="nuevaPromocion.sin_fecha_fin">
-              <label class="checkbox-label" style="margin-top: 0.5rem; font-size: 0.85rem;">
-                <input type="checkbox" [(ngModel)]="nuevaPromocion.sin_fecha_fin">
-                🎁 Sin fecha de expiración (Indefinida)
-              </label>
+              <div style="margin-top: 0.5rem;">
+                <label class="checkbox-label-simple">
+                  <input type="checkbox" [(ngModel)]="nuevaPromocion.sin_fecha_fin">
+                  <span>Indeterminado</span>
+                </label>
+              </div>
             </div>
           </div>
 
           <div class="form-group">
-            <label class="checkbox-label">
+            <label class="checkbox-label-simple">
               <input type="checkbox" [(ngModel)]="nuevaPromocion.activa">
-              Promoción activa
+              <span>Promoción activa</span>
             </label>
           </div>
 
