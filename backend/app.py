@@ -42,7 +42,7 @@ from models import db
 db.init_app(app)
 
 # Habilitar modo WAL solo si se usa SQLite
-from sqlalchemy import event
+from sqlalchemy import event, text, or_
 with app.app_context():
     if app.config['SQLALCHEMY_DATABASE_URI'].startswith('sqlite'):
         @event.listens_for(db.engine, "connect")
@@ -160,8 +160,7 @@ with app.app_context():
 
 
     if 'postgres' in app.config['SQLALCHEMY_DATABASE_URI']:
-        from sqlalchemy import text
-                # Migraciones para Admins
+        # Migraciones para Admins
         try:
             db.session.execute(text("ALTER TABLE admins ADD COLUMN IF NOT EXISTS email VARCHAR(120)"))
             db.session.execute(text("UPDATE admins SET email = username || '@elvestuario.com' WHERE email IS NULL"))
