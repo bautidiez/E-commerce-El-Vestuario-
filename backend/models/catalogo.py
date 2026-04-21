@@ -218,9 +218,6 @@ class Producto(db.Model):
         db.Index('idx_producto_destacado_activo', 'destacado', 'activo'),
     )
 
-    def get_precio_actual(self):
-        return self.precio_descuento if self.precio_descuento else self.precio_base
-
     def tiene_stock(self):
         return any(st.cantidad >= 4 for st in self.stock_talles)
 
@@ -231,6 +228,17 @@ class Producto(db.Model):
         if not self.stock_talles:
             return True
         return all(st.cantidad <= 0 for st in self.stock_talles)
+
+    @property
+    def en_oferta(self):
+        """Un producto está en oferta si tiene precio_descuento o promociones activas"""
+        if self.precio_descuento and self.precio_descuento > 0:
+            return True
+        # Usamos list para verificar si hay elementos sin recalcular todo
+        return len(self.get_promociones_activas()) > 0
+
+    def get_precio_actual(self):
+        return self.precio_descuento if self.precio_descuento and self.precio_descuento > 0 else self.precio_base
 
     def get_promociones_activas(self):
         from .promociones import PromocionProducto
@@ -259,6 +267,7 @@ class Producto(db.Model):
             'precio_base': self.precio_base,
             'precio_descuento': self.precio_descuento,
             'precio_actual': self.get_precio_actual(),
+            'en_oferta': self.en_oferta,
             'categoria_id': self.categoria_id,
             'categoria_nombre': self.categoria.nombre if self.categoria else None,
             'categoria_principal': (

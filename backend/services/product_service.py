@@ -66,7 +66,7 @@ class ProductService:
             active_promos_query = db.session.query(PromocionProducto.id).filter(
                 PromocionProducto.activa == True,
                 PromocionProducto.fecha_inicio <= ahora,
-                PromocionProducto.fecha_fin >= ahora
+                or_(PromocionProducto.fecha_fin >= ahora, PromocionProducto.fecha_fin == None)
             ).subquery()
 
             # Opción 2: Productos con promociones activas (directas)
@@ -166,7 +166,7 @@ class ProductService:
                 ).filter(
                     PromocionProducto.activa == True,
                     PromocionProducto.fecha_inicio <= ahora,
-                    PromocionProducto.fecha_fin >= ahora
+                    or_(PromocionProducto.fecha_fin >= ahora, PromocionProducto.fecha_fin == None)
                 )
             )
             
@@ -177,7 +177,7 @@ class ProductService:
                 ).filter(
                     PromocionProducto.activa == True,
                     PromocionProducto.fecha_inicio <= ahora,
-                    PromocionProducto.fecha_fin >= ahora
+                    or_(PromocionProducto.fecha_fin >= ahora, PromocionProducto.fecha_fin == None)
                 )
             )
 
