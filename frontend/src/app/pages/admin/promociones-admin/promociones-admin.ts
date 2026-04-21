@@ -18,7 +18,7 @@ interface Promocion {
   valor: number;
   activa: boolean;
   fecha_inicio: string;
-  fecha_fin: string;
+  fecha_fin: string | null;
   estado?: 'activa' | 'programada' | 'expirada';
   es_cupon?: boolean;
   codigo?: string;
@@ -59,6 +59,7 @@ export class PromocionesAdminComponent implements OnInit {
     activa: true,
     fecha_inicio: '',
     fecha_fin: '',
+    sin_fecha_fin: false,
     es_cupon: false,
     codigo: '',
     envio_gratis: false
@@ -211,6 +212,7 @@ export class PromocionesAdminComponent implements OnInit {
       activa: true,
       fecha_inicio: hoy.toISOString().split('T')[0],
       fecha_fin: fin.toISOString().split('T')[0],
+      sin_fecha_fin: false,
       es_cupon: false,
       codigo: '',
       envio_gratis: false
@@ -233,7 +235,8 @@ export class PromocionesAdminComponent implements OnInit {
       valor: promocion.valor,
       activa: promocion.activa,
       fecha_inicio: promocion.fecha_inicio.split('T')[0],
-      fecha_fin: promocion.fecha_fin.split('T')[0],
+      fecha_fin: promocion.fecha_fin ? promocion.fecha_fin.split('T')[0] : '',
+      sin_fecha_fin: !promocion.fecha_fin,
       es_cupon: promocion.es_cupon || false,
       codigo: promocion.codigo || '',
       envio_gratis: promocion.envio_gratis || false
@@ -307,7 +310,7 @@ export class PromocionesAdminComponent implements OnInit {
       ...this.nuevaPromocion,
       valor: this.nuevaPromocion.valor || 0,
       fecha_inicio: new Date(this.nuevaPromocion.fecha_inicio + 'T00:00:00.000Z').toISOString(),
-      fecha_fin: new Date(this.nuevaPromocion.fecha_fin + 'T23:59:59.999Z').toISOString()
+      fecha_fin: this.nuevaPromocion.sin_fecha_fin ? null : new Date(this.nuevaPromocion.fecha_fin + 'T23:59:59.999Z').toISOString()
     };
 
     const request = this.modoEdicion
@@ -368,15 +371,19 @@ export class PromocionesAdminComponent implements OnInit {
   }
 
   // Helpers
-  getEstadoPromocion(inicio: string, fin: string, activa: boolean): 'activa' | 'programada' | 'expirada' {
+  getEstadoPromocion(inicio: string, fin: string | null, activa: boolean): 'activa' | 'programada' | 'expirada' {
     if (!activa) return 'expirada';
 
     const ahora = new Date();
     const fechaInicio = new Date(inicio);
-    const fechaFin = new Date(fin);
-
+    
     if (ahora < fechaInicio) return 'programada';
-    if (ahora > fechaFin) return 'expirada';
+    
+    if (fin) {
+      const fechaFin = new Date(fin);
+      if (ahora > fechaFin) return 'expirada';
+    }
+    
     return 'activa';
   }
 
@@ -421,13 +428,14 @@ export class PromocionesAdminComponent implements OnInit {
   }
 
   validarFechas(): boolean {
+    if (this.nuevaPromocion.sin_fecha_fin) return true;
     const inicio = new Date(this.nuevaPromocion.fecha_inicio);
     const fin = new Date(this.nuevaPromocion.fecha_fin);
     return fin > inicio;
   }
 
-  formatFecha(fecha: string): string {
-    if (!fecha) return '-';
+  formatFecha(fecha: string | null): string {
+    if (!fecha) return 'Indefinida';
     // Si la fecha viene como "YYYY-MM-DD", la procesamos como local
     if (fecha.includes('-') && !fecha.includes('T')) {
       const [year, month, day] = fecha.split('-').map(Number);
@@ -442,11 +450,13 @@ export class PromocionesAdminComponent implements OnInit {
     return producto ? producto.nombre : '-';
   }
 
-  getDiasRestantes(fechaFin: string): number {
+  getDiasRestantes(fechaFin: string | null): string {
+    if (!fechaFin) return '∞';
     const ahora = new Date();
     const fin = new Date(fechaFin);
     const diff = fin.getTime() - ahora.getTime();
-    return Math.ceil(diff / (1000 * 60 * 60 * 24));
+    if (diff < 0) return '0';
+    return Math.ceil(diff / (1000 * 60 * 60 * 24)).toString();
   }
 
   // Autocomplete Products

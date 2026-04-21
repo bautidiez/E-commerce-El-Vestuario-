@@ -168,7 +168,11 @@
             </div>
             <div class="form-group">
               <label>Fecha de Fin *</label>
-              <input type="date" [(ngModel)]="nuevaPromocion.fecha_fin" class="form-control">
+              <input type="date" [(ngModel)]="nuevaPromocion.fecha_fin" class="form-control" [disabled]="nuevaPromocion.sin_fecha_fin">
+              <label class="checkbox-label" style="margin-top: 0.5rem; font-size: 0.85rem;">
+                <input type="checkbox" [(ngModel)]="nuevaPromocion.sin_fecha_fin">
+                🎁 Sin fecha de expiración (Indefinida)
+              </label>
             </div>
           </div>
 
