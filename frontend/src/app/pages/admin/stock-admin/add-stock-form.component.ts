@@ -26,35 +26,35 @@ import Swal from 'sweetalert2';
             style="padding-right: 40px;"
           />
           <i class="fas fa-search" style="position: absolute; right: 15px; top: 12px; color: #94a3b8;"></i>
-        </div>
-        
-        <!-- SEARCH RESULTS DROPDOWN (Aesthetic) -->
-        <div class="search-results" *ngIf="searchResults.length > 0">
-          <div
-            class="search-result-item"
-            *ngFor="let product of searchResults"
-            (click)="selectProduct(product)"
-          >
-            <img [src]="getImagenPrincipal(product)" alt="product">
-            <div class="result-info">
-              <div class="result-name">{{ product.nombre }}</div>
-              <div class="result-meta">
-                <span>{{ product.version || 'Original' }}</span>
-                <span *ngIf="product.color" style="opacity: 0.5;"> • </span>
-                <span>{{ product.color }}</span>
+          
+          <!-- SEARCH RESULTS DROPDOWN (Aesthetic) -->
+          <div class="search-results" *ngIf="searchResults.length > 0">
+            <div
+              class="search-result-item"
+              *ngFor="let product of searchResults"
+              (click)="selectProduct(product)"
+            >
+              <img [src]="getImagenPrincipal(product)" alt="product">
+              <div class="result-info">
+                <div class="result-name">{{ product.nombre }}</div>
+                <div class="result-meta">
+                  <span>{{ product.version || 'Original' }}</span>
+                  <span *ngIf="product.color" style="opacity: 0.5;"> • </span>
+                  <span>{{ product.color }}</span>
+                </div>
+              </div>
+              <div class="result-icon">
+                <i class="fas fa-plus-circle"></i>
               </div>
             </div>
-            <div class="result-icon">
-              <i class="fas fa-plus-circle"></i>
-            </div>
           </div>
-        </div>
-        
-        <!-- SEARCHING INDICATOR -->
-        <div class="search-results" *ngIf="searching">
-          <div class="search-result-item" style="justify-content: center; color: #64748b;">
-            <i class="fas fa-spinner fa-spin"></i>
-            <span style="margin-left: 10px;">Buscando productos...</span>
+          
+          <!-- SEARCHING INDICATOR -->
+          <div class="search-results" *ngIf="searching">
+            <div class="search-result-item" style="justify-content: center; color: #64748b;">
+              <i class="fas fa-spinner fa-spin"></i>
+              <span style="margin-left: 10px;">Buscando productos...</span>
+            </div>
           </div>
         </div>
       </div>
@@ -235,11 +235,12 @@ export class AddStockFormComponent implements OnInit, OnChanges {
   }
 
   getImagenPrincipal(product: any): string {
+    if (product.imagen_principal) return product.imagen_principal;
     if (product.imagenes && product.imagenes.length > 0) {
       const principal = product.imagenes.find((img: any) => img.es_principal);
       return principal ? principal.url : product.imagenes[0].url;
     }
-    return '/assets/no-image.png';
+    return '/assets/logo.png';
   }
 
   clearSelection() {

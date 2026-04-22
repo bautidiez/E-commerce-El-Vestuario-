@@ -664,12 +664,17 @@
 }
 /* ENHANCED SEARCH RESULTS AND CHIPS */
 .search-results {
+  position: absolute !important;
+  top: 100% !important;
+  left: 0 !important;
+  right: 0 !important;
   background: white !important;
   border: 1px solid #e2e8f0 !important;
   border-radius: 12px !important;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1) !important;
   overflow: hidden !important;
   margin-top: 5px !important;
+  z-index: 1000 !important;
 }
 
 .search-result-item {

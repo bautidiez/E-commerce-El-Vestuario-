@@ -35,7 +35,8 @@ def search_products():
         return jsonify([{
             'id': p.id, 'nombre': p.nombre,
             'precio_base': p.precio_base, 'precio_actual': p.get_precio_actual(),
-            'color': p.color, 'color_hex': p.color_hex
+            'color': p.color, 'color_hex': p.color_hex,
+            'imagen_principal': p.imagenes[0].url if p.imagenes else None
         } for p in productos]), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
