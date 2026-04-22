@@ -27,8 +27,12 @@ export class App implements OnInit {
       this.isAdminRoute = event.url.startsWith('/admin');
       if (this.isAdminRoute) {
         document.body.classList.add('admin-body');
+        document.body.classList.add('admin-layout');
+        document.documentElement.classList.add('admin-layout');
       } else {
         document.body.classList.remove('admin-body');
+        document.body.classList.remove('admin-layout');
+        document.documentElement.classList.remove('admin-layout');
       }
       window.scrollTo(0, 0);
     });

@@ -243,3 +243,80 @@
     border-color: #e2e8f0 !important;
     font-family: inherit;
 }
+
+/* HISTORY SECTION */
+.history-section-container {
+    margin-top: 50px;
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.history-list {
+    padding: 1rem;
+}
+
+.history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem;
+    border-bottom: 1px solid #f1f5f9;
+    transition: background 0.2s;
+}
+
+.history-item:last-child {
+    border-bottom: none;
+}
+
+.history-item:hover {
+    background: #f8fafc;
+}
+
+.history-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.history-date {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    font-weight: 600;
+}
+
+.history-subject {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.history-count {
+    font-size: 0.85rem;
+    color: #64748b;
+}
+
+.btn-copy {
+    padding: 0.6rem 1rem;
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-copy:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+}
+
+.empty-history {
+    padding: 3rem;
+    text-align: center;
+    color: #94a3b8;
+}

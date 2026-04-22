@@ -1032,37 +1032,131 @@ export class ProductosAdminComponent implements OnInit {
   }
 
   async abrirModalBulkStock() {
-    if (this.productosSeleccionados.length === 0) return;
+    if (this.productosSeleccionados.length === 0) {
+        Swal.fire('Atención', 'Selecciona al menos un producto de la lista.', 'info');
+        return;
+    }
+
+    // Mantener estado local de los productos a actualizar
+    let currentSelectedIds = [...this.productosSeleccionados];
+    const updateModalList = () => {
+        const listEl = document.getElementById('swal-products-list');
+        if (!listEl) return;
+        
+        const prods = this.productos.filter(p => currentSelectedIds.includes(p.id));
+        listEl.innerHTML = prods.map(p => `
+            <div class="product-item-bulk" style="display: flex; align-items: center; gap: 15px; padding: 10px; background: #f8fafc; border-radius: 10px; margin-bottom: 8px; border: 1px solid #e2e8f0;">
+                <img src="${this.getImagenPrincipal(p)}" style="width: 40px; height: 40px; border-radius: 6px; object-fit: cover;">
+                <div style="flex: 1; font-weight: 600; font-size: 0.9rem;">${p.nombre}</div>
+                <button type="button" class="btn-remove" data-id="${p.id}" style="color: #ef4444; border: none; background: none; cursor: pointer; font-weight: bold; font-size: 1.2rem;">×</button>
+            </div>
+        `).join('');
+
+        // Attach delete events
+        listEl.querySelectorAll('.btn-remove').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = parseInt((e.currentTarget as HTMLElement).getAttribute('data-id') || '0');
+                currentSelectedIds = currentSelectedIds.filter(cid => cid !== id);
+                updateModalList();
+            });
+        });
+    };
 
     const { value: formValues } = await Swal.fire({
-      title: 'Agregar Stock Masivo',
+      title: '📦 STOCK MASIVO',
+      width: '600px',
       html: `
-        <div style="text-align: left;">
-          <p>Se agregará stock a <b>${this.productosSeleccionados.length}</b> productos seleccionados.</p>
-          <label style="display: block; margin-top: 15px;">Talle:</label>
-          <select id="swal-talle" class="swal2-input" style="width: 100%; margin: 5px 0;">
-            ${this.tallesDisp.map(t => `<option value="${t.id}">${t.nombre}</option>`).join('')}
-          </select>
-          <label style="display: block; margin-top: 15px;">Cantidad a SUMAR:</label>
-          <input id="swal-cantidad" type="number" class="swal2-input" value="1" min="1" style="width: 100%; margin: 5px 0;">
+        <div class="bulk-stock-container">
+          <div style="margin-bottom: 15px; text-align: left;">
+            <label style="font-weight: 700; display: block; margin-bottom: 5px;">Añadir más productos:</label>
+            <div style="position: relative;">
+                <input id="swal-search-add" type="text" class="swal2-input" placeholder="Buscar por nombre..." style="width: 100%; margin: 0; height: 40px; font-size: 0.9rem;">
+                <div id="swal-search-results" style="position: absolute; width: 100%; top: 40px; background: white; border: 1px solid #ddd; z-index: 100; max-height: 150px; overflow-y: auto; display: none;"></div>
+            </div>
+          </div>
+
+          <div id="swal-products-list" style="max-height: 200px; overflow-y: auto; margin-bottom: 20px;">
+            <!-- Dinámico -->
+          </div>
+
+          <div style="background: #f1f5f9; padding: 20px; border-radius: 12px; text-align: left;">
+            <div style="margin-bottom: 15px;">
+              <label style="font-weight: 700; display: block; margin-bottom: 5px;">1. Selecciona el Talle:</label>
+              <select id="swal-talle" class="swal2-select" style="width: 100%; margin: 0; height: 45px; border-radius: 8px;">
+                ${this.tallesDisp.map(t => `<option value="${t.id}">${t.nombre}</option>`).join('')}
+              </select>
+            </div>
+
+            <div>
+              <label style="font-weight: 700; display: block; margin-bottom: 5px;">2. Cantidad a SUMAR:</label>
+              <input id="swal-cantidad" type="number" class="swal2-input" value="1" min="1" style="width: 100%; margin: 0; height: 45px; border-radius: 8px;">
+            </div>
+          </div>
         </div>
       `,
-      focusConfirm: false,
+      didOpen: () => {
+        updateModalList();
+        
+        const searchInput = document.getElementById('swal-search-add') as HTMLInputElement;
+        const resultsEl = document.getElementById('swal-search-results') as HTMLDivElement;
+
+        searchInput.addEventListener('input', () => {
+            const query = searchInput.value.toLowerCase().trim();
+            if (query.length < 2) {
+                resultsEl.style.display = 'none';
+                return;
+            }
+
+            const matches = this.productos.filter(p => 
+                p.nombre.toLowerCase().includes(query) && !currentSelectedIds.includes(p.id)
+            ).slice(0, 5);
+
+            if (matches.length > 0) {
+                resultsEl.innerHTML = matches.map(p => `
+                    <div class="search-match-item" data-id="${p.id}" style="padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px;">
+                        <img src="${this.getImagenPrincipal(p)}" style="width: 25px; height: 25px; object-fit: cover;">
+                        <span style="font-size: 0.85rem;">${p.nombre}</span>
+                    </div>
+                `).join('');
+                resultsEl.style.display = 'block';
+
+                resultsEl.querySelectorAll('.search-match-item').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        const id = parseInt((e.currentTarget as HTMLElement).getAttribute('data-id') || '0');
+                        currentSelectedIds.push(id);
+                        searchInput.value = '';
+                        resultsEl.style.display = 'none';
+                        updateModalList();
+                    });
+                });
+            } else {
+                resultsEl.style.display = 'none';
+            }
+        });
+      },
       showCancelButton: true,
-      confirmButtonText: 'Actualizar Stock',
+      confirmButtonText: '🚀 Actualizar Stock',
       cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#10b981',
       preConfirm: () => {
-        return {
-          talle_id: (document.getElementById('swal-talle') as HTMLSelectElement).value,
-          cantidad: (document.getElementById('swal-cantidad') as HTMLInputElement).value
-        };
+        const talle_id = (document.getElementById('swal-talle') as HTMLSelectElement).value;
+        const cantidad = (document.getElementById('swal-cantidad') as HTMLInputElement).value;
+        if (currentSelectedIds.length === 0) {
+            Swal.showValidationMessage('Selecciona al menos un producto');
+            return false;
+        }
+        if (!talle_id || !cantidad || parseInt(cantidad) <= 0) {
+            Swal.showValidationMessage('Ingresa un talle y una cantidad válida');
+            return false;
+        }
+        return { talle_id, cantidad, product_ids: currentSelectedIds };
       }
     });
 
     if (formValues) {
       this.procesandoBulk = true;
       const payload = {
-        product_ids: this.productosSeleccionados,
+        product_ids: formValues.product_ids,
         talle_id: parseInt(formValues.talle_id),
         cantidad: parseInt(formValues.cantidad)
       };
@@ -1070,8 +1164,14 @@ export class ProductosAdminComponent implements OnInit {
       this.apiService.updateStockBulk(payload).subscribe({
         next: (res) => {
           this.procesandoBulk = false;
-          Swal.fire('¡Éxito!', res.message, 'success');
-          this.loadProductos(); // Recargar para ver cambios
+          Swal.fire({
+            icon: 'success',
+            title: '¡Stock Actualizado!',
+            text: `Se sumaron ${formValues.cantidad} unidades a ${formValues.product_ids.length} productos.`,
+            confirmButtonColor: '#000'
+          });
+          this.productosSeleccionados = []; // Limpiar selección
+          this.loadProductos();
         },
         error: (err) => {
           this.procesandoBulk = false;
