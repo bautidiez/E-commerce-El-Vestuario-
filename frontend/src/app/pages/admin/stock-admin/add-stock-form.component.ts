@@ -13,10 +13,11 @@ import Swal from 'sweetalert2';
   styleUrl: './stock-administration.css',
   encapsulation: ViewEncapsulation.None,
   template: `
-    <div class="add-stock-form">
+    <div class="add-stock-form" style="min-height: 400px; background: white; display: block; width: 100%;">
+      
       <!-- STEP 1: SELECCIÓN -->
-      <div *ngIf="currentStep === 1" class="step-container animated fadeIn">
-        <div class="product-search-container cuadrado-box" style="padding-bottom: 5px;">
+      <div *ngIf="currentStep === 1" class="step-container">
+        <div class="product-search-container cuadrado-box" style="padding-bottom: 5px; border-top: 4px solid #6366f1;">
           <label style="font-weight: 800; color: #0f172a; margin-bottom: 15px; display: block; font-size: 1.2rem; letter-spacing: -0.5px;">
             <i class="fas fa-search" style="color: #6366f1;"></i> 1. Buscar Camisetas
           </label>
@@ -75,67 +76,66 @@ import Swal from 'sweetalert2';
           </div>
           
           <button type="button" class="btn-continue-wizard shadow-lg" (click)="nextStep()">
-            <span>SIGUIENTE: CARGAR STOCK</span>
+            <span>CONTINUAR A CARGA DE STOCK</span>
             <i class="fas fa-chevron-right"></i>
           </button>
         </div>
 
-        <div class="empty-state-placeholder animated pulse" *ngIf="selectedProducts.length === 0">
+        <div class="empty-state-placeholder" *ngIf="selectedProducts.length === 0" style="padding: 40px; text-align: center;">
           <p style="font-weight: 500; color: #64748b;">Busca y selecciona las camisetas que quieres actualizar.</p>
         </div>
       </div>
 
     <!-- STEP 2: CARGA DE STOCK -->
-    <div *ngIf="currentStep === 2" class="step-container animated fadeIn">
-      <div class="cuadrado-box" style="border-top: 4px solid #10b981;">
+    <div *ngIf="currentStep === 2" class="step-container" style="display: block !important;">
+      <div class="cuadrado-box" style="border-top: 5px solid #10b981; background-color: #ffffff; padding: 25px; border-radius: 15px;">
          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px;">
-            <div>
-              <label style="font-weight: 800; color: #1e293b; display: block; font-size: 1.2rem;">
-                PASO 2: Cargar Cantidades
-              </label>
-              <small style="color: #64748b; font-weight: 600;">{{ selectedProducts.length }} productos seleccionados.</small>
+            <div style="text-align: left;">
+              <h2 style="font-weight: 800; color: #1e293b; margin: 0; font-size: 1.4rem;">
+                PASO 2: Cargar Stock
+              </h2>
+              <p style="color: #64748b; font-weight: 600; margin: 5px 0;">Actualizando {{ selectedProducts.length }} productos.</p>
             </div>
-            <button type="button" class="btn-link" (click)="prevStep()" style="color: #4338ca; font-weight: 700; text-decoration: none; font-size: 0.9rem;">
-              <i class="fas fa-arrow-left"></i> VOLVER A SELECCIÓN
+            <button type="button" (click)="prevStep()" style="color: #4338ca; font-weight: 800; background: none; border: none; cursor: pointer; font-size: 0.95rem;">
+              <i class="fas fa-arrow-left"></i> VOLVER ATRÁS
             </button>
          </div>
          
-         <div class="sizes-grid">
-          <div class="size-input-group" *ngFor="let size of sizes">
-            <label>{{ size }}</label>
+         <div class="sizes-grid" style="display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 15px; background: #f8fafc; padding: 20px; border-radius: 12px;">
+          <div class="size-input-group" *ngFor="let size of sizes" style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+            <label style="font-weight: 800; color: #334155; font-size: 1rem;">{{ size }}</label>
             <input
               type="number"
               [(ngModel)]="sizeInputs[size]"
               min="0"
               placeholder="0"
+              style="width: 100%; height: 50px; text-align: center; font-size: 1.25rem; font-weight: 800; border: 2px solid #cbd5e1; border-radius: 10px;"
             />
           </div>
         </div>
 
-        <div style="display: flex; gap: 15px; margin-top: 30px;">
+        <div style="display: flex; gap: 15px; margin-top: 35px;">
           <button
             type="button"
             class="btn-confirm-save-premium"
             (click)="submitStock()"
             [disabled]="submitting"
+            style="flex: 2; background: #10b981; color: white; height: 65px; border-radius: 15px; font-weight: 900; font-size: 1.2rem; border: none; cursor: pointer;"
           >
-            <i class="fas" [class.fa-check-circle]="!submitting" [class.fa-spinner]="submitting" [class.fa-spin]="submitting"></i>
-            {{ submitting ? 'GUARDANDO...' : 'CONFIRMAR Y GUARDAR' }}
-          </button>
-          <button type="button" class="btn btn-secondary" (click)="prevStep()" [disabled]="submitting" style="flex: 1; height: 55px; border-radius: 12px; font-weight: 600;">
-            VOLVER
+            <i class="fas fa-check" *ngIf="!submitting"></i>
+            {{ submitting ? 'GUARDANDO...' : 'GUARDAR STOCK' }}
           </button>
         </div>
       </div>
     </div>
 
-      <!-- FOOTER ACTIONS -->
-      <div class="form-actions" style="margin-top: 2rem;" *ngIf="currentStep === 1">
-        <button type="button" class="btn btn-secondary" (click)="cancel()" style="width: 100%; background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; font-weight: 600; height: 45px;">
-          CANCELAR OPERACIÓN
-        </button>
-      </div>
+    <!-- FOOTER CANCEL -->
+    <div class="form-actions" style="margin-top: 2rem;" *ngIf="currentStep === 1">
+      <button type="button" class="btn btn-secondary" (click)="cancel()" style="width: 100%; height: 45px; border-radius: 10px;">
+        CANCELAR OPERACIÓN
+      </button>
     </div>
+  </div>
   `
 })
 export class AddStockFormComponent implements OnInit, OnChanges {
