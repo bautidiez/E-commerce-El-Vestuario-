@@ -55,31 +55,33 @@ import Swal from 'sweetalert2';
         </div>
 
         <!-- SELECTED PRODUCTS AREA -->
-        <div class="selected-area" style="margin-top: 25px;" *ngIf="selectedProducts.length > 0">
+        <div class="selected-area" style="margin-top: 25px; max-height: 400px; overflow-y: auto; padding-right: 10px;" *ngIf="selectedProducts.length > 0">
           <label style="font-weight: 800; color: #0f172a; margin-bottom: 15px; display: block; font-size: 1.1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">
              LISTA SELECCIONADA ({{ selectedProducts.length }})
           </label>
           
-          <div class="selected-list-container">
-            <div class="selected-row-card" *ngFor="let prod of selectedProducts; let i = index">
-              <div class="card-info">
-                <div class="card-name">{{ prod.nombre }}</div>
+          <div class="selected-grid-layout" style="display: flex; flex-wrap: wrap; gap: 12px;">
+            <div class="selected-row-card" *ngFor="let prod of selectedProducts; let i = index" style="flex: 1 1 calc(50% - 12px); min-width: 250px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px; display: flex; justify-content: space-between; align-items: center; transition: all 0.2s;">
+              <div class="card-info" style="display: flex; flex-direction: column; gap: 4px;">
+                <div class="card-name" style="font-weight: 700; color: #1e293b; font-size: 0.95rem;">{{ prod.nombre }}</div>
                 <div class="card-meta">
-                  <span class="version-badge-text" [class.jugador]="prod.version?.toLowerCase().includes('jugador')">
+                  <span class="version-badge-text" [class.jugador]="prod.version?.toLowerCase().includes('jugador')" style="font-size: 0.75rem; padding: 2px 8px; border-radius: 4px; background: #e2e8f0; font-weight: 600;">
                     {{ prod.version || 'No Definida' }}
                   </span>
                 </div>
               </div>
-              <button type="button" class="btn-click-remove" (click)="removeProduct(i)">
-                <i class="fas fa-trash-alt"></i> QUITAR
+              <button type="button" class="btn-click-remove" (click)="removeProduct(i)" style="background: none; border: none; color: #94a3b8; cursor: pointer; transition: color 0.2s; padding: 8px;" title="Quitar">
+                <i class="fas fa-trash-alt"></i>
               </button>
             </div>
           </div>
           
-          <button type="button" class="btn-continue-wizard shadow-lg" (click)="nextStep()">
-            <span>CONTINUAR A CARGA DE STOCK</span>
-            <i class="fas fa-chevron-right"></i>
-          </button>
+          <div style="position: sticky; bottom: 0; background: white; padding-top: 20px; z-index: 10;">
+            <button type="button" class="btn-continue-wizard shadow-lg" (click)="nextStep()" style="width: 100%; height: 55px; border-radius: 12px; background: #6366f1; color: white; border: none; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 15px; cursor: pointer; transition: all 0.3s;">
+              <span>CONTINUAR A CARGA DE STOCK</span>
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
         </div>
 
         <div class="empty-state-placeholder" *ngIf="selectedProducts.length === 0" style="padding: 40px; text-align: center;">
