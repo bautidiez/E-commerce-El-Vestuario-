@@ -16,7 +16,7 @@ import Swal from 'sweetalert2';
     <div class="add-stock-form" style="min-height: 450px; background: white; display: block; width: 100%; position: relative;">
       
       <!-- STEP 1: SELECCIÓN -->
-      <div [hidden]="currentStep !== 1" class="step-container" style="display: block;">
+      <div *ngIf="currentStep === 1" class="step-container">
         <div class="product-search-container cuadrado-box" style="padding-bottom: 5px; border-top: 4px solid #6366f1;">
           <label style="font-weight: 800; color: #0f172a; margin-bottom: 15px; display: block; font-size: 1.2rem; letter-spacing: -0.5px;">
             <i class="fas fa-search" style="color: #6366f1;"></i> 1. Buscar Camisetas
@@ -87,7 +87,7 @@ import Swal from 'sweetalert2';
       </div>
 
     <!-- STEP 2: CARGA DE STOCK -->
-    <div [hidden]="currentStep !== 2" class="step-container" style="display: block !important;">
+    <div *ngIf="currentStep === 2" class="step-container">
       <div class="cuadrado-box" style="border-top: 5px solid #10b981; background-color: #ffffff; padding: 25px; border-radius: 15px;">
          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px;">
             <div style="text-align: left;">
@@ -102,32 +102,32 @@ import Swal from 'sweetalert2';
          </div>
          
          <!-- GRID DE TALLES CON BOTONES +/- -->
-         <div class="sizes-grid-container" style="display: grid; grid-template-columns: repeat(1, 1fr); gap: 15px; background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0;">
-          <div class="size-row-item" *ngFor="let size of sizes" style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 12px 18px; border-radius: 10px; border: 1px solid #cbd5e1;">
-            <div style="font-weight: 900; font-size: 1.2rem; color: #0f172a; width: 50px;">{{ size }}</div>
+         <div class="sizes-grid-container" style="display: grid; grid-template-columns: repeat(1, 1fr); gap: 12px; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
+          <div class="size-row-item" *ngFor="let size of sizes" style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 15px; border-radius: 10px; border: 1px solid #cbd5e1;">
+            <div style="font-weight: 900; font-size: 1.1rem; color: #0f172a; width: 40px;">{{ size }}</div>
             
-            <div class="quantity-controller" style="display: flex; align-items: center; gap: 15px;">
-              <button type="button" (click)="decrementStock(size)" style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid #ef4444; background: white; color: #ef4444; font-size: 1.2rem; cursor: pointer; font-weight: 900;">-</button>
+            <div class="quantity-controller" style="display: flex; align-items: center; gap: 12px;">
+              <button type="button" (click)="decrementStock(size)" style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid #ef4444; background: white; color: #ef4444; font-size: 1.1rem; cursor: pointer; font-weight: 900;">-</button>
               
               <input
                 type="number"
                 [(ngModel)]="sizeInputs[size]"
                 min="0"
-                style="width: 70px; height: 45px; text-align: center; font-size: 1.4rem; font-weight: 900; border: none; background: #f1f5f9; border-radius: 8px; color: #1e293b;"
+                style="width: 60px; height: 40px; text-align: center; font-size: 1.3rem; font-weight: 900; border: none; background: #f1f5f9; border-radius: 8px; color: #1e293b;"
               />
               
-              <button type="button" (click)="incrementStock(size)" style="width: 40px; height: 40px; border-radius: 50%; border: 2px solid #10b981; background: white; color: #10b981; font-size: 1.2rem; cursor: pointer; font-weight: 900;">+</button>
+              <button type="button" (click)="incrementStock(size)" style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid #10b981; background: white; color: #10b981; font-size: 1.1rem; cursor: pointer; font-weight: 900;">+</button>
             </div>
           </div>
         </div>
 
-        <div style="display: flex; gap: 15px; margin-top: 35px;">
+        <div style="display: flex; gap: 15px; margin-top: 30px;">
           <button
             type="button"
             class="btn-confirm-save-premium"
             (click)="submitStock()"
             [disabled]="submitting"
-            style="flex: 2; background: #10b981; color: white; height: 65px; border-radius: 15px; font-weight: 900; font-size: 1.2rem; border: none; cursor: pointer;"
+            style="flex: 2; background: #10b981; color: white; height: 60px; border-radius: 15px; font-weight: 900; font-size: 1.2rem; border: none; cursor: pointer;"
           >
             <i class="fas fa-save" *ngIf="!submitting"></i>
             {{ submitting ? 'GUARDANDO...' : 'GUARDAR TODO' }}
