@@ -3,7 +3,7 @@
   <main class="main-content">
     <router-outlet></router-outlet>
   </main>
-  <app-footer></app-footer>
+  <app-footer *ngIf="!isAdminRoute"></app-footer>
   <app-whatsapp-button *ngIf="!isAdminRoute"></app-whatsapp-button>
   <app-toast></app-toast>
 </div>

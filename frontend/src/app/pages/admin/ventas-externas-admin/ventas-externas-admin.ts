@@ -70,7 +70,8 @@ export class VentasExternasAdminComponent implements OnInit, OnDestroy {
         talle_id: null as number | null,
         cantidad: 1,
         precio_unitario: 0,
-        notas: ''
+        notas: '',
+        fecha: new Date().toISOString().split('T')[0] // Default a hoy
     };
 
     // Filtros
@@ -132,6 +133,7 @@ export class VentasExternasAdminComponent implements OnInit, OnDestroy {
             next: (results: any) => {
                 this.searchResults = results || [];
                 this.searching = false;
+                this.cdr.detectChanges(); // FORZAR actualización inmediata para que aparezcan los resultados
             },
             error: (error) => {
                 console.error('Error searching products:', error);
@@ -374,7 +376,8 @@ export class VentasExternasAdminComponent implements OnInit, OnDestroy {
             talle_id: null,
             cantidad: 1,
             precio_unitario: 0,
-            notas: ''
+            notas: '',
+            fecha: new Date().toISOString().split('T')[0]
         };
         this.productoSeleccionado = null;
         this.stockProductoSeleccionado = [];
