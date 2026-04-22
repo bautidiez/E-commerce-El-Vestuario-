@@ -77,170 +77,19 @@
       </label>
 
       <button class="btn btn-secondary" (click)="limpiarFiltros()"
-        *ngIf="busqueda || categoriaFiltro || mostrarSoloStockBajo || mostrarSoloAgotado || productoPreseleccionadoId">
+        *ngIf="busqueda || categoriaFiltro || mostrarSoloStockBajo || mostrarSoloAgotado || productoPreseleccionadoIds.length > 0">
         🗑️ Limpiar / Ver Todos
       </button>
     </div>
 
     <!-- FORMULARIO NUEVO STOCK -->
-    <div *ngIf="mostrarFormulario" class="modal-overlay" (click)="cancelar()">
-      <div class="modal-form" (click)="$event.stopPropagation()">
-        <h3>➕ Agregar Nuevo Stock</h3>
-        <form (ngSubmit)="guardar()">
-          <div class="form-group">
-            <label>Producto *</label>
-            <select [(ngModel)]="nuevoStock.producto_id" name="producto_id" required class="form-control">
-              <option [ngValue]="null">Seleccionar producto...</option>
-              <option *ngFor="let producto of productos" [ngValue]="producto.id">{{ producto.nombre }}</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label>Color (opcional)</label>
-            <select [(ngModel)]="nuevoStock.color_id" name="color_id" class="form-control">
-              <option [ngValue]="null">Sin color específico</option>
-              <option *ngFor="let color of colores" [ngValue]="color.id">{{ color.nombre }}</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label>Talle *</label>
-            <select [(ngModel)]="nuevoStock.talle_id" name="talle_id" required class="form-control">
-              <option [ngValue]="null">Seleccionar talle...</option>
-              <option *ngFor="let talle of talles" [ngValue]="talle.id">{{ talle.nombre }}</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label>Cantidad Inicial *</label>
-            <input type="number" [(ngModel)]="nuevoStock.cantidad" name="cantidad" min="0" required
-              class="form-control">
-          </div>
-
-          <div class="form-actions">
-            <button type="submit" class="btn btn-success">💾 Guardar</button>
-            <button type="button" class="btn btn-secondary" (click)="cancelar()">Cancelar</button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- LOADING -->
-    <div *ngIf="loadingStock" class="loading">
-      <p>Cargando stock...</p>
-    </div>
-
-    <!-- SIN DATOS -->
-    <div *ngIf="!loadingStock && stockFiltrado.length === 0" class="empty-state">
-      <p>📭 No hay stock que mostrar</p>
-      <button class="btn btn-primary" (click)="limpiarFiltros()"
-        *ngIf="busqueda || categoriaFiltro || mostrarSoloStockBajo">
-        Ver Todo el Stock
-      </button>
-    </div>
-
-    <!-- TABLA NORMAL -->
-    <div *ngIf="!loadingStock && stockFiltrado.length > 0 && !vistaAgrupada" class="stock-table-container">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>Producto</th>
-            <th>Color</th>
-            <th>Talle</th>
-            <th>Cantidad</th>
-            <th>Estado</th>
-            <th>Actualizado</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let item of stockFiltrado" [class]="getStockClass(item.cantidad)">
-            <td><strong>{{ item.producto_nombre }}</strong></td>
-            <td>
-              <span class="color-badge" *ngIf="item.color_nombre">{{ item.color_nombre }}</span>
-              <span class="color-badge empty" *ngIf="!item.color_nombre">-</span>
-            </td>
-            <td><strong>{{ item.talle_nombre }}</strong></td>
-            <td>
-              <div *ngIf="!item.editing" class="cantidad-display" (dblclick)="activarEdicion(item)">
-                <strong>{{ item.cantidad }}</strong>
-                <button class="btn-icon-sm" (click)="activarEdicion(item)" title="Editar">✏️</button>
-              </div>
-              <div *ngIf="item.editing" class="cantidad-edit">
-                <input type="number" [(ngModel)]="item.tempCantidad" min="0" class="inline-input" autofocus>
-                <button class="btn-icon-sm success" (click)="guardarEdicion(item)" title="Guardar">✓</button>
-                <button class="btn-icon-sm cancel" (click)="cancelarEdicion(item)" title="Cancelar">✕</button>
-              </div>
-            </td>
-            <td>
-              <span class="badge" [ngClass]="getStockClass(item.cantidad)">
-                {{ getStockLabel(item.cantidad) }}
-              </span>
-            </td>
-            <td>
-              <small>{{ item.updated_at | date:'short' }}</small>
-            </td>
-            <td>
-              <button class="btn-icon" (click)="eliminar(item.id)" title="Eliminar">🗑️</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <!-- PAGINATION CONTROLS -->
-      <div class="pagination-controls" *ngIf="totalPages > 1">
-        <button class="btn btn-secondary" (click)="previousPage()" [disabled]="currentPage === 1">
-          ← Anterior
-        </button>
-
-        <span class="pagination-info">
-          Página {{ currentPage }} de {{ totalPages }} ({{ totalItems }} items totales)
-        </span>
-
-        <button class="btn btn-secondary" (click)="nextPage()" [disabled]="currentPage === totalPages">
-          Siguiente →
-        </button>
-      </div>
-    </div>
-
-    <!-- VISTA AGRUPADA -->
-    <div *ngIf="!loadingStock && stockFiltrado.length > 0 && vistaAgrupada" class="stock-grouped">
-      <div *ngFor="let grupo of stockAgrupado | keyvalue" class="grupo-producto">
-        <h3 class="grupo-titulo">{{ grupo.key }}</h3>
-        <div class="grupo-items">
-          <div *ngFor="let item of grupo.value" class="item-card" [ngClass]="getStockClass(item.cantidad)">
-            <div class="item-header">
-              <span class="item-talle">{{ item.talle_nombre }}</span>
-              <span class="item-color" *ngIf="item.color_nombre">{{ item.color_nombre }}</span>
-            </div>
-            <div class="item-cantidad">
-              <div *ngIf="!item.editing" (dblclick)="activarEdicion(item)">
-                <strong>{{ item.cantidad }}</strong> unidades
-                <button class="btn-icon-sm" (click)="activarEdicion(item)">✏️</button>
-              </div>
-              <div *ngIf="item.editing" class="inline-edit">
-                <input type="number" [(ngModel)]="item.tempCantidad" min="0" class="inline-input">
-                <button class="btn-icon-sm success" (click)="guardarEdicion(item)">✓</button>
-                <button class="btn-icon-sm cancel" (click)="cancelarEdicion(item)">✕</button>
-              </div>
-            </div>
-            <div class="item-footer">
-              <span class="badge-sm" [ngClass]="getStockClass(item.cantidad)">
-                {{ getStockLabel(item.cantidad) }}
-              </span>
-              <button class="btn-icon-sm" (click)="eliminar(item.id)">🗑️</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
+[... lines 85-238 ...]
     <!-- MODAL: AGREGAR STOCK POR TALLES -->
     <div *ngIf="mostrarFormularioAgregarStock" class="modal-overlay" (click)="cerrarAgregarStock()">
       <div class="modal-form add-stock-modal" (click)="$event.stopPropagation()">
         <h3>➕ Agregar Stock por Talle</h3>
 
-        <app-add-stock-form [preSelectedProductId]="productoPreseleccionadoId" (stockAdded)="onStockAdded()"
+        <app-add-stock-form [preSelectedProductIds]="productoPreseleccionadoIds" (stockAdded)="onStockAdded()"
           (cancelled)="cerrarAgregarStock()">
         </app-add-stock-form>
       </div>

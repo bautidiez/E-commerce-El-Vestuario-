@@ -87,7 +87,7 @@ export class StockAdminComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef
   ) { }
 
-  productoPreseleccionadoId: number | null = null;
+  productoPreseleccionadoIds: number[] = [];
 
   ngOnInit() {
     console.log('StockAdmin initialized v3 (Clean Overwrite)');
@@ -105,26 +105,34 @@ export class StockAdminComponent implements OnInit, OnDestroy {
     this.route.queryParams
       .pipe(takeUntil(this.destroy$))
       .subscribe((params: any) => {
-        // Validación y carga de producto preseleccionado
-        if (params['producto_id']) {
+        this.productoPreseleccionadoIds = [];
+
+        // CASO 1: Múltiples IDs (vienen de Gestión de Productos Bulk)
+        if (params['producto_ids']) {
+          const ids = params['producto_ids'].split(',').map((id: string) => Number(id)).filter((id: number) => !isNaN(id));
+          if (ids.length > 0) {
+            this.productoPreseleccionadoIds = ids;
+            this.abrirWizardInmediato();
+          }
+        } 
+        // CASO 2: ID único (viene de Gestión de Productos Individual o Directo)
+        else if (params['producto_id']) {
           const prodId = Number(params['producto_id']);
           if (!isNaN(prodId) && prodId > 0) {
-            console.log('ID Productos recibido:', prodId);
-            this.productoPreseleccionadoId = prodId;
-            // alert('DEBUG: ID recibido en StockAdmin: ' + prodId);
-
-            // Abrimos el modal inmediatamente con el ID
-            setTimeout(() => {
-              this.mostrarFormularioAgregarStock = true;
-              this.cdr.detectChanges();
-            }, 50);
+            this.productoPreseleccionadoIds = [prodId];
+            this.abrirWizardInmediato();
           }
-        } else {
-          this.productoPreseleccionadoId = null;
         }
 
         this.loadStock();
       });
+  }
+
+  private abrirWizardInmediato() {
+    setTimeout(() => {
+      this.mostrarFormularioAgregarStock = true;
+      this.cdr.detectChanges();
+    }, 50);
   }
 
   ngOnDestroy() {
@@ -150,8 +158,8 @@ export class StockAdminComponent implements OnInit, OnDestroy {
       params.categoria_id = this.categoriaFiltro;
     }
 
-    if (this.productoPreseleccionadoId) {
-      params.producto_id = this.productoPreseleccionadoId;
+    if (this.productoPreseleccionadoIds.length === 1) {
+      params.producto_id = this.productoPreseleccionadoIds[0];
     }
 
     this.apiService.getStock(params).subscribe({
@@ -389,8 +397,8 @@ export class StockAdminComponent implements OnInit, OnDestroy {
     this.talleFiltro = null;
 
     // Limpiar también el filtro de producto único si existe
-    if (this.productoPreseleccionadoId) {
-      this.productoPreseleccionadoId = null;
+    if (this.productoPreseleccionadoIds.length > 0) {
+      this.productoPreseleccionadoIds = [];
       // Limpiar URL
       this.router.navigate([], {
         relativeTo: this.route,

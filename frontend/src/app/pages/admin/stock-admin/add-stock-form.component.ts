@@ -181,7 +181,7 @@ import Swal from 'sweetalert2';
   `
 })
 export class AddStockFormComponent implements OnInit, OnChanges {
-  @Input() preSelectedProductId: number | null = null;
+  @Input() preSelectedProductIds: number[] = [];
   @Output() stockAdded = new EventEmitter<void>();
   @Output() cancelled = new EventEmitter<void>();
 
@@ -204,25 +204,35 @@ export class AddStockFormComponent implements OnInit, OnChanges {
   private searchSubject = new Subject<string>();
 
   ngOnInit() {
-    if (this.preSelectedProductId) {
-      this.loadAndSelectProduct(this.preSelectedProductId);
+    if (this.preSelectedProductIds && this.preSelectedProductIds.length > 0) {
+      this.loadAndSelectProducts(this.preSelectedProductIds);
     }
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['preSelectedProductId'] && changes['preSelectedProductId'].currentValue) {
-      this.loadAndSelectProduct(changes['preSelectedProductId'].currentValue);
+    if (changes['preSelectedProductIds'] && changes['preSelectedProductIds'].currentValue) {
+      this.loadAndSelectProducts(changes['preSelectedProductIds'].currentValue);
     }
   }
 
-  loadAndSelectProduct(id: number) {
-    if (this.selectedProducts.find(p => p.id === id)) return;
-    this.apiService.getProducto(id).subscribe({
-      next: (prod) => {
-        this.selectProduct(prod);
+  loadAndSelectProducts(ids: number[]) {
+    // Filtrar IDs que ya están seleccionados
+    const newIds = ids.filter(id => !this.selectedProducts.find(p => p.id === id));
+    if (newIds.length === 0) return;
+
+    const requests = newIds.map(id => this.apiService.getProducto(id));
+    
+    forkJoin(requests).subscribe({
+      next: (products: any[]) => {
+        products.forEach(prod => {
+          if (prod && !this.selectedProducts.find(p => p.id === prod.id)) {
+            this.selectedProducts.push(prod);
+          }
+        });
+        this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('Error fetching product by ID:', err);
+        console.error('Error fetching multiple products:', err);
       }
     });
   }
