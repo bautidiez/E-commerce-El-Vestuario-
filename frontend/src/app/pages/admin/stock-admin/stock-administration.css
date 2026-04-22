@@ -2,6 +2,10 @@
   padding: 2rem;
   max-width: 1600px;
   margin: 0 auto;
+  zoom: 0.9;
+  transform: scale(0.9);
+  transform-origin: top center;
+  width: 111.11%;
 }
 
 .admin-header {

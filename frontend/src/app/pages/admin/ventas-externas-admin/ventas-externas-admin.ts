@@ -456,7 +456,8 @@ export class VentasExternasAdminComponent implements OnInit, OnDestroy {
     }
 
     formatPrecio(precio: number): string {
-        return `$${precio.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        if (!precio && precio !== 0) return '0';
+        return precio.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
     }
 
     get gananciaTotal(): number {

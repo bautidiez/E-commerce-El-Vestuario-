@@ -1,6 +1,10 @@
 .productos-admin-page {
   min-height: 100vh;
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  zoom: 0.9;
+  transform: scale(0.9);
+  transform-origin: top center;
+  width: 111.11%; /* To compensate for scale and use full width */
 }
 
 .admin-header {

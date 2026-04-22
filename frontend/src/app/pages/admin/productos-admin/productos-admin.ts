@@ -1019,9 +1019,8 @@ export class ProductosAdminComponent implements OnInit {
   }
 
   formatPrecio(precio: number): string {
-    if (!precio) return '0';
-    // Formato manual para asegurar punto como separador de miles
-    return precio.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    if (!precio && precio !== 0) return '0';
+    return precio.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
   }
 }
 

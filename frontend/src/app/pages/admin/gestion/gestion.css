@@ -1,6 +1,10 @@
 .panel-gestion-page {
   min-height: 100vh;
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  zoom: 0.9;
+  transform: scale(0.9);
+  transform-origin: top center;
+  width: 111.11%;
 }
 
 .panel-header {
@@ -59,8 +63,20 @@
 
 .gestion-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 20px;
+}
+
+@media (max-width: 1200px) {
+  .gestion-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .gestion-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .gestion-card {

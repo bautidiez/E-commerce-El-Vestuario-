@@ -1,3 +1,4 @@
+// Deployment Version: 1.1.2 - Admin UI Improvements
 import { ApplicationConfig } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
