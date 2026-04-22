@@ -13,10 +13,10 @@ import Swal from 'sweetalert2';
   styleUrl: './stock-administration.css',
   encapsulation: ViewEncapsulation.None,
   template: `
-    <div class="add-stock-form" style="min-height: 500px; background: white; display: block !important; width: 100%; position: relative; overflow: visible !important;">
+    <div class="add-stock-form" style="min-height: 450px; background: white; display: block; width: 100%; position: relative;">
       
       <!-- STEP 1: SELECCIÓN -->
-      <div [style.display]="currentStep === 1 ? 'block' : 'none'" class="step-container" style="opacity: 1 !important; visibility: visible !important;">
+      <div *ngIf="currentStep === 1" class="step-container">
         <div class="product-search-container cuadrado-box" style="padding-bottom: 5px; border-top: 4px solid #6366f1;">
           <label style="font-weight: 800; color: #0f172a; margin-bottom: 15px; display: block; font-size: 1.2rem; letter-spacing: -0.5px;">
             <i class="fas fa-search" style="color: #6366f1;"></i> 1. Buscar Camisetas
@@ -86,14 +86,9 @@ import Swal from 'sweetalert2';
         </div>
       </div>
 
-    <!-- STEP 2: CARGA DE STOCK (Absolute Visibility Mode) -->
-    <div [style.display]="currentStep === 2 ? 'block' : 'none'" class="step-container" style="opacity: 1 !important; visibility: visible !important; background: #fffbeb !important; border: 3px dashed #f59e0b; padding: 10px; border-radius: 20px;">
-      
-      <div style="background: #10b981; color: white; padding: 10px; text-align: center; border-radius: 10px; margin-bottom: 15px; font-weight: 900;">
-         CARGA DE STOCK ACTIVA - SI VES ESTO FUNCIONA
-      </div>
-
-      <div class="cuadrado-box" style="border-top: 5px solid #10b981; background-color: #ffffff; padding: 25px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+    <!-- STEP 2: CARGA DE STOCK -->
+    <div *ngIf="currentStep === 2" class="step-container">
+      <div class="cuadrado-box" style="border-top: 5px solid #10b981; background-color: #ffffff; padding: 25px; border-radius: 15px;">
          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px;">
             <div style="text-align: left;">
               <h2 style="font-weight: 800; color: #1e293b; margin: 0; font-size: 1.4rem;">
@@ -107,10 +102,10 @@ import Swal from 'sweetalert2';
          </div>
          
          <!-- GRID DE TALLES (Hardcoded) -->
-         <div class="sizes-grid-container" style="display: grid !important; grid-template-columns: 1fr; gap: 12px; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0; overflow: visible !important;">
+         <div class="sizes-grid-container" style="display: grid; grid-template-columns: 1fr; gap: 12px; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
           
           <!-- ROW S -->
-          <div class="size-row-item" style="display: flex !important; justify-content: space-between; align-items: center; background: white; padding: 10px 15px; border-radius: 10px; border: 1px solid #cbd5e1;">
+          <div class="size-row-item" style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 15px; border-radius: 10px; border: 1px solid #cbd5e1;">
             <div style="font-weight: 900; font-size: 1.1rem; color: #0f172a; width: 40px;">S</div>
             <div class="quantity-controller" style="display: flex; align-items: center; gap: 12px;">
               <button type="button" (click)="decrementStock('S')" style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid #ef4444; background: white; color: #ef4444; font-size: 1.1rem; cursor: pointer; font-weight: 900;">-</button>
@@ -120,7 +115,7 @@ import Swal from 'sweetalert2';
           </div>
 
           <!-- ROW M -->
-          <div class="size-row-item" style="display: flex !important; justify-content: space-between; align-items: center; background: white; padding: 10px 15px; border-radius: 10px; border: 1px solid #cbd5e1;">
+          <div class="size-row-item" style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 15px; border-radius: 10px; border: 1px solid #cbd5e1;">
             <div style="font-weight: 900; font-size: 1.1rem; color: #0f172a; width: 40px;">M</div>
             <div class="quantity-controller" style="display: flex; align-items: center; gap: 12px;">
               <button type="button" (click)="decrementStock('M')" style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid #ef4444; background: white; color: #ef4444; font-size: 1.1rem; cursor: pointer; font-weight: 900;">-</button>
@@ -130,7 +125,7 @@ import Swal from 'sweetalert2';
           </div>
 
           <!-- ROW L -->
-          <div class="size-row-item" style="display: flex !important; justify-content: space-between; align-items: center; background: white; padding: 10px 15px; border-radius: 10px; border: 1px solid #cbd5e1;">
+          <div class="size-row-item" style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 15px; border-radius: 10px; border: 1px solid #cbd5e1;">
             <div style="font-weight: 900; font-size: 1.1rem; color: #0f172a; width: 40px;">L</div>
             <div class="quantity-controller" style="display: flex; align-items: center; gap: 12px;">
               <button type="button" (click)="decrementStock('L')" style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid #ef4444; background: white; color: #ef4444; font-size: 1.1rem; cursor: pointer; font-weight: 900;">-</button>
@@ -140,7 +135,7 @@ import Swal from 'sweetalert2';
           </div>
 
           <!-- ROW XL -->
-          <div class="size-row-item" style="display: flex !important; justify-content: space-between; align-items: center; background: white; padding: 10px 15px; border-radius: 10px; border: 1px solid #cbd5e1;">
+          <div class="size-row-item" style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 15px; border-radius: 10px; border: 1px solid #cbd5e1;">
             <div style="font-weight: 900; font-size: 1.1rem; color: #0f172a; width: 40px;">XL</div>
             <div class="quantity-controller" style="display: flex; align-items: center; gap: 12px;">
               <button type="button" (click)="decrementStock('XL')" style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid #ef4444; background: white; color: #ef4444; font-size: 1.1rem; cursor: pointer; font-weight: 900;">-</button>
@@ -150,7 +145,7 @@ import Swal from 'sweetalert2';
           </div>
 
           <!-- ROW XXL -->
-          <div class="size-row-item" style="display: flex !important; justify-content: space-between; align-items: center; background: white; padding: 10px 15px; border-radius: 10px; border: 1px solid #cbd5e1;">
+          <div class="size-row-item" style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 15px; border-radius: 10px; border: 1px solid #cbd5e1;">
             <div style="font-weight: 900; font-size: 1.1rem; color: #0f172a; width: 40px;">XXL</div>
             <div class="quantity-controller" style="display: flex; align-items: center; gap: 12px;">
               <button type="button" (click)="decrementStock('XXL')" style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid #ef4444; background: white; color: #ef4444; font-size: 1.1rem; cursor: pointer; font-weight: 900;">-</button>
