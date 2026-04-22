@@ -18,50 +18,63 @@
     <div class="panel-content">
         <div class="container">
             <p class="subtitle">Creá y enviá campañas de email marketing a tus suscriptores.</p>
-        </div>
-    </div>
 
-    <div class="newsletter-grid">
-        <div class="compose-card">
-            <div class="form-group">
-                <label>Asunto del Correo</label>
-                <input type="text" [(ngModel)]="subject" placeholder="Ej: ¡Llegaron nuevos ingresos! 🚀">
-            </div>
+            <div class="newsletter-grid">
+                <!-- Compose Card -->
+                <div class="compose-card">
+                    <div class="card-header">
+                        <h3>📝 Redactar Mensaje</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>Asunto del Correo</label>
+                            <input type="text" [(ngModel)]="subject" placeholder="Ej: ¡Llegaron nuevos ingresos! 🚀" class="form-control">
+                        </div>
 
-            <div class="form-group">
-                <label>Mensaje</label>
-                <quill-editor [(ngModel)]="content" placeholder="Escribí tu mensaje aquí..."
-                    [styles]="{height: '300px'}" class="editor-container">
-                </quill-editor>
-            </div>
-        </div>
+                        <div class="form-group">
+                            <label>Contenido HTML</label>
+                            <quill-editor [(ngModel)]="content" placeholder="Escribí tu mensaje aquí..."
+                                [styles]="{height: '350px'}" class="editor-container">
+                            </quill-editor>
+                        </div>
+                    </div>
+                </div>
 
-        <div class="actions-card">
-            <h3>Acciones</h3>
+                <!-- Actions Card -->
+                <div class="actions-card">
+                    <div class="card-header">
+                        <h3>⚡ Acciones</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="test-section">
+                            <label>📧 Enviar Prueba</label>
+                            <div class="test-input-wrapper">
+                                <input type="email" [(ngModel)]="testEmail" placeholder="tu@email.com" class="form-control">
+                                <button class="btn btn-test" (click)="send(true)" [disabled]="isLoading">
+                                    {{ isLoading ? '⌛' : 'Probar' }}
+                                </button>
+                            </div>
+                            <small class="hint">Recibirás una copia exacta antes del envío masivo.</small>
+                        </div>
 
+                        <div class="divider"></div>
 
-            <div class="test-section">
-                <label>Email de Prueba</label>
-                <input type="email" [(ngModel)]="testEmail" placeholder="tu@email.com">
-                <button class="btn-test" (click)="send(true)" [disabled]="isLoading">
-                    <span *ngIf="!isLoading">🧪 Probar Envío</span>
-                    <span *ngIf="isLoading" class="loader-dots">⏳ Enviando...</span>
-                </button>
-            </div>
+                        <div class="send-section">
+                            <div class="warning-box">
+                                <p>⚠️ <strong>¡Atención!</strong> Esta acción enviará el correo a todos los suscritos.</p>
+                            </div>
+                            <button class="btn btn-send-all" (click)="send(false)" [disabled]="isLoading">
+                                <span *ngIf="!isLoading">🚀 ENVIAR A TODOS</span>
+                                <span *ngIf="isLoading">⏳ PROCESANDO...</span>
+                            </button>
+                        </div>
 
-            <div class="divider"></div>
-
-            <div class="send-section">
-                <p class="warning-text">⚠️ Cuidado: Esto enviará el correo a todos los clientes suscritos.</p>
-                <button class="btn-send-all" (click)="send(false)" [disabled]="isLoading">
-                    <span *ngIf="!isLoading">✈️ Enviar a TODOS</span>
-                    <span *ngIf="isLoading">⏳ Enviando...</span>
-                </button>
-            </div>
-
-            <div *ngIf="lastStats" class="stats-box success">
-                <h4>Último Envío:</h4>
-                <p>Enviados: <strong>{{ lastStats.sent_count }}</strong> / {{ lastStats.total_targets }}</p>
+                        <div *ngIf="lastStats" class="stats-box success">
+                            <h4>📊 Último Envío:</h4>
+                            <p>Enviados: <strong>{{ lastStats.sent_count }}</strong> / {{ lastStats.total_targets }}</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

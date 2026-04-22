@@ -2,6 +2,10 @@
     padding: 2rem;
     max-width: 1400px;
     margin: 0 auto;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    zoom: 0.85;
+    width: 100%;
 }
 
 .admin-header {

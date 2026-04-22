@@ -2,8 +2,6 @@
   min-height: 100vh;
   background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   zoom: 1.0;
-  transform: scale(1.0);
-  transform-origin: top center;
   width: 100%;
 }
 
