@@ -12,6 +12,7 @@ import Swal from 'sweetalert2';
   imports: [CommonModule, FormsModule],
   styleUrl: './stock-administration.css',
   encapsulation: ViewEncapsulation.None,
+  template: `
     <div class="add-stock-form" style="min-height: 500px; background: white; display: block !important; width: 100%; position: relative; overflow: visible !important;">
       
       <!-- STEP 1: SELECCIÓN -->
