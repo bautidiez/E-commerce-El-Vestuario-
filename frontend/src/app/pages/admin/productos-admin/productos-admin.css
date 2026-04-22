@@ -247,3 +247,89 @@ tr.selected {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
+/* SEARCH MATCH STYLES */
+.search-match-item {
+  padding: 12px 15px;
+  cursor: pointer;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex !important;
+  align-items: center;
+  gap: 15px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  background: white;
+}
+
+.search-match-item:hover {
+  background: #f8fafc !important;
+  padding-left: 20px;
+}
+
+.search-match-item img {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  object-fit: cover;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.search-match-item .match-info {
+  flex: 1;
+  text-align: left;
+}
+
+.search-match-item .match-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #1e293b;
+  margin-bottom: 2px;
+}
+
+.search-match-item .match-meta {
+  font-size: 0.75rem;
+  color: #64748b;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.search-match-item .match-icon {
+  color: #10b981;
+  font-size: 1.1rem;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: all 0.2s;
+}
+
+.search-match-item:hover .match-icon {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* SELECTED PRODUCTS LIST */
+#swal-products-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+#swal-products-list::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.bulk-selected-card {
+  display: flex !important;
+  align-items: center;
+  gap: 12px;
+  background: #fff;
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}

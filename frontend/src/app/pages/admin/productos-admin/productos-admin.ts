@@ -1045,10 +1045,12 @@ export class ProductosAdminComponent implements OnInit {
         
         const prods = this.productos.filter(p => currentSelectedIds.includes(p.id));
         listEl.innerHTML = prods.map(p => `
-            <div class="product-item-bulk" style="display: flex; align-items: center; gap: 15px; padding: 10px; background: #f8fafc; border-radius: 10px; margin-bottom: 8px; border: 1px solid #e2e8f0;">
-                <img src="${this.getImagenPrincipal(p)}" style="width: 40px; height: 40px; border-radius: 6px; object-fit: cover;">
-                <div style="flex: 1; font-weight: 600; font-size: 0.9rem;">${p.nombre}</div>
-                <button type="button" class="btn-remove" data-id="${p.id}" style="color: #ef4444; border: none; background: none; cursor: pointer; font-weight: bold; font-size: 1.2rem;">×</button>
+            <div class="bulk-selected-card">
+                <img src="${this.getImagenPrincipal(p)}" style="width: 32px; height: 32px; border-radius: 4px; object-fit: cover;">
+                <div style="flex: 1; font-weight: 600; font-size: 0.9rem; text-align: left;">${p.nombre}</div>
+                <button type="button" class="btn-remove" data-id="${p.id}" style="color: #94a3b8; border: none; background: none; cursor: pointer; font-size: 1.1rem; padding: 5px;" title="Quitar">
+                    <i class="fas fa-times-circle"></i>
+                </button>
             </div>
         `).join('');
 
@@ -1075,8 +1077,8 @@ export class ProductosAdminComponent implements OnInit {
             </div>
           </div>
 
-          <div id="swal-products-list" style="max-height: 200px; overflow-y: auto; margin-bottom: 20px;">
-            <!-- Dinámico -->
+          <div id="swal-products-list" style="max-height: 220px; overflow-y: auto; margin-bottom: 20px; border-radius: 8px; padding-right: 5px;">
+            <!-- Dinámico: Tarjetas de productos seleccionados -->
           </div>
 
           <div style="background: #f1f5f9; padding: 20px; border-radius: 12px; text-align: left;">
@@ -1114,13 +1116,19 @@ export class ProductosAdminComponent implements OnInit {
 
                 if (matches.length > 0) {
                     resultsEl.innerHTML = matches.map((p: any) => `
-                        <div class="search-match-item" data-id="${p.id}" style="padding: 10px 12px; cursor: pointer; border-bottom: 1px dotted #e2e8f0; display: flex; align-items: center; gap: 12px; transition: background 0.2s;">
-                            <img src="${this.getImagenPrincipal(p)}" style="width: 32px; height: 32px; border-radius: 4px; object-fit: cover;">
-                            <div style="flex: 1;">
-                                <div style="font-weight: 600; font-size: 0.85rem; color: #1e293b;">${p.nombre}</div>
-                                <div style="font-size: 0.75rem; color: #64748b;">${p.version || ''}</div>
+                        <div class="search-match-item" data-id="${p.id}">
+                            <img src="${this.getImagenPrincipal(p)}">
+                            <div class="match-info">
+                                <div class="match-name">${p.nombre}</div>
+                                <div class="match-meta">
+                                    <span>${p.version || 'Original'}</span>
+                                    <span style="opacity: 0.5;">•</span>
+                                    <span>${p.color || 'Unico'}</span>
+                                </div>
                             </div>
-                            <i class="fas fa-plus-circle" style="color: #10b981;"></i>
+                            <div class="match-icon">
+                                <i class="fas fa-plus-circle"></i>
+                            </div>
                         </div>
                     `).join('');
                     resultsEl.style.display = 'block';

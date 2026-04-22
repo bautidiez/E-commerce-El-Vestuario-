@@ -662,3 +662,109 @@
     grid-template-columns: 1fr;
   }
 }
+/* ENHANCED SEARCH RESULTS AND CHIPS */
+.search-results {
+  background: white !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1) !important;
+  overflow: hidden !important;
+  margin-top: 5px !important;
+}
+
+.search-result-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  padding: 10px 15px !important;
+  cursor: pointer !important;
+  transition: all 0.2s !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+}
+
+.search-result-item:hover {
+  background: #f8fafc !important;
+}
+
+.search-result-item img {
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 6px !important;
+  object-fit: cover !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+.result-info {
+  flex: 1 !important;
+}
+
+.result-name {
+  font-weight: 600 !important;
+  font-size: 0.9rem !important;
+  color: #1e293b !important;
+  text-align: left !important;
+}
+
+.result-meta {
+  font-size: 0.75rem !important;
+  color: #64748b !important;
+  text-align: left !important;
+}
+
+.result-icon {
+  color: #10b981 !important;
+  font-size: 1.1rem !important;
+  opacity: 0.5 !important;
+}
+
+/* SELECTED PRODUCTS CHIPS */
+.selected-products-container {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  margin-bottom: 1.5rem !important;
+}
+
+.product-chip {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  background: #f1f5f9 !important;
+  padding: 6px 12px !important;
+  border-radius: 30px !important;
+  border: 1px solid #e2e8f0 !important;
+  animation: popIn 0.3s ease-out !important;
+}
+
+.product-chip img {
+  width: 24px !important;
+  height: 24px !important;
+  border-radius: 50% !important;
+  object-fit: cover !important;
+}
+
+.product-chip .chip-name {
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  color: #334155 !important;
+}
+
+.btn-remove-chip {
+  background: none !important;
+  border: none !important;
+  color: #94a3b8 !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  font-size: 1.1rem !important;
+  line-height: 1 !important;
+  transition: color 0.2s !important;
+}
+
+.btn-remove-chip:hover {
+  color: #ef4444 !important;
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}
