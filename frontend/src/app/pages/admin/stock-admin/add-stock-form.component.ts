@@ -154,7 +154,7 @@ export class AddStockFormComponent implements OnInit, OnChanges {
   @Output() stockAdded = new EventEmitter<void>();
   @Output() cancelled = new EventEmitter<void>();
 
-  currentStep: number = 1; // 1: Selección, 2: Carga de Stock
+  currentStep: any = 1;
   selectedProducts: any[] = [];
   searchQuery = '';
   searchResults: any[] = [];
