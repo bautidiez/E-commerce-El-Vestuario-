@@ -27,7 +27,7 @@ import Swal from 'sweetalert2';
           />
           <i class="fas fa-search" style="position: absolute; right: 15px; top: 12px; color: #94a3b8;"></i>
           
-          <!-- SEARCH RESULTS DROPDOWN (Aesthetic) -->
+          <!-- SEARCH RESULTS DROPDOWN (Aesthetic List) -->
           <div class="search-results" *ngIf="searchResults.length > 0">
             <div
               class="search-result-item"
@@ -38,14 +38,15 @@ import Swal from 'sweetalert2';
               <div class="result-info">
                 <div class="result-name">{{ product.nombre }}</div>
                 <div class="result-meta">
-                  <span>{{ product.version || 'Original' }}</span>
-                  <span *ngIf="product.color" style="opacity: 0.5;"> • </span>
-                  <span>{{ product.color }}</span>
+                  <span class="version-badge" *ngIf="product.version">
+                    {{ product.version }}
+                  </span>
+                  <span *ngIf="product.color" style="margin-left: 8px;">• {{ product.color }}</span>
                 </div>
               </div>
-              <div class="result-icon">
-                <i class="fas fa-plus-circle"></i>
-              </div>
+              <button class="btn-add-search">
+                  <i class="fas fa-plus"></i> Añadir
+              </button>
             </div>
           </div>
           

@@ -671,77 +671,88 @@
   background: white !important;
   border: 1px solid #e2e8f0 !important;
   border-radius: 12px !important;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1) !important;
-  overflow-x: auto !important;
-  display: flex !important;
-  gap: 12px !important;
-  padding: 15px !important;
-  margin-top: 5px !important;
-  z-index: 1000 !important;
-  scrollbar-width: thin;
-}
-
-.search-results::-webkit-scrollbar {
-  height: 6px;
-}
-
-.search-results::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 10px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15) !important;
+  max-height: 280px !important;
+  overflow-y: auto !important;
+  display: block !important;
+  padding: 8px !important;
+  margin-top: 8px !important;
+  z-index: 2000 !important;
 }
 
 .search-result-item {
-  flex: 0 0 160px !important;
   display: flex !important;
-  flex-direction: column !important;
   align-items: center !important;
-  text-align: center !important;
-  padding: 12px !important;
+  gap: 15px !important;
+  padding: 10px 15px !important;
   cursor: pointer !important;
   transition: all 0.2s !important;
-  border: 1px solid #f1f5f9 !important;
-  border-radius: 10px !important;
-  background: #fff !important;
+  border-radius: 8px !important;
+  margin-bottom: 4px !important;
+  border: 1px solid transparent !important;
 }
 
 .search-result-item:hover {
-  background: #f8fafc !important;
-  border-color: #2563eb !important;
-  transform: translateY(-2px);
+  background: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
 }
 
 .search-result-item img {
-  width: 60px !important;
-  height: 60px !important;
+  width: 45px !important;
+  height: 45px !important;
   border-radius: 8px !important;
   object-fit: cover !important;
-  margin-bottom: 8px !important;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important;
 }
 
 .result-info {
+  flex: 1 !important;
   display: flex !important;
   flex-direction: column !important;
-  gap: 2px !important;
-  width: 100% !important;
+  text-align: left !important;
 }
 
 .result-name {
   font-weight: 700 !important;
-  font-size: 0.85rem !important;
+  font-size: 0.95rem !important;
   color: #1e293b !important;
-  white-space: nowrap !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
+  margin: 0 !important;
 }
 
 .result-meta {
-  font-size: 0.7rem !important;
+  font-size: 0.8rem !important;
   color: #64748b !important;
+  font-weight: 500 !important;
 }
 
-.result-icon {
-  display: none !important; /* Hide icon in card view */
+.version-badge {
+  font-size: 0.7rem !important;
+  padding: 2px 8px !important;
+  border-radius: 4px !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  background: #f1f5f9 !important;
+  color: #475569 !important;
+  border: 1px solid #e2e8f0 !important;
+  display: inline-block !important;
+  margin-top: 2px !important;
+  width: fit-content !important;
+}
+
+.btn-add-search {
+  background: #000 !important;
+  color: #fff !important;
+  border: none !important;
+  padding: 6px 12px !important;
+  border-radius: 6px !important;
+  font-size: 0.75rem !important;
+  font-weight: 700 !important;
+  transition: all 0.2s !important;
+}
+
+.search-result-item:hover .btn-add-search {
+  background: #2563eb !important;
+  transform: scale(1.05) !important;
 }
 
 /* SELECTED PRODUCTS CHIPS */
