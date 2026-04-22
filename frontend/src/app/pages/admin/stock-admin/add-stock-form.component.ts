@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Output, ChangeDetectorRef, NgZone, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Output, ChangeDetectorRef, NgZone, Input, OnInit, OnChanges, SimpleChanges, ViewEncapsulation } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, of, forkJoin } from 'rxjs';
@@ -10,6 +10,8 @@ import Swal from 'sweetalert2';
   selector: 'app-add-stock-form',
   standalone: true,
   imports: [CommonModule, FormsModule],
+  styleUrl: './stock-administration.css',
+  encapsulation: ViewEncapsulation.None,
   template: `
     <div class="add-stock-form">
       <!-- STEP 1: SELECCIÓN -->
@@ -29,7 +31,7 @@ import Swal from 'sweetalert2';
             />
             <i class="fas fa-search" style="position: absolute; right: 20px; top: 18px; color: #94a3b8; font-size: 1.2rem;"></i>
             
-           <!-- SEARCH RESULTS DROPDOWN (Aesthetic List) -->
+          <!-- SEARCH RESULTS DROPDOWN (Aesthetic List) -->
           <div class="search-results shadow-xl" *ngIf="searchResults.length > 0">
             <div
               class="search-result-item-row"
@@ -39,7 +41,7 @@ import Swal from 'sweetalert2';
                 <div class="row-name">{{ product.nombre }}</div>
                 <div class="row-meta">
                   <span class="version-label" [class.jugador]="product.version?.toLowerCase().includes('jugador')">
-                    {{ product.version || 'Version' }}
+                    {{ product.version || 'No Definida' }}
                   </span>
                 </div>
               </div>
@@ -62,7 +64,7 @@ import Swal from 'sweetalert2';
                 <div class="card-name">{{ prod.nombre }}</div>
                 <div class="card-meta">
                   <span class="version-badge-text" [class.jugador]="prod.version?.toLowerCase().includes('jugador')">
-                    {{ prod.version }}
+                    {{ prod.version || 'No Definida' }}
                   </span>
                 </div>
               </div>
