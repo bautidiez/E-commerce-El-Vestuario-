@@ -4,6 +4,15 @@
   flex-direction: column;
 }
 
+.admin-layout {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
+  zoom: 0.85;
+}
+
+.admin-layout .main-content {
+  background: transparent !important;
+}
+
 .main-content {
   flex: 1;
   padding-top: 0;

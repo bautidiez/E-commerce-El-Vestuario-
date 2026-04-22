@@ -65,6 +65,11 @@ h3,
   letter-spacing: 0.5px;
 }
 
+body.admin-body {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
+  background-attachment: fixed !important;
+}
+
 .container {
   max-width: 1400px;
   margin: 0 auto;

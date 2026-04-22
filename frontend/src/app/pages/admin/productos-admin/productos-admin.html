@@ -1,20 +1,16 @@
-<div class="productos-admin-page">
+<div class="admin-container">
   <div class="admin-header">
-    <div class="container">
-      <div class="header-content">
-        <div class="header-title">
-          <button class="btn-back" routerLink="/admin/gestion" title="Volver al Panel de Gestión">
-            <span>←</span>
-          </button>
-          <h1>Gestión de Productos</h1>
-        </div>
-        <div class="header-actions">
-          <button *ngIf="productosSeleccionados.length > 0" class="btn btn-danger" (click)="eliminarSeleccionados()" [disabled]="procesandoBulk">
-            🗑️ Eliminar {{ productosSeleccionados.length }}
-          </button>
-          <button class="btn btn-primary" (click)="nuevo()">+ Nuevo Producto</button>
-        </div>
-      </div>
+    <div class="header-title">
+      <button class="btn-back" routerLink="/admin/gestion" title="Volver al Panel de Gestión">
+        <span>←</span>
+      </button>
+      <h1>Gestión de Productos</h1>
+    </div>
+    <div class="header-actions">
+      <button *ngIf="productosSeleccionados.length > 0" class="btn btn-danger" (click)="eliminarSeleccionados()" [disabled]="procesandoBulk">
+        🗑️ Eliminar {{ productosSeleccionados.length }}
+      </button>
+      <button class="btn btn-primary" (click)="nuevo()">+ Nuevo Producto</button>
     </div>
   </div>
 

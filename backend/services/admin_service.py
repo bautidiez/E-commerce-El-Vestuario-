@@ -56,7 +56,9 @@ class AdminService:
         - Mes: 12 meses del año especificado, navegable por año
         - Año: Solo el año actual
         """
-        if not ahora: ahora = datetime.utcnow()
+        if not ahora: 
+            # Ajustar a horario local Argentina (GMT-3) para que las estadísticas coincidan con el día real del usuario
+            ahora = datetime.utcnow() - timedelta(hours=3)
         datos = []
         intervalos = []
         
@@ -91,7 +93,7 @@ class AdminService:
                 # Opcional: No mostrar semanas futuras si estamos navegando cerca de la fecha real
                 # Pero si navegamos al pasado, queremos verlas.
                 # Solo break si inicio es mayor que NOW (tiempo real, no fecha_ref)
-                if inicio > datetime.utcnow():
+                if inicio > ahora:
                      break
                 
                 label = f"S {inicio.strftime('%d/%m')}"

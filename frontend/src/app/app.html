@@ -1,4 +1,4 @@
-<div class="app-container">
+<div class="app-container" [class.admin-layout]="isAdminRoute">
   <app-header *ngIf="!isAdminRoute"></app-header>
   <main class="main-content">
     <router-outlet></router-outlet>

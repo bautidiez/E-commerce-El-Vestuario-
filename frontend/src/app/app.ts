@@ -25,6 +25,11 @@ export class App implements OnInit {
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: NavigationEnd) => {
       this.isAdminRoute = event.url.startsWith('/admin');
+      if (this.isAdminRoute) {
+        document.body.classList.add('admin-body');
+      } else {
+        document.body.classList.remove('admin-body');
+      }
       window.scrollTo(0, 0);
     });
 
