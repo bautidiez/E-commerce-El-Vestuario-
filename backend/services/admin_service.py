@@ -23,7 +23,7 @@ class AdminService:
         # Ventas totales (Pedidos APROBADOS que no estén cancelados/fallidos)
         total_ventas_web = db.session.query(func.sum(Pedido.total)).filter(
             Pedido.aprobado == True,
-            Pedido.estado.in_(['confirmado', 'enviado', 'entregado'])
+            Pedido.estado.in_(['pendiente', 'confirmado', 'en_preparacion', 'enviado', 'entregado'])
         ).scalar() or 0
         
         # Ventas externas (todas cuentan)
@@ -150,7 +150,7 @@ class AdminService:
             # Ventas del sitio web (Aprobados o Entregados)
             ventas_web = db.session.query(func.sum(Pedido.total)).filter(
                 Pedido.aprobado == True,
-                Pedido.estado.in_(['confirmado', 'enviado', 'entregado']),
+                Pedido.estado.in_(['pendiente', 'confirmado', 'en_preparacion', 'enviado', 'entregado']),
                 Pedido.created_at.between(inicio, fin)
             ).scalar() or 0
             

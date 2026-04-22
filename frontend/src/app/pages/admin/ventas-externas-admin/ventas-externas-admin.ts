@@ -71,7 +71,7 @@ export class VentasExternasAdminComponent implements OnInit, OnDestroy {
         cantidad: 1,
         precio_unitario: 0,
         notas: '',
-        fecha: new Date().toISOString().split('T')[0] // Default a hoy
+        fecha: new Date().toLocaleDateString('sv').split(' ')[0] // Local YYYY-MM-DD
     };
 
     // Filtros
