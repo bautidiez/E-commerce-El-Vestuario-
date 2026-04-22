@@ -27,17 +27,42 @@
   flex-wrap: wrap;
 }
 
-.search-input {
-  padding: 0.6rem 1rem;
+.search-box {
+  display: flex;
+  align-items: center;
+  background: white;
   border: 2px solid #e2e8f0;
-  border-radius: 6px;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+  flex: 1;
   min-width: 250px;
-  font-size: 0.95rem;
 }
 
-.search-input:focus {
-  outline: none;
+.search-box:focus-within {
   border-color: #2563eb;
+}
+
+.search-input {
+  border: none !important;
+  padding: 0.6rem 1rem;
+  flex: 1;
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.btn-search-icon {
+  background: none;
+  border: none;
+  padding: 0 15px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  color: #64748b;
+  transition: color 0.2s;
+}
+
+.btn-search-icon:hover {
+  color: #2563eb;
 }
 
 .filter-select {
@@ -125,7 +150,7 @@
 }
 
 .data-table td {
-  padding: 1rem;
+  padding: 0.75rem 1rem;
   border-bottom: 1px solid #f1f5f9;
 }
 
@@ -199,9 +224,9 @@
 .modal-content {
   background: white;
   border-radius: 12px;
-  max-width: 1200px;
-  width: 100%;
-  max-height: 90vh;
+  max-width: 1400px;
+  width: 95%;
+  max-height: 95vh;
   overflow-y: auto;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
 }
@@ -271,8 +296,9 @@
 }
 
 .detail-card p {
-  margin: 0.5rem 0;
+  margin: 0.4rem 0;
   color: #475569;
+  font-size: 0.95rem;
 }
 
 /* Items List */

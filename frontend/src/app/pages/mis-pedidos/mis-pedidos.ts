@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { CheckoutService } from '../../services/checkout.service';
 import { AuthService } from '../../services/auth.service';
+import Swal from 'sweetalert2';
 
 @Component({
     selector: 'app-mis-pedidos',
@@ -90,14 +91,14 @@ export class MisPedidosComponent implements OnInit {
         this.checkoutService.updateProfile(this.profileData).subscribe({
             next: (updatedCliente) => {
                 this.authService.updateCliente(updatedCliente); // Update local storage
-                alert('Perfil actualizado correctamente');
+                Swal.fire('Éxito', 'Perfil actualizado correctamente', 'success');
                 this.savingProfile = false;
                 this.isEditingProfile = false; // Return to view mode
                 this.cd.detectChanges();
             },
             error: (err) => {
                 console.error(err);
-                alert('Error al actualizar perfil');
+                Swal.fire('Error', 'Error al actualizar perfil', 'error');
                 this.savingProfile = false;
                 this.cd.detectChanges();
             }
@@ -106,11 +107,11 @@ export class MisPedidosComponent implements OnInit {
 
     changePassword() {
         if (this.passwordData.new !== this.passwordData.confirm) {
-            alert('Las contraseñas nuevas no coinciden');
+            Swal.fire('Aviso', 'Las contraseñas nuevas no coinciden', 'warning');
             return;
         }
         if (!this.passwordData.old || !this.passwordData.new) {
-            alert('Por favor completá todos los campos');
+            Swal.fire('Aviso', 'Por favor completá todos los campos', 'warning');
             return;
         }
 
@@ -120,7 +121,7 @@ export class MisPedidosComponent implements OnInit {
             new_password: this.passwordData.new
         }).subscribe({
             next: (res) => {
-                alert(res.message);
+                Swal.fire('Aviso', res.message, 'info');
                 this.passwordData = { old: '', new: '', confirm: '' };
                 this.togglePasswordModal();
                 this.changingPassword = false;
@@ -128,7 +129,7 @@ export class MisPedidosComponent implements OnInit {
             },
             error: (err) => {
                 console.error(err);
-                alert(err.error?.error || 'Error al cambiar contraseña');
+                Swal.fire('Error', err.error?.error || 'Error al cambiar contraseña', 'error');
                 this.changingPassword = false;
                 this.cd.detectChanges();
             }
@@ -229,7 +230,7 @@ export class MisPedidosComponent implements OnInit {
             // Optimistic Update or Wait? Wait is safer.
             this.checkoutService.deleteOrder(pedido.id).subscribe({
                 next: () => {
-                    alert('Pedido eliminado correctamente.');
+                    Swal.fire('Éxito', 'Pedido eliminado correctamente.', 'success');
                     this.pedidos = this.pedidos.filter(p => p.id !== pedido.id);
                     if (this.pedidoDetalle && this.pedidoDetalle.id === pedido.id) {
                         this.cerrarDetalle();
@@ -238,7 +239,7 @@ export class MisPedidosComponent implements OnInit {
                 },
                 error: (err) => {
                     console.error('Error deleting order:', err);
-                    alert(err.error?.error || 'Error al eliminar el pedido.');
+                    Swal.fire('Error', err.error?.error || 'Error al eliminar el pedido.', 'error');
                     this.cd.detectChanges();
                 }
             });
@@ -268,7 +269,7 @@ export class MisPedidosComponent implements OnInit {
 
     getWhatsAppUrl(order: any, numberIndex: 1 | 2 = 1): string {
         if (!order) return '';
-        const phoneNumber = '5493584171716';
+        const phoneNumber = '3584171716';
         let msg = '';
 
         if (this.isPaymentMethod(order, 'efectivo_local')) {

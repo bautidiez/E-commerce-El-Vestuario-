@@ -165,7 +165,7 @@ export class EncargoEspecialComponent implements OnInit {
       `Email: ${this.encargo.email_cliente}\n` +
       `Teléfono: ${telefonoCompleto}`;
 
-    const whatsappUrl = `https://wa.me/5493584171716?text=${encodeURIComponent(mensaje)}`;
+    const whatsappUrl = `https://wa.me/3584171716?text=${encodeURIComponent(mensaje)}`;
     window.open(whatsappUrl, '_blank');
 
     setTimeout(() => {

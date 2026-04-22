@@ -286,6 +286,14 @@ export class CartService {
     this.cartItems = [];
     const key = this.getCartKey();
     localStorage.removeItem(key); // O guardar vacío: localStorage.setItem(key, JSON.stringify({items: [], lastUpdated: Date.now()}));
+    
+    if (this.authService.isLoggedIn()) {
+      this.apiService.syncCart([]).subscribe({
+        next: () => console.log('DEBUG CART: Synced empty cart to server'),
+        error: (e: any) => console.error('DEBUG CART: Empty sync error', e)
+      });
+    }
+
     // Remover item es más limpio para "no tener nada"
     this.notify();
   }

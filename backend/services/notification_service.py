@@ -20,7 +20,7 @@ class NotificationService:
             <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
                 <h3>💵 Paso final: Confirmar pago en efectivo</h3>
                 <p>Para preparar tu pedido, necesitamos que nos confirmes por WhatsApp que pasarás a retirar y abonar.</p>
-                <p><a href="https://wa.me/5493564639908?text=Hola! Hice el pedido %23{numero} y paso a retirar." style="background-color: #25d366; color: white; padding: 10px 20px; text-decoration: none; border-radius: 20px;">Confirmar pedido por WhatsApp</a></p>
+                <p><a href="https://wa.me/3584171716?text=Hola! Hice el pedido %23{numero} y paso a retirar." style="background-color: #25d366; color: white; padding: 10px 20px; text-decoration: none; border-radius: 20px;">Confirmar pedido por WhatsApp</a></p>
             </div>
             """.format(numero=pedido.numero_pedido)
         elif 'transferencia' in metodo_nombre:
@@ -34,7 +34,7 @@ class NotificationService:
                 <p><strong>Monto a transferir:</strong> ${total}</p>
                 <br>
                 <p style="color: #d32f2f;"><strong>⚠️ IMPORTANTE:</strong> Enviá el comprobante por WhatsApp para confirmar tu pedido.</p>
-                <p><a href="https://wa.me/5493564639908" style="background-color: #25d366; color: white; padding: 10px 20px; text-decoration: none; border-radius: 20px;">Enviar Comprobante</a></p>
+                <p><a href="https://wa.me/3584171716" style="background-color: #25d366; color: white; padding: 10px 20px; text-decoration: none; border-radius: 20px;">Enviar Comprobante</a></p>
             </div>
             """.format(total=pedido.total)
         elif 'efectivo' in metodo_nombre: # Pago Facil / Rapipago
@@ -46,7 +46,7 @@ class NotificationService:
                 <p><strong>Monto a pagar:</strong> ${total}</p>
                 <br>
                 <p style="color: #d32f2f;"><strong>⚠️ IMPORTANTE:</strong> Una vez pagado, envianos el ticket por WhatsApp.</p>
-                <p><a href="https://wa.me/5493564639908" style="background-color: #25d366; color: white; padding: 10px 20px; text-decoration: none; border-radius: 20px;">Enviar Comprobante</a></p>
+                <p><a href="https://wa.me/3584171716" style="background-color: #25d366; color: white; padding: 10px 20px; text-decoration: none; border-radius: 20px;">Enviar Comprobante</a></p>
             </div>
             """.format(total=pedido.total)
 

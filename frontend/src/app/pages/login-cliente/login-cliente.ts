@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { RecaptchaModule } from 'ng-recaptcha';
+import Swal from 'sweetalert2';
 
 @Component({
     selector: 'app-login-cliente',
@@ -72,7 +73,7 @@ export class LoginClienteComponent {
                 this.zone.run(() => {
                     this.loading = false;
                     if (err.status === 403 && err.error?.requires_verification) {
-                        alert('Debes verificar tu email antes de entrar. Te redirigimos.');
+                        Swal.fire('Aviso', 'Debes verificar tu email antes de entrar. Te redirigimos.', 'info');
                         this.router.navigate(['/registro'], { queryParams: { email: this.email, verify: true } });
                         return;
                     }

@@ -229,6 +229,7 @@ def upload_imagen(producto_id):
             )
             db.session.add(imagen)
             db.session.commit()
+            invalidate_cache(pattern='productos')
             return jsonify(imagen.to_dict()), 201
         except Exception as e:
             logger.error(f"Error processing image: {e}")

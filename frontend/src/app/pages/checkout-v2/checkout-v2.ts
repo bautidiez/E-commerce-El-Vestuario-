@@ -7,6 +7,7 @@ import { CheckoutService } from '../../services/checkout.service';
 import { ApiService } from '../../services/api.service';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import Swal from 'sweetalert2';
 
 @Component({
     selector: 'app-checkout-v2',
@@ -90,6 +91,7 @@ export class CheckoutV2Component implements OnInit {
     ngOnInit() {
         console.log('DEBUG: CHECKOUT V2 LOADED');
         this.cartService.cart$.subscribe(items => {
+            if (this.orderCreated) return; // Prevent UI freeze/flicker to $0.00 when cart is cleared
             this.items = items;
             this.total = this.cartService.getTotal();
             if (this.items.length === 0 && !this.orderCreated) {
@@ -235,7 +237,7 @@ export class CheckoutV2Component implements OnInit {
             // Validate that shipping is selected
             if (this.envioForm.invalid) {
                 this.envioForm.markAllAsTouched();
-                alert('Por favor selecciona una forma de envío');
+                Swal.fire('Aviso', 'Por favor selecciona una forma de envío', 'warning');
                 return;
             }
             // Validate personal data
@@ -528,7 +530,7 @@ export class CheckoutV2Component implements OnInit {
                 this.zone.run(() => {
                     console.error("Error creating order:", err);
                     const msg = err.error?.error || err.message || "Error desconocido al procesar el pedido";
-                    alert("Error al crear el pedido: " + msg);
+                    Swal.fire("Error", "Error al crear el pedido: " + msg, "error");
                     this.loading = false;
                     this.cdr.detectChanges();
                 });
@@ -584,7 +586,7 @@ export class CheckoutV2Component implements OnInit {
 
     getWhatsAppUrl(order: any, numberIndex: 1 | 2 = 1): string {
         if (!order) return '';
-        const phoneNumber = '5493584171716';
+        const phoneNumber = '3584171716';
         let msg = '';
 
         if (this.isPaymentMethod(order, 'efectivo_local')) {

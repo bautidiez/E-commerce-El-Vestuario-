@@ -7,9 +7,11 @@
       <h1>📋 Gestión de Pedidos</h1>
     </div>
     <div class="actions">
-      <input type="text" [(ngModel)]="busquedaCliente" (keyup.enter)="buscar()"
-        placeholder="🔍 Buscar por cliente, N° pedido (Enter)" class="search-input">
-      <button class="btn-icon" (click)="buscar()" title="Buscar">🔍</button>
+      <div class="search-box">
+        <input type="text" [(ngModel)]="busquedaCliente" (keyup.enter)="buscar()"
+          placeholder="Buscar por cliente, N° pedido..." class="search-input">
+        <button class="btn-search-icon" (click)="buscar()" title="Buscar">🔍</button>
+      </div>
       <select [(ngModel)]="filtroEstado" (change)="filtrarPorEstado()" class="filter-select">
         <option value="">Todos los estados</option>
         <option *ngFor="let estado of estados" [value]="estado">{{ getEstadoLabel(estado) }}</option>

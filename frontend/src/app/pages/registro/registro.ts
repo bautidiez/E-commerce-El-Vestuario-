@@ -5,6 +5,7 @@ import { ApiService } from '../../services/api.service';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { RecaptchaModule } from 'ng-recaptcha';
+import Swal from 'sweetalert2';
 
 @Component({
     selector: 'app-registro',
@@ -240,7 +241,7 @@ export class RegistroComponent implements OnInit {
     reenviarCodigo() {
         this.apiService.reenviarCodigo(this.cliente.email).subscribe({
             next: () => {
-                alert(`Código reenviado. Revisa tu email.`);
+                Swal.fire('Éxito', 'Código reenviado. Revisa tu email.', 'success');
             }
         });
     }

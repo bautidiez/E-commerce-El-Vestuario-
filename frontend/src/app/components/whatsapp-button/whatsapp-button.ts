@@ -8,7 +8,7 @@ import { CommonModule } from '@angular/common';
   styleUrl: './whatsapp-button.css'
 })
 export class WhatsAppButtonComponent {
-  whatsappNumber = '5493584171716';
+  whatsappNumber = '3584171716';
   whatsappMessage = 'Hola! Me gustaría hacer una consulta sobre sus productos.';
 
   openWhatsApp() {
