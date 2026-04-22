@@ -2,6 +2,39 @@
     padding: 30px;
     max-width: 1200px;
     margin: 0 auto;
+    zoom: 0.85;
+    transform: scale(0.85);
+    transform-origin: top center;
+    width: 117.65%;
+}
+
+.header-title {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.btn-back {
+    background: #f1f5f9;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.2rem;
+    color: #475569;
+    transition: all 0.2s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-back:hover {
+    background: #e2e8f0;
+    transform: translateX(-3px);
+    color: #1e293b;
 }
 
 .header-section {
