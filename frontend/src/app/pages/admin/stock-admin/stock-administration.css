@@ -672,54 +672,76 @@
   border: 1px solid #e2e8f0 !important;
   border-radius: 12px !important;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1) !important;
-  overflow: hidden !important;
+  overflow-x: auto !important;
+  display: flex !important;
+  gap: 12px !important;
+  padding: 15px !important;
   margin-top: 5px !important;
   z-index: 1000 !important;
+  scrollbar-width: thin;
+}
+
+.search-results::-webkit-scrollbar {
+  height: 6px;
+}
+
+.search-results::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
 }
 
 .search-result-item {
+  flex: 0 0 160px !important;
   display: flex !important;
+  flex-direction: column !important;
   align-items: center !important;
-  gap: 12px !important;
-  padding: 10px 15px !important;
+  text-align: center !important;
+  padding: 12px !important;
   cursor: pointer !important;
   transition: all 0.2s !important;
-  border-bottom: 1px solid #f1f5f9 !important;
+  border: 1px solid #f1f5f9 !important;
+  border-radius: 10px !important;
+  background: #fff !important;
 }
 
 .search-result-item:hover {
   background: #f8fafc !important;
+  border-color: #2563eb !important;
+  transform: translateY(-2px);
 }
 
 .search-result-item img {
-  width: 38px !important;
-  height: 38px !important;
-  border-radius: 6px !important;
+  width: 60px !important;
+  height: 60px !important;
+  border-radius: 8px !important;
   object-fit: cover !important;
+  margin-bottom: 8px !important;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
 }
 
 .result-info {
-  flex: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+  width: 100% !important;
 }
 
 .result-name {
-  font-weight: 600 !important;
-  font-size: 0.9rem !important;
+  font-weight: 700 !important;
+  font-size: 0.85rem !important;
   color: #1e293b !important;
-  text-align: left !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
 }
 
 .result-meta {
-  font-size: 0.75rem !important;
+  font-size: 0.7rem !important;
   color: #64748b !important;
-  text-align: left !important;
 }
 
 .result-icon {
-  color: #10b981 !important;
-  font-size: 1.1rem !important;
-  opacity: 0.5 !important;
+  display: none !important; /* Hide icon in card view */
 }
 
 /* SELECTED PRODUCTS CHIPS */
