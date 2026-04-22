@@ -83,8 +83,7 @@ import Swal from 'sweetalert2';
         </div>
 
         <div class="empty-state-placeholder animated pulse" *ngIf="selectedProducts.length === 0">
-          <img src="/assets/logo.png" style="opacity: 0.1; width: 80px; margin-bottom: 15px;">
-          <p>Busca y selecciona las camisetas que quieres actualizar.</p>
+          <p style="font-weight: 500; color: #64748b;">Busca y selecciona las camisetas que quieres actualizar.</p>
         </div>
       </div>
 
