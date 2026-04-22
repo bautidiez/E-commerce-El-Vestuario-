@@ -141,3 +141,33 @@ input, select, textarea {
 /* Animations */
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 .fade-in { animation: fadeIn 0.4s ease-out forwards; }
+/* STANDARD ADMIN BACK BUTTON (Circular Slate Style) */
+.btn-back {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 50% !important;
+  background-color: #334155 !important; /* Dark Gray / Slate 700 */
+  color: white !important;
+  border: none !important;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+  font-size: 1.1rem !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  flex-shrink: 0;
+}
+
+.btn-back:hover {
+  background-color: #0f172a !important; /* Slate 900 */
+  transform: translateX(-3px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.header-title {
+  display: flex !important;
+  align-items: center;
+  gap: 1rem;
+}
