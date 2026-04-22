@@ -180,8 +180,6 @@ import Swal from 'sweetalert2';
     </div> <!-- FINAL ADD-STOCK-FORM CONTAINER -->
   `
 })
-  `
-})
 export class AddStockFormComponent implements OnInit, OnChanges {
   @Input() preSelectedProductId: number | null = null;
   @Output() stockAdded = new EventEmitter<void>();
