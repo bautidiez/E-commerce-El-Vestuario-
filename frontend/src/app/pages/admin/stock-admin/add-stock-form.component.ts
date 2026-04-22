@@ -13,129 +13,96 @@ import Swal from 'sweetalert2';
   styleUrl: './stock-administration.css',
   encapsulation: ViewEncapsulation.None,
   template: `
-    <div class="add-stock-form" style="min-height: 400px; background: white; display: block; width: 100%;">
+    <div class="add-stock-form" style="min-height: 500px !important; background: white !important; display: block !important; width: 100% !important; border: 5px solid #000 !important; padding: 20px !important; position: relative !important; z-index: 9999 !important;">
       
+      <!-- DEBUG BAR -->
+      <div style="background: #000; color: #fff; padding: 5px 15px; font-weight: 800; font-size: 12px; margin-bottom: 20px; border-radius: 5px; display: flex; justify-content: space-between;">
+        <span>MODO ADMINISTRADOR: GESTIÓN DE STOCK</span>
+        <span>PASO ACTUAL: {{ currentStep }} | SELECCIONADOS: {{ selectedProducts.length }}</span>
+      </div>
+
       <!-- STEP 1: SELECCIÓN -->
-      <div *ngIf="currentStep === 1" class="step-container">
-        <div class="product-search-container cuadrado-box" style="padding-bottom: 5px; border-top: 4px solid #6366f1;">
-          <label style="font-weight: 800; color: #0f172a; margin-bottom: 15px; display: block; font-size: 1.2rem; letter-spacing: -0.5px;">
-            <i class="fas fa-search" style="color: #6366f1;"></i> 1. Buscar Camisetas
-          </label>
+      <div [hidden]="currentStep !== 1" style="display: block !important;">
+        <div class="product-search-container" style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 2px solid #6366f1; margin-bottom: 20px;">
+          <h4 style="margin: 0 0 15px 0; color: #0f172a; font-weight: 800;">1. BUSCAR PRODUCTOS</h4>
           <div style="position: relative;">
             <input
               type="text"
-              class="form-control main-search-input"
+              class="form-control"
               [(ngModel)]="searchQuery"
               (input)="onSearchInput($event)"
-              placeholder="Ej: Argentina Titular, Messi, Liverpool..."
-              autocomplete="off"
+              placeholder="Escribe el nombre de la camiseta..."
+              style="width: 100%; padding: 15px; border-radius: 10px; border: 2px solid #cbd5e1; font-size: 1.1rem;"
             />
-            <i class="fas fa-search" style="position: absolute; right: 20px; top: 18px; color: #94a3b8; font-size: 1.2rem;"></i>
             
-          <!-- SEARCH RESULTS DROPDOWN (Aesthetic List) -->
-          <div class="search-results shadow-xl" *ngIf="searchResults.length > 0">
-            <div
-              class="search-result-item-row"
-              *ngFor="let product of searchResults"
-            >
-              <div class="row-info">
-                <div class="row-name">{{ product.nombre }}</div>
-                <div class="row-meta">
-                  <span class="version-label" [class.jugador]="product.version?.toLowerCase().includes('jugador')">
-                    {{ product.version || 'No Definida' }}
-                  </span>
+            <!-- SEARCH RESULTS -->
+            <div class="search-results shadow-2xl" *ngIf="searchResults.length > 0" style="position: absolute; top: 100%; left: 0; right: 0; background: white; z-index: 10000; border: 2px solid #cbd5e1; border-radius: 0 0 12px 12px; max-height: 300px; overflow-y: auto;">
+              <div *ngFor="let product of searchResults" style="display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; border-bottom: 1px solid #f1f5f9;">
+                <div>
+                  <div style="font-weight: 800; color: #1e293b;">{{ product.nombre }}</div>
+                  <div style="font-size: 0.8rem; color: #4338ca; font-weight: 700; text-transform: uppercase;">{{ product.version || 'No Definida' }}</div>
                 </div>
+                <button (click)="selectProduct(product)" style="background: #000; color: white; border: none; padding: 8px 15px; border-radius: 8px; font-weight: 800; cursor: pointer;">
+                  AÑADIR
+                </button>
               </div>
-              <button class="btn-click-add" (click)="selectProduct(product)">
-                  <i class="fas fa-plus"></i> AÑADIR
-              </button>
             </div>
           </div>
         </div>
 
-        <!-- SELECTED PRODUCTS AREA (Vertical List Rows) -->
-        <div class="selected-area" style="margin-top: 25px;" *ngIf="selectedProducts.length > 0">
-          <label style="font-weight: 800; color: #0f172a; margin-bottom: 15px; display: block; font-size: 1.1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">
-             LISTA SELECCIONADA ({{ selectedProducts.length }})
-          </label>
-          
-          <div class="selected-list-container">
-            <div class="selected-row-card" *ngFor="let prod of selectedProducts; let i = index">
-              <div class="card-info">
-                <div class="card-name">{{ prod.nombre }}</div>
-                <div class="card-meta">
-                  <span class="version-badge-text" [class.jugador]="prod.version?.toLowerCase().includes('jugador')">
-                    {{ prod.version || 'No Definida' }}
-                  </span>
-                </div>
-              </div>
-              <button type="button" class="btn-click-remove" (click)="removeProduct(i)">
-                <i class="fas fa-trash-alt"></i> QUITAR
-              </button>
+        <div class="selected-area" *ngIf="selectedProducts.length > 0">
+          <h4 style="font-weight: 800; color: #0f172a; margin: 25px 0 15px 0;">LISTA DE SELECCIÓN</h4>
+          <div *ngFor="let prod of selectedProducts; let i = index" style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px 20px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 10px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);">
+            <div>
+              <div style="font-weight: 800;">{{ prod.nombre }}</div>
+              <div style="font-size: 0.8rem; color: #64748b;">{{ prod.version }}</div>
             </div>
-          </div>
-          
-          <button type="button" class="btn-continue-wizard shadow-lg" (click)="nextStep()">
-            <span>CONTINUAR A CARGA DE STOCK</span>
-            <i class="fas fa-chevron-right"></i>
-          </button>
-        </div>
-
-        <div class="empty-state-placeholder" *ngIf="selectedProducts.length === 0" style="padding: 40px; text-align: center;">
-          <p style="font-weight: 500; color: #64748b;">Busca y selecciona las camisetas que quieres actualizar.</p>
-        </div>
-      </div>
-
-    <!-- STEP 2: CARGA DE STOCK -->
-    <div *ngIf="currentStep === 2" class="step-container" style="display: block !important;">
-      <div class="cuadrado-box" style="border-top: 5px solid #10b981; background-color: #ffffff; padding: 25px; border-radius: 15px;">
-         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px;">
-            <div style="text-align: left;">
-              <h2 style="font-weight: 800; color: #1e293b; margin: 0; font-size: 1.4rem;">
-                PASO 2: Cargar Stock
-              </h2>
-              <p style="color: #64748b; font-weight: 600; margin: 5px 0;">Actualizando {{ selectedProducts.length }} productos.</p>
-            </div>
-            <button type="button" (click)="prevStep()" style="color: #4338ca; font-weight: 800; background: none; border: none; cursor: pointer; font-size: 0.95rem;">
-              <i class="fas fa-arrow-left"></i> VOLVER ATRÁS
+            <button (click)="removeProduct(i)" style="background: #fee2e2; color: #ef4444; border: 1px solid #fecaca; padding: 6px 12px; border-radius: 8px; font-weight: 800; cursor: pointer;">
+              QUITAR
             </button>
-         </div>
-         
-         <div class="sizes-grid" style="display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 15px; background: #f8fafc; padding: 20px; border-radius: 12px;">
-          <div class="size-input-group" *ngFor="let size of sizes" style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
-            <label style="font-weight: 800; color: #334155; font-size: 1rem;">{{ size }}</label>
-            <input
-              type="number"
-              [(ngModel)]="sizeInputs[size]"
-              min="0"
-              placeholder="0"
-              style="width: 100%; height: 50px; text-align: center; font-size: 1.25rem; font-weight: 800; border: 2px solid #cbd5e1; border-radius: 10px;"
-            />
           </div>
-        </div>
-
-        <div style="display: flex; gap: 15px; margin-top: 35px;">
-          <button
-            type="button"
-            class="btn-confirm-save-premium"
-            (click)="submitStock()"
-            [disabled]="submitting"
-            style="flex: 2; background: #10b981; color: white; height: 65px; border-radius: 15px; font-weight: 900; font-size: 1.2rem; border: none; cursor: pointer;"
-          >
-            <i class="fas fa-check" *ngIf="!submitting"></i>
-            {{ submitting ? 'GUARDANDO...' : 'GUARDAR STOCK' }}
+          
+          <button (click)="nextStep()" style="width: 100%; height: 60px; background: #000; color: white; border: none; border-radius: 12px; font-weight: 800; font-size: 1.1rem; margin-top: 20px; cursor: pointer; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);">
+            SIGUIENTE: CARGAR STOCK <i class="fas fa-chevron-right"></i>
           </button>
         </div>
       </div>
-    </div>
 
-    <!-- FOOTER CANCEL -->
-    <div class="form-actions" style="margin-top: 2rem;" *ngIf="currentStep === 1">
-      <button type="button" class="btn btn-secondary" (click)="cancel()" style="width: 100%; height: 45px; border-radius: 10px;">
-        CANCELAR OPERACIÓN
-      </button>
+      <!-- STEP 2: CARGA DE STOCK -->
+      <div [hidden]="currentStep !== 2" style="display: block !important;">
+        <div style="background: #fff; padding: 30px; border-radius: 18px; border: 3px solid #10b981; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);">
+          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 30px;">
+            <div style="text-align: left;">
+              <h3 style="font-weight: 900; color: #1e293b; margin: 0; font-size: 1.5rem;">Cargar Unidades</h3>
+              <p style="color: #64748b; font-weight: 700; margin: 5px 0;">Sumar stock a {{ selectedProducts.length }} camisetas</p>
+            </div>
+            <button (click)="prevStep()" style="background: #f1f5f9; border: 1px solid #e2e8f0; padding: 8px 15px; border-radius: 8px; color: #4338ca; font-weight: 800; cursor: pointer;">
+              <i class="fas fa-arrow-left"></i> VOLVER
+            </button>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; background: #f8fafc; padding: 25px; border-radius: 15px; border: 1px solid #cbd5e1;">
+            <div *ngFor="let size of sizes" style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+              <label style="font-weight: 900; color: #1e293b; font-size: 1.1rem;">{{ size }}</label>
+              <input
+                type="number"
+                [(ngModel)]="sizeInputs[size]"
+                style="width: 100%; height: 60px; text-align: center; font-size: 1.5rem; font-weight: 900; border: 3px solid #cbd5e1; border-radius: 12px; background: white;"
+              />
+            </div>
+          </div>
+
+          <button (click)="submitStock()" [disabled]="submitting" style="width: 100%; height: 70px; background: #10b981; color: white; border: none; border-radius: 15px; font-weight: 900; font-size: 1.3rem; margin-top: 30px; cursor: pointer; box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.3);">
+            {{ submitting ? 'GUARDANDO...' : 'CONFIRMAR Y GUARDAR' }}
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="selectedProducts.length === 0 && currentStep === 1" style="padding: 40px; text-align: center; color: #94a3b8;">
+        <i class="fas fa-tshirt" style="font-size: 3rem; margin-bottom: 15px; display: block; opacity: 0.2;"></i>
+        <p style="font-weight: 700;">Busca camisetas arriba para empezar.</p>
+      </div>
     </div>
-  </div>
   `
 })
 export class AddStockFormComponent implements OnInit, OnChanges {
