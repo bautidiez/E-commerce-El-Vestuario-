@@ -14,63 +14,80 @@ import Swal from 'sweetalert2';
     <div class="add-stock-form">
       <!-- STEP 1: SELECCIÓN -->
       <div *ngIf="currentStep === 1" class="step-container animated fadeIn">
-        <div class="product-search-container cuadrado-box">
-          <label style="font-weight: 700; color: #1e293b; margin-bottom: 12px; display: block; font-size: 1.1rem;">
-            <i class="fas fa-search"></i> PASO 1: Seleccionar Productos
+        <div class="product-search-container cuadrado-box" style="padding-bottom: 5px;">
+          <label style="font-weight: 800; color: #0f172a; margin-bottom: 15px; display: block; font-size: 1.2rem; letter-spacing: -0.5px;">
+            <i class="fas fa-search" style="color: #6366f1;"></i> 1. Buscar Camisetas
           </label>
           <div style="position: relative;">
             <input
               type="text"
-              class="form-control"
+              class="form-control main-search-input"
               [(ngModel)]="searchQuery"
               (input)="onSearchInput($event)"
-              placeholder="Buscar por nombre, talle o color..."
+              placeholder="Ej: Argentina Titular, Messi, Liverpool..."
               autocomplete="off"
-              style="padding: 12px 40px 12px 15px; border-radius: 10px;"
             />
-            <i class="fas fa-search" style="position: absolute; right: 15px; top: 15px; color: #94a3b8;"></i>
+            <i class="fas fa-search" style="position: absolute; right: 20px; top: 18px; color: #94a3b8; font-size: 1.2rem;"></i>
             
-            <!-- SEARCH RESULTS DROPDOWN -->
-            <div class="search-results" *ngIf="searchResults.length > 0">
+            <!-- SEARCH RESULTS DROPDOWN (Enhanced List) -->
+            <div class="search-results shadow-xl" *ngIf="searchResults.length > 0">
               <div
-                class="search-result-item"
+                class="search-result-item-row"
                 *ngFor="let product of searchResults"
                 (click)="selectProduct(product)"
               >
-                <img [src]="getImagenPrincipal(product)" alt="product">
-                <div class="result-info">
-                  <div class="result-name">{{ product.nombre }}</div>
-                  <div class="result-meta">
-                    <span class="version-badge" *ngIf="product.version">{{ product.version }}</span>
-                    <span *ngIf="product.color" style="margin-left: 8px;">• {{ product.color }}</span>
+                <div class="row-left">
+                  <img [src]="getImagenPrincipal(product)" alt="product" class="search-thumb">
+                  <div class="row-info">
+                    <div class="row-name">{{ product.nombre }}</div>
+                    <div class="row-meta">
+                      <span class="badge-version" [class.jugador]="product.version?.toLowerCase().includes('jugador')">
+                        {{ product.version || 'Original' }}
+                      </span>
+                      <span class="row-color" *ngIf="product.color">
+                        <i class="fas fa-palette"></i> {{ product.color }}
+                      </span>
+                    </div>
                   </div>
                 </div>
-                <button class="btn-add-search"><i class="fas fa-plus"></i> Añadir</button>
+                <button class="btn-click-add">
+                    <i class="fas fa-plus-circle"></i> AGREGAR
+                </button>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- SELECTED PRODUCTS AREA -->
-        <div class="selected-area cuadrado-box" style="margin-top: 20px;" *ngIf="selectedProducts.length > 0">
-          <label style="font-weight: 700; color: #1e293b; margin-bottom: 12px; display: block;">Productos Seleccionados ({{ selectedProducts.length }})</label>
-          <div class="selected-products-container">
-            <div class="product-chip" *ngFor="let prod of selectedProducts; let i = index">
-              <img [src]="getImagenPrincipal(prod)" alt="thumb">
-              <div class="chip-name">{{ prod.nombre }}</div>
-              <button type="button" class="btn-remove-chip" (click)="removeProduct(i)">
-                <i class="fas fa-times-circle"></i>
+        <!-- SELECTED PRODUCTS AREA (Vertical List of Cards) -->
+        <div class="selected-area" style="margin-top: 25px;" *ngIf="selectedProducts.length > 0">
+          <label style="font-weight: 800; color: #0f172a; margin-bottom: 15px; display: block; font-size: 1.1rem;">
+             LISTA SELECCIONADA <span class="badge-count">{{ selectedProducts.length }}</span>
+          </label>
+          
+          <div class="selected-list-container">
+            <div class="selected-row-card animated fadeIn" *ngFor="let prod of selectedProducts; let i = index">
+              <div class="card-left">
+                <img [src]="getImagenPrincipal(prod)" alt="thumb" class="card-thumb">
+                <div class="card-info">
+                  <div class="card-name">{{ prod.nombre }}</div>
+                  <div class="card-meta">{{ prod.version }} • {{ prod.color }}</div>
+                </div>
+              </div>
+              <button type="button" class="btn-click-remove" (click)="removeProduct(i)" title="Eliminar">
+                <i class="fas fa-trash-alt"></i>
               </button>
             </div>
           </div>
           
-          <button type="button" class="btn-primary" (click)="nextStep()" style="width: 100%; margin-top: 20px; height: 50px; font-weight: 700; font-size: 1rem; border-radius: 10px;">
-            CONTINUAR A CARGA DE STOCK <i class="fas fa-arrow-right"></i>
+          <button type="button" class="btn-continue-wizard shadow-lg" (click)="nextStep()">
+            <span>SIGUIENTE: CARGAR STOCK</span>
+            <i class="fas fa-chevron-right"></i>
           </button>
         </div>
 
-        <div class="alert alert-info" *ngIf="selectedProducts.length === 0" style="margin-top: 20px; border-radius: 12px;">
-          <i class="fas fa-info-circle"></i> Busca un producto para comenzar.
+        <div class="empty-state-placeholder animated pulse" *ngIf="selectedProducts.length === 0">
+          <img src="/assets/logo.png" style="opacity: 0.1; width: 80px; margin-bottom: 15px;">
+          <p>Busca y selecciona las camisetas que quieres actualizar.</p>
         </div>
       </div>
 
@@ -242,12 +259,8 @@ export class AddStockFormComponent implements OnInit, OnChanges {
   }
 
   getImagenPrincipal(product: any): string {
-    if (product.imagen_principal) return product.imagen_principal;
-    if (product.imagenes && product.imagenes.length > 0) {
-      const principal = product.imagenes.find((img: any) => img.es_principal);
-      return principal ? principal.url : product.imagenes[0].url;
-    }
-    return '/assets/logo.png';
+    const rawUrl = product.imagen_principal || (product.imagenes && product.imagenes.length > 0 ? (product.imagenes.find((img: any) => img.es_principal)?.url || product.imagenes[0].url) : null);
+    return this.apiService.getFormattedImageUrl(rawUrl);
   }
 
   clearSelection() {
