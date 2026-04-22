@@ -1,9 +1,9 @@
 <div class="admin-container">
   <div class="admin-header">
     <div class="header-title">
-      <button class="btn-back" routerLink="/admin/gestion" title="Volver al Panel de Gestión">
-        <span>←</span>
-      </button>
+      <a routerLink="/admin/gestion" class="btn-back" title="Volver al Panel de Gestión">
+        <i class="fas fa-arrow-left"></i>
+      </a>
       <h1>📋 Gestión de Pedidos</h1>
     </div>
     <div class="actions">
@@ -13,7 +13,9 @@
         <button class="btn-search-icon" (click)="buscar()" title="Buscar">🔍</button>
       </div>
       <select [(ngModel)]="filtroEstado" (change)="filtrarPorEstado()" class="filter-select">
-        <option value="">Todos los estados</option>
+        <option value="">Todos los pedidos</option>
+        <option value="externas">Solo Ventas Externas</option>
+        <option value="web">Solo Ventas Web</option>
         <option *ngFor="let estado of estados" [value]="estado">{{ getEstadoLabel(estado) }}</option>
       </select>
       <button class="btn btn-secondary" (click)="limpiarFiltros()" *ngIf="filtroEstado || busquedaCliente">

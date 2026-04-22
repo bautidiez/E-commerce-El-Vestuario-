@@ -1107,31 +1107,44 @@ export class ProductosAdminComponent implements OnInit {
                 return;
             }
 
-            const matches = this.productos.filter(p => 
-                p.nombre.toLowerCase().includes(query) && !currentSelectedIds.includes(p.id)
-            ).slice(0, 5);
+            // Usamos el servicio de búsqueda para mayor cobertura (paginación)
+            this.apiService.getProductos({ busqueda: query, page_size: 10, activos: false }).subscribe(data => {
+                const results = data.items || data;
+                const matches = results.filter((p: any) => !currentSelectedIds.includes(p.id)).slice(0, 5);
 
-            if (matches.length > 0) {
-                resultsEl.innerHTML = matches.map(p => `
-                    <div class="search-match-item" data-id="${p.id}" style="padding: 8px 12px; cursor: pointer; border-bottom: 1px solid #eee; display: flex; align-items: center; gap: 10px;">
-                        <img src="${this.getImagenPrincipal(p)}" style="width: 25px; height: 25px; object-fit: cover;">
-                        <span style="font-size: 0.85rem;">${p.nombre}</span>
-                    </div>
-                `).join('');
-                resultsEl.style.display = 'block';
+                if (matches.length > 0) {
+                    resultsEl.innerHTML = matches.map((p: any) => `
+                        <div class="search-match-item" data-id="${p.id}" style="padding: 10px 12px; cursor: pointer; border-bottom: 1px dotted #e2e8f0; display: flex; align-items: center; gap: 12px; transition: background 0.2s;">
+                            <img src="${this.getImagenPrincipal(p)}" style="width: 32px; height: 32px; border-radius: 4px; object-fit: cover;">
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600; font-size: 0.85rem; color: #1e293b;">${p.nombre}</div>
+                                <div style="font-size: 0.75rem; color: #64748b;">${p.version || ''}</div>
+                            </div>
+                            <i class="fas fa-plus-circle" style="color: #10b981;"></i>
+                        </div>
+                    `).join('');
+                    resultsEl.style.display = 'block';
 
-                resultsEl.querySelectorAll('.search-match-item').forEach(item => {
-                    item.addEventListener('click', (e) => {
-                        const id = parseInt((e.currentTarget as HTMLElement).getAttribute('data-id') || '0');
-                        currentSelectedIds.push(id);
-                        searchInput.value = '';
-                        resultsEl.style.display = 'none';
-                        updateModalList();
+                    resultsEl.querySelectorAll('.search-match-item').forEach(item => {
+                        item.addEventListener('click', () => {
+                            const id = Number(item.getAttribute('data-id'));
+                            const prod = results.find((p: any) => p.id === id);
+                            if (prod) {
+                                currentSelectedIds.push(id);
+                                updateModalList();
+                                searchInput.value = '';
+                                resultsEl.innerHTML = '';
+                                resultsEl.style.display = 'none';
+                            }
+                        });
+                        item.addEventListener('mouseenter', () => (item as HTMLElement).style.background = '#f1f5f9');
+                        item.addEventListener('mouseleave', () => (item as HTMLElement).style.background = 'transparent');
                     });
-                });
-            } else {
-                resultsEl.style.display = 'none';
-            }
+                } else {
+                    resultsEl.innerHTML = '<div style="padding: 10px; font-size: 0.8rem; color: #64748b; text-align: center;">No hay más resultados</div>';
+                    resultsEl.style.display = 'block';
+                }
+            });
         });
       },
       showCancelButton: true,

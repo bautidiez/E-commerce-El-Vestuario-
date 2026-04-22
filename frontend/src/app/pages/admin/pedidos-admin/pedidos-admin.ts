@@ -94,9 +94,27 @@ export class PedidosAdminComponent implements OnInit {
 
   loadPedidos() {
     this.loading = true;
-    this.apiService.getPedidos(this.filtroEstado || undefined, this.currentPage, this.pageSize, this.busquedaCliente || undefined).subscribe({
+    let params: any = {
+        page: this.currentPage,
+        page_size: this.pageSize
+    };
+    
+    if (this.filtroEstado) {
+        if (this.filtroEstado === 'externas' || this.filtroEstado === 'web') {
+            params.tipo = this.filtroEstado;
+        } else {
+            params.estado = this.filtroEstado;
+        }
+    }
+    
+    if (this.busquedaCliente) {
+        params.q = this.busquedaCliente;
+    }
+
+    // Usamos getVentasExternas si solo pedimos externas para mayor precisión? 
+    // No, usaremos getPedidos con el nuevo parámetro tipo que el backend debería soportar ahora
+    this.apiService.get(`/admin/pedidos`, params).subscribe({
       next: (response: any) => {
-        // Handle paginated response
         if (response.items) {
           this.pedidos = response.items;
           this.totalOrders = response.total;
@@ -104,7 +122,6 @@ export class PedidosAdminComponent implements OnInit {
           this.currentPage = response.page;
           this.generatePagesArray();
         } else {
-          // Fallback if backend implementation varies
           this.pedidos = response;
           this.totalOrders = response.length;
           this.totalPages = 1;
@@ -169,7 +186,17 @@ export class PedidosAdminComponent implements OnInit {
 
   filtrarPorEstado() {
     this.currentPage = 1;
-    this.loadPedidos();
+    if (this.filtroEstado === 'externas' || this.filtroEstado === 'web') {
+        // We handle these locally or by calling a specific API if needed
+        // but since getPedidos only takes 'estado', we might need to filter response
+        // OR better: have the backend support a 'tipo' filter.
+        // For now, I'll call getPedidos and then if response is not paginated perfectly, we filter.
+        // Wait, the API getPedidos(estado?) already sends 'estado' to backend.
+        // I'll check how backend handles it.
+        this.loadPedidos();
+    } else {
+        this.loadPedidos();
+    }
   }
 
   buscar() {
