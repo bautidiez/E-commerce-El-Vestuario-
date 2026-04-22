@@ -69,6 +69,27 @@
                     </div>
                 </div>
             </div>
+
+            <!-- History Section -->
+            <div class="history-section-container" *ngIf="history.length > 0">
+                <div class="card-header">
+                    <h3>📧 Historial de Envíos (Últimos 30)</h3>
+                </div>
+                <div class="history-list">
+                    <div class="history-item" *ngFor="let item of history">
+                        <div class="history-info">
+                            <span class="history-date">{{ item.sent_at | date:'dd/MM/yyyy HH:mm' }}</span>
+                            <span class="history-subject">{{ item.asunto }}</span>
+                            <span class="history-count">Enviados: {{ item.sent_count }}</span>
+                        </div>
+                        <div class="history-actions">
+                            <button class="btn btn-copy" (click)="copyFromHistory(item)" title="Copiar al editor">
+                                📋 Clonar para editar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

@@ -1,9 +1,8 @@
-import { Component, ChangeDetectorRef } from '@angular/core';
+import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../environments/environment';
+import { ApiService } from '../../../services/api.service';
 import { ToastService } from '../../../services/toast.service';
 import { QuillModule } from 'ngx-quill';
 
@@ -14,21 +13,33 @@ import { QuillModule } from 'ngx-quill';
     templateUrl: './newsletter-admin.html',
     styleUrl: './newsletter-admin.css'
 })
-export class NewsletterAdminComponent {
+export class NewsletterAdminComponent implements OnInit {
     subject: string = '';
     content: string = '';
     testEmail: string = '';
 
     isLoading: boolean = false;
+    history: any[] = [];
     lastStats: any = null;
 
-    private apiUrl = environment.apiUrl;
-
     constructor(
-        private http: HttpClient,
+        private apiService: ApiService,
         private toastService: ToastService,
         private cdr: ChangeDetectorRef
     ) { }
+
+    ngOnInit() {
+        this.loadHistory();
+    }
+
+    loadHistory() {
+        this.apiService.getNewsletterHistory().subscribe({
+            next: (history) => {
+                this.history = history;
+                this.cdr.detectChanges();
+            }
+        });
+    }
 
     send(isTest: boolean = true) {
         if (!this.subject || !this.content) {
@@ -47,32 +58,40 @@ export class NewsletterAdminComponent {
 
         this.isLoading = true;
         this.lastStats = null;
-        this.cdr.detectChanges(); // Ensure update before request
+        this.cdr.detectChanges();
 
         const payload = {
             subject: this.subject,
-            content: this.content, // En el futuro podremos usar un editor HTML
+            content: this.content,
             test_email: isTest ? this.testEmail : null
         };
 
-        const token = localStorage.getItem('token');
-
-        this.http.post(`${this.apiUrl}/admin/newsletter/send`, payload, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        }).subscribe({
+        this.apiService.sendNewsletter(payload).subscribe({
             next: (res: any) => {
                 this.isLoading = false;
                 this.lastStats = res;
                 this.toastService.show(res.message, 'success');
-                this.cdr.detectChanges(); // Force update
+                if (!isTest) {
+                    this.loadHistory();
+                }
+                this.cdr.detectChanges();
             },
             error: (err) => {
                 this.isLoading = false;
                 console.error('Error enviando newsletter:', err);
                 const msg = err.error?.error || 'Error al enviar newsletter';
                 this.toastService.show(msg, 'error');
-                this.cdr.detectChanges(); // Force update
+                this.cdr.detectChanges();
             }
         });
+    }
+
+    copyFromHistory(item: any) {
+        this.subject = item.asunto;
+        this.content = item.contenido;
+        this.toastService.show('Contenido copiado al editor', 'info');
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        this.cdr.detectChanges();
     }
 }

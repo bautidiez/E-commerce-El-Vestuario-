@@ -19,27 +19,71 @@ def get_all_pedidos():
         page_size = request.args.get('page_size', 40, type=int)
         estado = request.args.get('estado')
         aprobado = request.args.get('aprobado')
-        query = Pedido.query
-        if estado:
-            query = query.filter_by(estado=estado)
-        if aprobado is not None:
-            query = query.filter_by(aprobado=aprobado.lower() == 'true')
         q = request.args.get('q')
+
+        from models import VentaExterna
+        
+        # 1. Fetch Pedidos
+        query_pedidos = Pedido.query
+        if estado:
+            query_pedidos = query_pedidos.filter_by(estado=estado)
+        if aprobado is not None:
+            query_pedidos = query_pedidos.filter_by(aprobado=aprobado.lower() == 'true')
         if q:
             search = f"%{q}%"
-            query = query.filter(
+            query_pedidos = query_pedidos.filter(
                 (Pedido.cliente_nombre.ilike(search)) |
                 (Pedido.cliente_email.ilike(search)) |
                 (Pedido.numero_pedido.ilike(search))
             )
-        query = query.order_by(Pedido.created_at.desc())
-        pagination = query.paginate(page=page, per_page=page_size, error_out=False)
+        
+        # 2. Fetch Ventas Externas (only if no specific web-only state/approval is requested)
+        ventas_externas_list = []
+        if not estado or estado == 'entregado': # Assuming external sales are 'delivered'
+            if aprobado is None or aprobado.lower() == 'true':
+                query_ext = VentaExterna.query
+                if q:
+                    search = f"%{q}%"
+                    # Search by product name if linked
+                    query_ext = query_ext.join(Producto).filter(Producto.nombre.ilike(search))
+                
+                # Fetch recent external sales
+                ventas_externas = query_ext.order_by(VentaExterna.fecha.desc()).limit(100).all()
+                for ve in ventas_externas:
+                    ventas_externas_list.append({
+                        'id': f"ext_{ve.id}",
+                        'numero_pedido': 'Externa',
+                        'cliente_nombre': 'Registro Externo',
+                        'cliente_email': ve.admin.username if ve.admin else '-',
+                        'total': ve.ganancia_total,
+                        'estado': 'entregado',
+                        'aprobado': True,
+                        'created_at': ve.fecha.isoformat(),
+                        'tipo': 'externa',
+                        'item_count': ve.cantidad,
+                        'notas': ve.notas,
+                        'db_id': ve.id # Original ID
+                    })
+
+        # 3. Get Web Pedidos items
+        web_pedidos = [p.to_dict() for p in query_pedidos.order_by(Pedido.created_at.desc()).limit(200).all()]
+        for p in web_pedidos: p['tipo'] = 'web'
+
+        # 4. Merge and Sort
+        combined = sorted(web_pedidos + ventas_externas_list, key=lambda x: x['created_at'], reverse=True)
+        
+        # 5. Paginate manually
+        total = len(combined)
+        start = (page - 1) * page_size
+        end = start + page_size
+        items = combined[start:end]
+        
         return jsonify({
-            'items': [p.to_dict() for p in pagination.items],
-            'total': pagination.total,
+            'items': items,
+            'total': total,
             'page': page,
             'page_size': page_size,
-            'pages': pagination.pages
+            'pages': (total // page_size) + (1 if total % page_size > 0 else 0)
         }), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500

@@ -66,8 +66,8 @@ h3,
 }
 
 body.admin-body {
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%) !important;
-  background-attachment: fixed !important;
+  background-color: #fcfcfc !important;
+  background-image: none !important;
 }
 
 .container {

@@ -181,10 +181,18 @@ export class PedidosAdminComponent implements OnInit {
     this.loadPedidos();
   }
 
-  verDetalle(pedido: Pedido) {
+  verDetalle(pedido: any) {
+    if (pedido.tipo === 'externa') {
+        // No fetch required for external sales, use the list item directly
+        this.pedidoSeleccionado = pedido;
+        this.cdr.detectChanges();
+        return;
+    }
+
     this.apiService.getPedido(pedido.id).subscribe({
       next: (data: Pedido) => {
         this.pedidoSeleccionado = data;
+        (this.pedidoSeleccionado as any).tipo = 'web';
         this.nuevoEstado = data.estado;
         this.loadNotasInternas(pedido.id);
         this.cdr.detectChanges();
@@ -193,6 +201,30 @@ export class PedidosAdminComponent implements OnInit {
         console.error('Error cargando detalle:', error);
         Swal.fire('Error', 'No se pudo cargar el detalle del pedido', 'error');
         this.cdr.detectChanges();
+      }
+    });
+  }
+
+  eliminarVentaExterna(pedido: any) {
+    Swal.fire({
+      title: '¿Eliminar registro externo?',
+      text: 'Se eliminará permanentemente esta venta externa. Esta acción no se puede deshacer.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.apiService.eliminarVentaExterna(pedido.db_id).subscribe({
+            next: () => {
+                Swal.fire('Eliminado', 'Venta externa eliminada', 'success');
+                this.loadPedidos();
+            },
+            error: (err) => {
+                Swal.fire('Error', 'No se pudo eliminar el registro', 'error');
+            }
+        });
       }
     });
   }

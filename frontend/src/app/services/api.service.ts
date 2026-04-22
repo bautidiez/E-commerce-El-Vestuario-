@@ -496,6 +496,22 @@ export class ApiService {
     return this.http.post(`${this.apiUrl}/newsletter/subscribe`, data);
   }
 
+  getNewsletterHistory(): Observable<any> {
+    const url = `${this.apiUrl}/admin/newsletter/history`;
+    return this.http.get(url, { headers: this.getHeaders(url) });
+  }
+
+  sendNewsletter(data: { subject: string, content: string, test_email?: string }): Observable<any> {
+    const url = `${this.apiUrl}/admin/newsletter/send`;
+    return this.http.post(url, data, { headers: this.getHeaders(url) });
+  }
+
+  // Stock Bulk
+  updateStockBulk(data: { product_ids: number[], talle_id: number, cantidad: number }): Observable<any> {
+    const url = `${this.apiUrl}/admin/stock/bulk`;
+    return this.http.post(url, data, { headers: this.getHeaders(url) });
+  }
+
   // Carrito
   getCart(): Observable<any> {
     const url = `${this.apiUrl}/cart`;

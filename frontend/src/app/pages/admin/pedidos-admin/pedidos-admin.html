@@ -36,7 +36,7 @@
       <thead>
         <tr>
           <th>N° Pedido</th>
-          <th>Cliente</th>
+          <th>Cliente / Ref</th>
           <th>Items</th>
           <th>Total</th>
           <th>Estado</th>
@@ -46,15 +46,21 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let pedido of pedidosFiltrados">
-          <td><strong>{{ pedido.numero_pedido }}</strong></td>
+        <tr *ngFor="let pedido of pedidosFiltrados" [class.row-externa]="pedido.tipo === 'externa'">
+          <td>
+            <span *ngIf="pedido.tipo === 'externa'" class="badge badge-externa">EXTERNA</span>
+            <strong *ngIf="pedido.tipo === 'web'">{{ pedido.numero_pedido }}</strong>
+          </td>
           <td>
             <div class="cliente-info">
               <div>{{ pedido.cliente_nombre }}</div>
-              <small>{{pedido.cliente_email }}</small>
+              <small>{{ pedido.cliente_email }}</small>
             </div>
           </td>
-          <td>{{ getTotalItems(pedido) }} items</td>
+          <td>
+            <span *ngIf="pedido.tipo === 'externa'">{{ pedido.item_count }} un.</span>
+            <span *ngIf="pedido.tipo === 'web'">{{ getTotalItems(pedido) }} items</span>
+          </td>
           <td><strong>${{ pedido.total | number:'1.0-0' }}</strong></td>
           <td>
             <span class="badge" [ngClass]="getEstadoClass(pedido.estado)">
@@ -64,10 +70,6 @@
           <td>
             <div *ngIf="!pedido.aprobado">
               <span class="badge badge-warning">Pendiente</span>
-              <small *ngIf="pedido.fecha_expiracion"
-                [ngClass]="{'text-danger': isExpirando(pedido), 'text-muted': !isExpirando(pedido)}">
-                <br>{{ getDiasRestantes(pedido.fecha_expiracion) }} días
-              </small>
             </div>
             <span *ngIf="pedido.aprobado" class="badge badge-success">✓ Aprobado</span>
           </td>
@@ -76,11 +78,16 @@
           </td>
           <td>
             <button class="btn-icon" (click)="verDetalle(pedido)" title="Ver Detalle">👁️</button>
-            <button *ngIf="!pedido.aprobado" class="btn-icon btn-aprobar" (click)="aprobarPedido(pedido)"
-              [disabled]="isExpirando(pedido) && getDiasRestantes(pedido.fecha_expiracion!) < 0"
-              title="Aprobar Pedido">✓</button>
-            <button *ngIf="pedido.estado !== 'cancelado'" class="btn-icon btn-cancelar" (click)="cancelarPedido(pedido)"
-              title="Cancelar Pedido">✕</button>
+            <ng-container *ngIf="pedido.tipo === 'web'">
+              <button *ngIf="!pedido.aprobado" class="btn-icon btn-aprobar" (click)="aprobarPedido(pedido)"
+                [disabled]="isExpirando(pedido) && getDiasRestantes(pedido.fecha_expiracion!) < 0"
+                title="Aprobar Pedido">✓</button>
+              <button *ngIf="pedido.estado !== 'cancelado'" class="btn-icon btn-cancelar" (click)="cancelarPedido(pedido)"
+                title="Cancelar Pedido">✕</button>
+            </ng-container>
+            <ng-container *ngIf="pedido.tipo === 'externa'">
+                <button class="btn-icon btn-delete" (click)="eliminarVentaExterna(pedido)" title="Eliminar Registro">🗑️</button>
+            </ng-container>
           </td>
         </tr>
       </tbody>
@@ -94,33 +101,20 @@
       <span class="total-count">(Total: {{ totalOrders }} pedidos)</span>
     </div>
     <div class="pagination-controls">
-      <button class="btn-page" (click)="anteriorPagina()" [disabled]="currentPage === 1">
-        « Anterior
-      </button>
-
+      <button class="btn-page" (click)="anteriorPagina()" [disabled]="currentPage === 1">« Anterior</button>
       <ng-container *ngFor="let p of pagesArray">
-        <button class="btn-page-number" [class.active]="p === currentPage" (click)="cambiarPagina(p)">
-          {{ p }}
-        </button>
+        <button class="btn-page-number" [class.active]="p === currentPage" (click)="cambiarPagina(p)">{{ p }}</button>
       </ng-container>
-
-      <button class="btn-page" (click)="siguientePagina()" [disabled]="currentPage === totalPages">
-        Siguiente »
-      </button>
+      <button class="btn-page" (click)="siguientePagina()" [disabled]="currentPage === totalPages">Siguiente »</button>
     </div>
-  </div>
-
-  <div class="pagination-goto" *ngIf="totalPages > 5">
-    <small>Ir a pág:</small>
-    <input type="number" min="1" [max]="totalPages" [(ngModel)]="currentPage" (change)="loadPedidos()"
-      style="width: 60px; text-align: center;">
   </div>
 
   <!-- DETALLE DEL PEDIDO (MODAL) -->
   <div *ngIf="pedidoSeleccionado" class="modal-overlay" (click)="cerrarDetalle()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2>Pedido {{ pedidoSeleccionado.numero_pedido }}</h2>
+        <h2 *ngIf="pedidoSeleccionado.tipo === 'web'">Pedido {{ pedidoSeleccionado.numero_pedido }}</h2>
+        <h2 *ngIf="pedidoSeleccionado.tipo === 'externa'">Registro de Venta Externa</h2>
         <span class="badge" [ngClass]="getEstadoClass(pedidoSeleccionado.estado)">
           {{ getEstadoLabel(pedidoSeleccionado.estado) }}
         </span>
@@ -129,127 +123,84 @@
 
       <div class="modal-body">
         <div class="detail-columns">
-          <!-- COLUMNA IZQUIERDA -->
           <div class="left-column">
-            <!-- Info Cliente -->
             <div class="detail-card">
-              <h3>👤 Cliente</h3>
-              <p><strong>Nombre:</strong> {{ pedidoSeleccionado.cliente_nombre }}</p>
-              <p><strong>Email:</strong> {{ pedidoSeleccionado.cliente_email }}</p>
-              <p *ngIf="pedidoSeleccionado.cliente_telefono"><strong>Teléfono:</strong> {{
-                pedidoSeleccionado.cliente_telefono }}</p>
-              <p><strong>Dirección:</strong> {{ pedidoSeleccionado.cliente_direccion }}</p>
-              <p><strong>Localidad:</strong> {{ pedidoSeleccionado.cliente_localidad }},
-                {{pedidoSeleccionado.cliente_provincia }} (CP: {{ pedidoSeleccionado.cliente_codigo_postal }})</p>
+              <h3>{{ pedidoSeleccionado.tipo === 'externa' ? '👤 Vendedor' : '👤 Cliente' }}</h3>
+              <p *ngIf="pedidoSeleccionado.tipo === 'web'"><strong>Nombre:</strong> {{ pedidoSeleccionado.cliente_nombre }}</p>
+              <p *ngIf="pedidoSeleccionado.tipo === 'web'"><strong>Email:</strong> {{ pedidoSeleccionado.cliente_email }}</p>
+              <p *ngIf="pedidoSeleccionado.tipo === 'web' && pedidoSeleccionado.cliente_telefono"><strong>Teléfono:</strong> {{ pedidoSeleccionado.cliente_telefono }}</p>
+              <p *ngIf="pedidoSeleccionado.tipo === 'web'"><strong>Dirección:</strong> {{ pedidoSeleccionado.cliente_direccion }}</p>
+              
+              <p *ngIf="pedidoSeleccionado.tipo === 'externa'"><strong>Admin:</strong> {{ pedidoSeleccionado.cliente_email }}</p>
+              <p *ngIf="pedidoSeleccionado.tipo === 'externa'"><strong>Fecha Operación:</strong> {{ formatFecha(pedidoSeleccionado.created_at) }}</p>
             </div>
 
-            <!-- Items -->
             <div class="detail-card">
-              <h3>📦 Items del Pedido</h3>
+              <h3>📦 Items</h3>
               <div class="items-list">
-                <div *ngFor="let item of pedidoSeleccionado.items" class="item-row">
-                  <div class="item-info">
-                    <strong>{{ item.producto_nombre }}</strong>
-                    <small>Talle: {{ item.talle_nombre }} × {{ item.cantidad }}</small>
+                <ng-container *ngIf="pedidoSeleccionado.tipo === 'web'">
+                  <div *ngFor="let item of pedidoSeleccionado.items" class="item-row">
+                    <div class="item-info">
+                      <strong>{{ item.producto_nombre }}</strong>
+                      <small>Talle: {{ item.talle_nombre }} × {{ item.cantidad }}</small>
+                    </div>
+                    <div class="item-price">${{ item.subtotal | number:'1.0-0' }}</div>
                   </div>
-                  <div class="item-price">
-                    ${{ item.subtotal | number:'1.0-0' }}
+                </ng-container>
+                <ng-container *ngIf="pedidoSeleccionado.tipo === 'externa'">
+                  <div class="item-row">
+                    <div class="item-info">
+                      <strong>Venta Registrada</strong>
+                      <small>Cantidad: {{ pedidoSeleccionado.item_count }} un.</small>
+                    </div>
+                    <div class="item-price">${{ pedidoSeleccionado.total | number:'1.0-0' }}</div>
                   </div>
-                </div>
+                </ng-container>
               </div>
             </div>
 
-            <!-- Resumen -->
+            <div class="detail-card" *ngIf="pedidoSeleccionado.notas">
+              <h3>📝 Notas / Observaciones</h3>
+              <p>{{ pedidoSeleccionado.notas }}</p>
+            </div>
+          </div>
+
+          <div class="right-column">
             <div class="detail-card">
-              <h3>💰 Resumen</h3>
-              <div class="summary-row">
-                <span>Subtotal:</span>
-                <span>${{ pedidoSeleccionado.subtotal | number:'1.0-0' }}</span>
-              </div>
-              <div class="summary-row" *ngIf="pedidoSeleccionado.descuento > 0">
-                <span>Descuento:</span>
-                <span class="discount">-${{ pedidoSeleccionado.descuento | number:'1.0-0' }}</span>
-              </div>
-              <div class="summary-row">
-                <span>Envío:</span>
-                <span>${{ pedidoSeleccionado.costo_envio | number:'1.0-0' }}</span>
-              </div>
+              <h3>💰 Resumen Económico</h3>
               <div class="summary-row total-row">
                 <span>Total:</span>
                 <strong>${{ pedidoSeleccionado.total | number:'1.0-0' }}</strong>
               </div>
             </div>
-          </div>
 
-          <!-- COLUMNA DERECHA -->
-          <div class="right-column">
-            <!-- Info de Aprobación -->
-            <div class="detail-card info-aprobacion">
-              <h3>{{ pedidoSeleccionado.aprobado ? '✅ Aprobado' : '⏳ Pendiente de Aprobación' }}</h3>
-
-              <div *ngIf="!pedidoSeleccionado.aprobado">
-                <p *ngIf="pedidoSeleccionado.fecha_expiracion" class="expiracion-info"
-                  [ngClass]="{'expirando': isExpirando(pedidoSeleccionado)}">
-                  ⏰ Expira en: <strong>{{ getDiasRestantes(pedidoSeleccionado.fecha_expiracion!) }} días</strong>
-                  <br><small>{{ formatFecha(pedidoSeleccionado.fecha_expiracion!) }}</small>
-                </p>
-                <button class="btn btn-success full-width" (click)="aprobarPedido(pedidoSeleccionado)"
-                  [disabled]="getDiasRestantes(pedidoSeleccionado.fecha_expiracion!) < 0">
-                  ✓ APROBAR PEDIDO
-                </button>
-                <small class="help-text">Al aprobar se reducirá el stock y se procesará el pedido</small>
+            <div class="detail-card" *ngIf="pedidoSeleccionado.tipo === 'web'">
+              <h3>🔄 Gestionar Pedido</h3>
+              <div *ngIf="!pedidoSeleccionado.aprobado" class="mb-3">
+                <button class="btn btn-success full-width" (click)="aprobarPedido(pedidoSeleccionado)">✓ APROBAR PEDIDO</button>
               </div>
-
-              <div *ngIf="pedidoSeleccionado.aprobado">
-                <p><strong>Aprobado por:</strong> {{ pedidoSeleccionado.admin_aprobador_username || 'Sistema' }}</p>
-                <p><strong>Fecha:</strong> {{ formatFecha(pedidoSeleccionado.fecha_aprobacion!) }}</p>
-              </div>
-            </div>
-
-            <!-- Cambiar Estado -->
-            <div class="detail-card">
-              <h3>🔄 Actualizar Estado</h3>
               <div class="form-group">
-                <label>Nuevo Estado:</label>
+                <label>Cambiar Estado:</label>
                 <select [(ngModel)]="nuevoEstado" class="form-control">
                   <option *ngFor="let estado of estados" [value]="estado">{{ getEstadoLabel(estado) }}</option>
                 </select>
               </div>
-              <button class="btn btn-primary full-width" (click)="actualizarEstado()">
-                💾 Actualizar Estado
-              </button>
+              <button class="btn btn-primary full-width" (click)="actualizarEstado()">💾 Guardar Estado</button>
             </div>
 
-            <!-- Notas Internas -->
-            <div class="detail-card notes-card">
+            <div class="detail-card notes-card" *ngIf="pedidoSeleccionado.tipo === 'web'">
               <h3>📝 Notas Internas</h3>
-
-              <!-- Agregar nota -->
               <div class="add-note">
-                <textarea [(ngModel)]="nuevaNota" placeholder="Escribe una nota interna..." rows="3"
-                  class="form-control"></textarea>
-                <button class="btn btn-success" (click)="agregarNota()" [disabled]="!nuevaNota.trim()">
-                  ➕ Agregar Nota
-                </button>
+                <textarea [(ngModel)]="nuevaNota" placeholder="Escribir nota..." rows="2" class="form-control"></textarea>
+                <button class="btn btn-success btn-sm" (click)="agregarNota()">➕ Agregar</button>
               </div>
-
-              <!-- Lista de notas -->
               <div class="notes-list">
-                <div *ngIf="loadingNotas" class="loading-notes">
-                  Cargando notas...
-                </div>
-
-                <div *ngIf="!loadingNotas && notasInternas.length === 0" class="no-notes">
-                  <small>Sin notas aún</small>
-                </div>
-
                 <div *ngFor="let nota of notasInternas" class="note-item">
                   <div class="note-header">
                     <strong>{{ nota.admin_username }}</strong>
-                    <button class="btn-icon-sm" (click)="eliminarNota(nota.id)" title="Eliminar">🗑️</button>
+                    <button (click)="eliminarNota(nota.id)" class="btn-del">✕</button>
                   </div>
                   <p>{{ nota.contenido }}</p>
-                  <small class="note-date">{{ formatFecha(nota.created_at) }}</small>
                 </div>
               </div>
             </div>

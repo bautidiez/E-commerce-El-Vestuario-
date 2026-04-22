@@ -85,6 +85,8 @@ def fix_db_sequences_route():
 @jwt_required()
 def send_marketing_newsletter():
     try:
+        from models import NewsletterHistory
+
         data = request.get_json()
         subject = data.get('subject')
         content = data.get('content')
@@ -103,6 +105,32 @@ def send_marketing_newsletter():
 
         from services.notification_service import NotificationService
         sent_count = NotificationService.send_newsletter(subject, content, recipients, test_email)
+
+        # Guardar en historial (solo si no es un envío de prueba)
+        if not test_email:
+            try:
+                historial = NewsletterHistory(
+                    asunto=subject,
+                    contenido=content,
+                    sent_count=sent_count
+                )
+                db.session.add(historial)
+                db.session.commit()
+            except Exception as hist_err:
+                print(f"Error guardando historial newsletter: {hist_err}")
+                db.session.rollback()
+
         return jsonify({'message': 'Newsletter procesado', 'sent_count': sent_count, 'total_targets': len(recipients)}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@misc_bp.route('/api/admin/newsletter/history', methods=['GET'])
+@jwt_required()
+def get_newsletter_history():
+    try:
+        from models import NewsletterHistory
+        history = NewsletterHistory.query.order_by(NewsletterHistory.sent_at.desc()).limit(30).all()
+        return jsonify([h.to_dict() for h in history]), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
@@ -102,7 +102,8 @@ export class VentasExternasAdminComponent implements OnInit, OnDestroy {
         private apiService: ApiService,
         private authService: AuthService,
         private router: Router,
-        private cdr: ChangeDetectorRef
+        private cdr: ChangeDetectorRef,
+        private zone: NgZone
     ) { }
 
     ngOnInit() {
@@ -131,9 +132,11 @@ export class VentasExternasAdminComponent implements OnInit, OnDestroy {
             takeUntil(this.destroy$)
         ).subscribe({
             next: (results: any) => {
-                this.searchResults = results || [];
-                this.searching = false;
-                this.cdr.detectChanges(); // FORZAR actualización inmediata para que aparezcan los resultados
+                this.zone.run(() => {
+                    this.searchResults = results || [];
+                    this.searching = false;
+                    this.cdr.detectChanges();
+                });
             },
             error: (error) => {
                 console.error('Error searching products:', error);

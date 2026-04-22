@@ -40,6 +40,9 @@ from .promociones import (
 # ── Ventas externas ───────────────────────────────────────────────────────────
 from .ventas import VentaExterna
 
+# ── Marketing ─────────────────────────────────────────────────────────────────
+from .marketing import NewsletterHistory
+
 __all__ = [
     'db',
     # Catálogo
@@ -58,4 +61,6 @@ __all__ = [
     'promocion_productos_link', 'promocion_categorias_link',
     # Ventas
     'VentaExterna',
+    # Marketing
+    'NewsletterHistory',
 ]

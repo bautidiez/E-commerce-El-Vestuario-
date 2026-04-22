@@ -206,6 +206,20 @@ with app.app_context():
             db.session.rollback()
             print(f"Nota: Error en migración promociones: {e}")
 
+        # Migraciones para Tipos de Promoción
+        try:
+            db.session.execute(text("""
+                CREATE TABLE IF NOT EXISTS tipos_promocion (
+                    id SERIAL PRIMARY KEY,
+                    nombre VARCHAR(100) NOT NULL,
+                    descripcion TEXT
+                )
+            """))
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            print(f"Nota: Error en creación tipos_promocion: {e}")
+
         # Migraciones para Categorías
         try:
             db.session.execute(text("ALTER TABLE categorias ADD COLUMN IF NOT EXISTS slug VARCHAR(100)"))

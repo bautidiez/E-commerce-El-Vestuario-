@@ -764,7 +764,7 @@ table tbody tr:hover {
 }
 
 .autocomplete-option:hover {
-  background-color: #f5f7fa;
+  background-color: #fff;
 }
 
 .autocomplete-option .chip-color {

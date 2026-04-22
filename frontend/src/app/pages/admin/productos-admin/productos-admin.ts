@@ -98,6 +98,14 @@ export class ProductosAdminComponent implements OnInit {
     }
     this.loadProductos();
     this.loadCategorias();
+    this.loadTalles();
+  }
+
+  tallesDisp: any[] = [];
+  loadTalles() {
+    this.apiService.getTalles().subscribe(data => {
+      this.tallesDisp = data;
+    });
   }
 
   loadProductos() {
@@ -1021,6 +1029,56 @@ export class ProductosAdminComponent implements OnInit {
   formatPrecio(precio: number): string {
     if (!precio && precio !== 0) return '0';
     return precio.toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  }
+
+  async abrirModalBulkStock() {
+    if (this.productosSeleccionados.length === 0) return;
+
+    const { value: formValues } = await Swal.fire({
+      title: 'Agregar Stock Masivo',
+      html: `
+        <div style="text-align: left;">
+          <p>Se agregará stock a <b>${this.productosSeleccionados.length}</b> productos seleccionados.</p>
+          <label style="display: block; margin-top: 15px;">Talle:</label>
+          <select id="swal-talle" class="swal2-input" style="width: 100%; margin: 5px 0;">
+            ${this.tallesDisp.map(t => `<option value="${t.id}">${t.nombre}</option>`).join('')}
+          </select>
+          <label style="display: block; margin-top: 15px;">Cantidad a SUMAR:</label>
+          <input id="swal-cantidad" type="number" class="swal2-input" value="1" min="1" style="width: 100%; margin: 5px 0;">
+        </div>
+      `,
+      focusConfirm: false,
+      showCancelButton: true,
+      confirmButtonText: 'Actualizar Stock',
+      cancelButtonText: 'Cancelar',
+      preConfirm: () => {
+        return {
+          talle_id: (document.getElementById('swal-talle') as HTMLSelectElement).value,
+          cantidad: (document.getElementById('swal-cantidad') as HTMLInputElement).value
+        };
+      }
+    });
+
+    if (formValues) {
+      this.procesandoBulk = true;
+      const payload = {
+        product_ids: this.productosSeleccionados,
+        talle_id: parseInt(formValues.talle_id),
+        cantidad: parseInt(formValues.cantidad)
+      };
+
+      this.apiService.updateStockBulk(payload).subscribe({
+        next: (res) => {
+          this.procesandoBulk = false;
+          Swal.fire('¡Éxito!', res.message, 'success');
+          this.loadProductos(); // Recargar para ver cambios
+        },
+        error: (err) => {
+          this.procesandoBulk = false;
+          Swal.fire('Error', 'No se pudo actualizar el stock masivo.', 'error');
+        }
+      });
+    }
   }
 }
 

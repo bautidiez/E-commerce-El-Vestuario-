@@ -147,3 +147,33 @@ def add_stock_by_sizes():
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
+
+
+@stock_bp.route('/api/admin/stock/bulk', methods=['POST'])
+@jwt_required()
+def bulk_update_stock():
+    """Actualiza el stock de múltiples productos simultáneamente"""
+    try:
+        data = request.get_json()
+        product_ids = data.get('product_ids', [])
+        talle_id = data.get('talle_id')
+        cantidad = data.get('cantidad', 0)
+
+        if not product_ids:
+            return jsonify({'error': 'No se proporcionaron IDs de producto'}), 400
+        if not talle_id:
+            return jsonify({'error': 'ID de talle es requerido'}), 400
+
+        for pid in product_ids:
+            stock = StockTalle.query.filter_by(producto_id=pid, talle_id=talle_id).first()
+            if stock:
+                stock.cantidad += int(cantidad)
+            else:
+                stock = StockTalle(producto_id=pid, talle_id=talle_id, cantidad=int(cantidad))
+                db.session.add(stock)
+
+        db.session.commit()
+        return jsonify({'message': f'Stock actualizado para {len(product_ids)} productos'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500

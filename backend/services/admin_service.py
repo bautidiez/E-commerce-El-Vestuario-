@@ -32,6 +32,9 @@ class AdminService:
         # Total combinado
         total_ventas = float(total_ventas_web) + float(total_ventas_externas)
         
+        # Ventas externas count
+        total_ventas_externas_count = VentaExterna.query.count()
+        
         return {
             'productos': {
                 'total': total_productos,
@@ -40,6 +43,8 @@ class AdminService:
             },
             'pedidos': {
                 'total': total_pedidos,
+                'total_web': total_pedidos,
+                'total_externas': total_ventas_externas_count,
                 'pendientes': pedidos_pendientes,
                 'pendientes_aprobacion': pedidos_pendientes_aprobacion
             },

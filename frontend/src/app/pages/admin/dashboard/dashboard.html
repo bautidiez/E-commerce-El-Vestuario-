@@ -38,10 +38,20 @@
           </div>
         </div>
 
-        <div class="stat-card">
+        <div class="stat-card double-stat">
           <div class="stat-icon">📦</div>
           <h3>Total de Pedidos</h3>
-          <div class="stat-value">{{ estadisticas.pedidos.total }}</div>
+          <div class="stat-values-grid">
+            <div class="sub-stat">
+              <span class="sub-label">Externas</span>
+              <span class="sub-value">{{ estadisticas.pedidos.total_externas || 0 }}</span>
+            </div>
+            <div class="sub-stat divider"></div>
+            <div class="sub-stat">
+              <span class="sub-label">Pedidos</span>
+              <span class="sub-value">{{ estadisticas.pedidos.total_web || 0 }}</span>
+            </div>
+          </div>
         </div>
 
         <div class="stat-card">
