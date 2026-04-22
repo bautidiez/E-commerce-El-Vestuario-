@@ -35,17 +35,12 @@ import Swal from 'sweetalert2';
               class="search-result-item-row"
               *ngFor="let product of searchResults"
             >
-              <div class="row-left">
-                <div class="row-info">
-                  <div class="row-name">{{ product.nombre }}</div>
-                  <div class="row-meta">
-                    <span class="version-label" [class.jugador]="product.version?.toLowerCase().includes('jugador')">
-                      {{ product.version || 'Version no definida' }}
-                    </span>
-                    <span class="row-color" *ngIf="product.color">
-                      • {{ product.color }}
-                    </span>
-                  </div>
+              <div class="row-info">
+                <div class="row-name">{{ product.nombre }}</div>
+                <div class="row-meta">
+                  <span class="version-label" [class.jugador]="product.version?.toLowerCase().includes('jugador')">
+                    {{ product.version || 'Version' }}
+                  </span>
                 </div>
               </div>
               <button class="btn-click-add" (click)="selectProduct(product)">
@@ -58,7 +53,7 @@ import Swal from 'sweetalert2';
         <!-- SELECTED PRODUCTS AREA (Vertical List Rows) -->
         <div class="selected-area" style="margin-top: 25px;" *ngIf="selectedProducts.length > 0">
           <label style="font-weight: 800; color: #0f172a; margin-bottom: 15px; display: block; font-size: 1.1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">
-             PRODUCTOS A ACTUALIZAR ({{ selectedProducts.length }})
+             LISTA SELECCIONADA ({{ selectedProducts.length }})
           </label>
           
           <div class="selected-list-container">
@@ -66,11 +61,12 @@ import Swal from 'sweetalert2';
               <div class="card-info">
                 <div class="card-name">{{ prod.nombre }}</div>
                 <div class="card-meta">
-                  <span style="font-weight: 700; color: #4338ca;">{{ prod.version }}</span> 
-                  <span *ngIf="prod.color"> • {{ prod.color }}</span>
+                  <span class="version-badge-text" [class.jugador]="prod.version?.toLowerCase().includes('jugador')">
+                    {{ prod.version }}
+                  </span>
                 </div>
               </div>
-              <button type="button" class="btn-click-remove" (click)="removeProduct(i)" title="Eliminar de la lista">
+              <button type="button" class="btn-click-remove" (click)="removeProduct(i)">
                 <i class="fas fa-trash-alt"></i> QUITAR
               </button>
             </div>
@@ -87,57 +83,49 @@ import Swal from 'sweetalert2';
         </div>
       </div>
 
-      <!-- STEP 2: CARGA DE STOCK -->
-      <div *ngIf="currentStep === 2" class="step-container animated fadeIn">
-        <div class="cuadrado-box" style="border-left: 5px solid #10b981;">
-           <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
-              <div>
-                <label style="font-weight: 700; color: #1e293b; display: block; font-size: 1.1rem;">
-                  <i class="fas fa-boxes"></i> PASO 2: Cargar Cantidades
-                </label>
-                <small style="color: #64748b;">Incrementando stock para {{ selectedProducts.length }} productos seleccionados.</small>
-              </div>
-              <button type="button" class="btn-link" (click)="prevStep()" style="color: #2563eb; font-weight: 600; text-decoration: none;">
-                <i class="fas fa-edit"></i> Editar lista
-              </button>
-           </div>
-           
-           <div class="sizes-grid" style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 20px;">
-            <div class="size-input-group" *ngFor="let size of sizes">
-              <label>{{ size }}</label>
-              <input
-                type="number"
-                [(ngModel)]="sizeInputs[size]"
-                min="0"
-                placeholder="0"
-                style="font-weight: 700; text-align: center; font-size: 1.2rem; border-color: #cbd5e1;"
-              />
+    <!-- STEP 2: CARGA DE STOCK -->
+    <div *ngIf="currentStep === 2" class="step-container animated fadeIn">
+      <div class="cuadrado-box" style="border-top: 4px solid #10b981;">
+         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px;">
+            <div>
+              <label style="font-weight: 800; color: #1e293b; display: block; font-size: 1.2rem;">
+                PASO 2: Cargar Cantidades
+              </label>
+              <small style="color: #64748b; font-weight: 600;">{{ selectedProducts.length }} productos seleccionados.</small>
             </div>
-          </div>
-
-          <div style="display: flex; gap: 10px;">
-            <button
-              type="button"
-              class="btn btn-success"
-              (click)="submitStock()"
-              [disabled]="submitting"
-              style="flex: 2; height: 55px; font-weight: 800; font-size: 1.1rem; border-radius: 10px; background: #10b981; border: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);"
-            >
-              <i class="fas" [class.fa-check-circle]="!submitting" [class.fa-spinner]="submitting" [class.fa-spin]="submitting"></i>
-              {{ submitting ? 'GUARDANDO...' : 'CONFIRMAR Y GUARDAR STOCK' }}
+            <button type="button" class="btn-link" (click)="prevStep()" style="color: #4338ca; font-weight: 700; text-decoration: none; font-size: 0.9rem;">
+              <i class="fas fa-arrow-left"></i> VOLVER A SELECCIÓN
             </button>
-            <button
-              type="button"
-              class="btn btn-secondary"
-              (click)="prevStep()"
-              [disabled]="submitting"
-              style="flex: 1; height: 55px; border-radius: 10px; background: #94a3b8; border: none;"
-            >
-              VOLVER
-            </button>
+         </div>
+         
+         <div class="sizes-grid">
+          <div class="size-input-group" *ngFor="let size of sizes">
+            <label>{{ size }}</label>
+            <input
+              type="number"
+              [(ngModel)]="sizeInputs[size]"
+              min="0"
+              placeholder="0"
+            />
           </div>
         </div>
+
+        <div style="display: flex; gap: 15px; margin-top: 30px;">
+          <button
+            type="button"
+            class="btn-confirm-save-premium"
+            (click)="submitStock()"
+            [disabled]="submitting"
+          >
+            <i class="fas" [class.fa-check-circle]="!submitting" [class.fa-spinner]="submitting" [class.fa-spin]="submitting"></i>
+            {{ submitting ? 'GUARDANDO...' : 'CONFIRMAR Y GUARDAR' }}
+          </button>
+          <button type="button" class="btn btn-secondary" (click)="prevStep()" [disabled]="submitting" style="flex: 1; height: 55px; border-radius: 12px; font-weight: 600;">
+            VOLVER
+          </button>
+        </div>
       </div>
+    </div>
 
       <!-- FOOTER ACTIONS -->
       <div class="form-actions" style="margin-top: 2rem;" *ngIf="currentStep === 1">
