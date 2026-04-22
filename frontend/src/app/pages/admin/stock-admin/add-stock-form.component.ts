@@ -29,52 +29,49 @@ import Swal from 'sweetalert2';
             />
             <i class="fas fa-search" style="position: absolute; right: 20px; top: 18px; color: #94a3b8; font-size: 1.2rem;"></i>
             
-            <!-- SEARCH RESULTS DROPDOWN (Enhanced List) -->
-            <div class="search-results shadow-xl" *ngIf="searchResults.length > 0">
-              <div
-                class="search-result-item-row"
-                *ngFor="let product of searchResults"
-                (click)="selectProduct(product)"
-              >
-                <div class="row-left">
-                  <img [src]="getImagenPrincipal(product)" alt="product" class="search-thumb">
-                  <div class="row-info">
-                    <div class="row-name">{{ product.nombre }}</div>
-                    <div class="row-meta">
-                      <span class="badge-version" [class.jugador]="product.version?.toLowerCase().includes('jugador')">
-                        {{ product.version || 'Original' }}
-                      </span>
-                      <span class="row-color" *ngIf="product.color">
-                        <i class="fas fa-palette"></i> {{ product.color }}
-                      </span>
-                    </div>
+           <!-- SEARCH RESULTS DROPDOWN (Aesthetic List) -->
+          <div class="search-results shadow-xl" *ngIf="searchResults.length > 0">
+            <div
+              class="search-result-item-row"
+              *ngFor="let product of searchResults"
+            >
+              <div class="row-left">
+                <div class="row-info">
+                  <div class="row-name">{{ product.nombre }}</div>
+                  <div class="row-meta">
+                    <span class="version-label" [class.jugador]="product.version?.toLowerCase().includes('jugador')">
+                      {{ product.version || 'Version no definida' }}
+                    </span>
+                    <span class="row-color" *ngIf="product.color">
+                      • {{ product.color }}
+                    </span>
                   </div>
                 </div>
-                <button class="btn-click-add">
-                    <i class="fas fa-plus-circle"></i> AGREGAR
-                </button>
               </div>
+              <button class="btn-click-add" (click)="selectProduct(product)">
+                  <i class="fas fa-plus"></i> AÑADIR
+              </button>
             </div>
           </div>
         </div>
 
-        <!-- SELECTED PRODUCTS AREA (Vertical List of Cards) -->
+        <!-- SELECTED PRODUCTS AREA (Vertical List Rows) -->
         <div class="selected-area" style="margin-top: 25px;" *ngIf="selectedProducts.length > 0">
-          <label style="font-weight: 800; color: #0f172a; margin-bottom: 15px; display: block; font-size: 1.1rem;">
-             LISTA SELECCIONADA <span class="badge-count">{{ selectedProducts.length }}</span>
+          <label style="font-weight: 800; color: #0f172a; margin-bottom: 15px; display: block; font-size: 1.1rem; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px;">
+             PRODUCTOS A ACTUALIZAR ({{ selectedProducts.length }})
           </label>
           
           <div class="selected-list-container">
-            <div class="selected-row-card animated fadeIn" *ngFor="let prod of selectedProducts; let i = index">
-              <div class="card-left">
-                <img [src]="getImagenPrincipal(prod)" alt="thumb" class="card-thumb">
-                <div class="card-info">
-                  <div class="card-name">{{ prod.nombre }}</div>
-                  <div class="card-meta">{{ prod.version }} • {{ prod.color }}</div>
+            <div class="selected-row-card" *ngFor="let prod of selectedProducts; let i = index">
+              <div class="card-info">
+                <div class="card-name">{{ prod.nombre }}</div>
+                <div class="card-meta">
+                  <span style="font-weight: 700; color: #4338ca;">{{ prod.version }}</span> 
+                  <span *ngIf="prod.color"> • {{ prod.color }}</span>
                 </div>
               </div>
-              <button type="button" class="btn-click-remove" (click)="removeProduct(i)" title="Eliminar">
-                <i class="fas fa-trash-alt"></i>
+              <button type="button" class="btn-click-remove" (click)="removeProduct(i)" title="Eliminar de la lista">
+                <i class="fas fa-trash-alt"></i> QUITAR
               </button>
             </div>
           </div>
