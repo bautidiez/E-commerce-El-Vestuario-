@@ -18,7 +18,8 @@ class AdminService:
         
         total_pedidos = Pedido.query.filter(Pedido.estado != 'cancelado').count()
         pedidos_pendientes_aprobacion = Pedido.query.filter_by(aprobado=False, estado='pendiente_aprobacion').count()
-        pedidos_pendientes = Pedido.query.filter(Pedido.estado.in_(['pendiente', 'pendiente_aprobacion', 'confirmado'])).count()
+        # Pendientes a Entregar: Todos los que no estén Entregados ni Cancelados
+        pedidos_pendientes = Pedido.query.filter(Pedido.estado.notin_(['entregado', 'cancelado'])).count()
         
         # Ventas totales (Pedidos APROBADOS que no estén cancelados/fallidos)
         total_ventas_web = db.session.query(func.sum(Pedido.total)).filter(

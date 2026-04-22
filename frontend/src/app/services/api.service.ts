@@ -302,24 +302,24 @@ export class ApiService {
   }
 
   // Métodos genéricos para llamadas HTTP
-  get(endpoint: string): Observable<any> {
+  get(endpoint: string, params?: any): Observable<any> {
     const url = endpoint.startsWith('http') ? endpoint : `${this.apiUrl}${endpoint}`;
-    return this.http.get(url, { headers: this.getHeaders(url) });
+    return this.http.get(url, { headers: this.getHeaders(url), params });
   }
 
-  post(endpoint: string, data: any): Observable<any> {
+  post(endpoint: string, data: any, params?: any): Observable<any> {
     const url = endpoint.startsWith('http') ? endpoint : `${this.apiUrl}${endpoint}`;
-    return this.http.post(url, data, { headers: this.getHeaders(url) });
+    return this.http.post(url, data, { headers: this.getHeaders(url), params });
   }
 
-  put(endpoint: string, data: any): Observable<any> {
+  put(endpoint: string, data: any, params?: any): Observable<any> {
     const url = endpoint.startsWith('http') ? endpoint : `${this.apiUrl}${endpoint}`;
-    return this.http.put(url, data, { headers: this.getHeaders(url) });
+    return this.http.put(url, data, { headers: this.getHeaders(url), params });
   }
 
-  delete(endpoint: string): Observable<any> {
+  delete(endpoint: string, params?: any): Observable<any> {
     const url = endpoint.startsWith('http') ? endpoint : `${this.apiUrl}${endpoint}`;
-    return this.http.delete(url, { headers: this.getHeaders(url) });
+    return this.http.delete(url, { headers: this.getHeaders(url), params });
   }
 
   // Talles

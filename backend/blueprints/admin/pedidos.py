@@ -104,11 +104,31 @@ def get_pedido_detalle(pedido_id):
 def update_pedido_estado(pedido_id):
     try:
         pedido = Pedido.query.get_or_404(pedido_id)
+        current_status = pedido.estado
         data = request.get_json()
-        if 'estado' in data:
-            pedido.estado = data['estado']
+        new_status = data.get('estado')
+
+        if new_status:
+            # Si se cancela y estaba aprobado, reponer stock
+            if new_status == 'cancelado' and current_status != 'cancelado' and pedido.aprobado:
+                for item in pedido.items:
+                    stock_talle = StockTalle.query.filter_by(producto_id=item.producto_id, talle_id=item.talle_id).first()
+                    if stock_talle:
+                        stock_talle.aumentar_stock(item.cantidad)
+                    
+                    if item.producto:
+                        item.producto.ventas_count = max(0, (item.producto.ventas_count or 0) - item.cantidad)
+                
+                # Opcional: marquemos como no aprobado si se cancela? 
+                # El usuario dice que debe restar la plata de estadísticas, 
+                # y las estadísticas filtran por Pedido.estado != 'cancelado'.
+                pedido.aprobado = False 
+
+            pedido.estado = new_status
+
         db.session.commit()
         invalidate_cache(pattern='estadisticas')
+        invalidate_cache(pattern='productos')
         return jsonify(pedido.to_dict()), 200
     except Exception as e:
         db.session.rollback()
