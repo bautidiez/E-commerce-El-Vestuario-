@@ -86,8 +86,8 @@ import Swal from 'sweetalert2';
         </div>
       </div>
 
-    <!-- STEP 2: CARGA DE STOCK -->
-    <div *ngIf="currentStep === 2" class="step-container">
+    <!-- STEP 2: CARGA DE STOCK (Robust Version) -->
+    <div *ngIf="currentStep === 2" class="step-container" style="display: block !important; opacity: 1 !important; visibility: visible !important;">
       <div class="cuadrado-box" style="border-top: 5px solid #10b981; background-color: #ffffff; padding: 25px; border-radius: 15px;">
          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px;">
             <div style="text-align: left;">
@@ -101,24 +101,59 @@ import Swal from 'sweetalert2';
             </button>
          </div>
          
-         <!-- GRID DE TALLES CON BOTONES +/- -->
-         <div class="sizes-grid-container" style="display: grid; grid-template-columns: repeat(1, 1fr); gap: 12px; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
-          <div class="size-row-item" *ngFor="let size of sizes" style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 15px; border-radius: 10px; border: 1px solid #cbd5e1;">
-            <div style="font-weight: 900; font-size: 1.1rem; color: #0f172a; width: 40px;">{{ size }}</div>
-            
+         <!-- GRID DE TALLES (Hardcoded for maximum reliability) -->
+         <div class="sizes-grid-container" style="display: grid; grid-template-columns: 1fr; gap: 12px; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #e2e8f0;">
+          
+          <!-- ROW S -->
+          <div class="size-row-item" style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 15px; border-radius: 10px; border: 1px solid #cbd5e1;">
+            <div style="font-weight: 900; font-size: 1.1rem; color: #0f172a; width: 40px;">S</div>
             <div class="quantity-controller" style="display: flex; align-items: center; gap: 12px;">
-              <button type="button" (click)="decrementStock(size)" style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid #ef4444; background: white; color: #ef4444; font-size: 1.1rem; cursor: pointer; font-weight: 900;">-</button>
-              
-              <input
-                type="number"
-                [(ngModel)]="sizeInputs[size]"
-                min="0"
-                style="width: 60px; height: 40px; text-align: center; font-size: 1.3rem; font-weight: 900; border: none; background: #f1f5f9; border-radius: 8px; color: #1e293b;"
-              />
-              
-              <button type="button" (click)="incrementStock(size)" style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid #10b981; background: white; color: #10b981; font-size: 1.1rem; cursor: pointer; font-weight: 900;">+</button>
+              <button type="button" (click)="decrementStock('S')" style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid #ef4444; background: white; color: #ef4444; font-size: 1.1rem; cursor: pointer; font-weight: 900;">-</button>
+              <input type="number" [(ngModel)]="sizeInputs['S']" min="0" style="width: 60px; height: 40px; text-align: center; font-size: 1.3rem; font-weight: 900; border: none; background: #f1f5f9; border-radius: 8px; color: #1e293b;" />
+              <button type="button" (click)="incrementStock('S')" style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid #10b981; background: white; color: #10b981; font-size: 1.1rem; cursor: pointer; font-weight: 900;">+</button>
             </div>
           </div>
+
+          <!-- ROW M -->
+          <div class="size-row-item" style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 15px; border-radius: 10px; border: 1px solid #cbd5e1;">
+            <div style="font-weight: 900; font-size: 1.1rem; color: #0f172a; width: 40px;">M</div>
+            <div class="quantity-controller" style="display: flex; align-items: center; gap: 12px;">
+              <button type="button" (click)="decrementStock('M')" style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid #ef4444; background: white; color: #ef4444; font-size: 1.1rem; cursor: pointer; font-weight: 900;">-</button>
+              <input type="number" [(ngModel)]="sizeInputs['M']" min="0" style="width: 60px; height: 40px; text-align: center; font-size: 1.3rem; font-weight: 900; border: none; background: #f1f5f9; border-radius: 8px; color: #1e293b;" />
+              <button type="button" (click)="incrementStock('M')" style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid #10b981; background: white; color: #10b981; font-size: 1.1rem; cursor: pointer; font-weight: 900;">+</button>
+            </div>
+          </div>
+
+          <!-- ROW L -->
+          <div class="size-row-item" style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 15px; border-radius: 10px; border: 1px solid #cbd5e1;">
+            <div style="font-weight: 900; font-size: 1.1rem; color: #0f172a; width: 40px;">L</div>
+            <div class="quantity-controller" style="display: flex; align-items: center; gap: 12px;">
+              <button type="button" (click)="decrementStock('L')" style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid #ef4444; background: white; color: #ef4444; font-size: 1.1rem; cursor: pointer; font-weight: 900;">-</button>
+              <input type="number" [(ngModel)]="sizeInputs['L']" min="0" style="width: 60px; height: 40px; text-align: center; font-size: 1.3rem; font-weight: 900; border: none; background: #f1f5f9; border-radius: 8px; color: #1e293b;" />
+              <button type="button" (click)="incrementStock('L')" style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid #10b981; background: white; color: #10b981; font-size: 1.1rem; cursor: pointer; font-weight: 900;">+</button>
+            </div>
+          </div>
+
+          <!-- ROW XL -->
+          <div class="size-row-item" style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 15px; border-radius: 10px; border: 1px solid #cbd5e1;">
+            <div style="font-weight: 900; font-size: 1.1rem; color: #0f172a; width: 40px;">XL</div>
+            <div class="quantity-controller" style="display: flex; align-items: center; gap: 12px;">
+              <button type="button" (click)="decrementStock('XL')" style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid #ef4444; background: white; color: #ef4444; font-size: 1.1rem; cursor: pointer; font-weight: 900;">-</button>
+              <input type="number" [(ngModel)]="sizeInputs['XL']" min="0" style="width: 60px; height: 40px; text-align: center; font-size: 1.3rem; font-weight: 900; border: none; background: #f1f5f9; border-radius: 8px; color: #1e293b;" />
+              <button type="button" (click)="incrementStock('XL')" style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid #10b981; background: white; color: #10b981; font-size: 1.1rem; cursor: pointer; font-weight: 900;">+</button>
+            </div>
+          </div>
+
+          <!-- ROW XXL -->
+          <div class="size-row-item" style="display: flex; justify-content: space-between; align-items: center; background: white; padding: 10px 15px; border-radius: 10px; border: 1px solid #cbd5e1;">
+            <div style="font-weight: 900; font-size: 1.1rem; color: #0f172a; width: 40px;">XXL</div>
+            <div class="quantity-controller" style="display: flex; align-items: center; gap: 12px;">
+              <button type="button" (click)="decrementStock('XXL')" style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid #ef4444; background: white; color: #ef4444; font-size: 1.1rem; cursor: pointer; font-weight: 900;">-</button>
+              <input type="number" [(ngModel)]="sizeInputs['XXL']" min="0" style="width: 60px; height: 40px; text-align: center; font-size: 1.3rem; font-weight: 900; border: none; background: #f1f5f9; border-radius: 8px; color: #1e293b;" />
+              <button type="button" (click)="incrementStock('XXL')" style="width: 36px; height: 36px; border-radius: 50%; border: 2px solid #10b981; background: white; color: #10b981; font-size: 1.1rem; cursor: pointer; font-weight: 900;">+</button>
+            </div>
+          </div>
+
         </div>
 
         <div style="display: flex; gap: 15px; margin-top: 30px;">
@@ -150,7 +185,7 @@ export class AddStockFormComponent implements OnInit, OnChanges {
   @Output() stockAdded = new EventEmitter<void>();
   @Output() cancelled = new EventEmitter<void>();
 
-  currentStep: any = 1;
+  currentStep: number = 1;
   selectedProducts: any[] = [];
   searchQuery = '';
   searchResults: any[] = [];
