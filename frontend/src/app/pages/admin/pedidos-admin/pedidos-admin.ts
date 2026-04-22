@@ -17,6 +17,9 @@ interface NotaPedido {
 
 interface Pedido {
   id: number;
+  db_id?: number; // Para registro de venta externa
+  tipo?: 'web' | 'externa';
+  item_count?: number; 
   numero_pedido: string;
   cliente_nombre: string;
   cliente_email: string;

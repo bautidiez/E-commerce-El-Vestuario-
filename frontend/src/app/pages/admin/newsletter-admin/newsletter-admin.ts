@@ -63,7 +63,7 @@ export class NewsletterAdminComponent implements OnInit {
         const payload = {
             subject: this.subject,
             content: this.content,
-            test_email: isTest ? this.testEmail : null
+            test_email: isTest ? this.testEmail : undefined
         };
 
         this.apiService.sendNewsletter(payload).subscribe({
