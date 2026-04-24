@@ -1,11 +1,12 @@
 .login-page {
-    min-height: 90vh;
-    padding: 60px 20px;
+    min-height: 100vh;
+    padding: 20px;
     background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('/assets/portada3.png') center/cover no-repeat fixed !important;
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    overflow: hidden;
 }
 
 .container {
@@ -16,8 +17,8 @@
 .login-card {
     background: #fff;
     border-radius: 16px;
-    padding: 40px;
-    max-width: 450px;
+    padding: 25px 35px;
+    max-width: 420px;
     width: 100%;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
     animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
@@ -37,14 +38,14 @@
 
 .login-header {
     text-align: center;
-    margin-bottom: 2.5rem;
+    margin-bottom: 1.2rem;
 }
 
 .login-logo {
-    height: 80px;
+    height: 55px;
     width: auto;
     display: block;
-    margin: 0 auto 1.5rem;
+    margin: 0 auto 0.8rem;
     filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
     transition: transform 0.3s ease;
 }
@@ -54,18 +55,18 @@
 }
 
 .login-header h1 {
-    font-size: 32px;
+    font-size: 26px;
     color: #333;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
 }
 
 .login-header p {
     color: #666;
-    font-size: 16px;
+    font-size: 14px;
 }
 
 .form-group {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
 }
 
 .form-group label {
@@ -104,18 +105,18 @@
 
 .btn-login {
     width: 100%;
-    padding: 14px;
+    padding: 12px;
     background-image: url('/assets/fondo.png');
     background-size: cover;
     background-position: center;
     color: #fff;
     border: none;
     border-radius: 8px;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 600;
     cursor: pointer;
     transition: transform 0.3s;
-    margin-top: 1rem;
+    margin-top: 0.5rem;
 }
 
 .btn-login:hover:not(:disabled) {
@@ -133,8 +134,8 @@
 
 .register-link {
     text-align: center;
-    margin-top: 2rem;
-    font-size: 0.9rem;
+    margin-top: 0.8rem;
+    font-size: 0.85rem;
     color: #94a3b8;
 }
 
@@ -150,7 +151,7 @@
 
 .home-link {
     text-align: center;
-    margin-top: 1.5rem;
+    margin-top: 0.8rem;
 }
 
 .home-link a {
@@ -169,9 +170,9 @@
     display: flex;
     align-items: center;
     text-align: center;
-    margin: 20px 0;
+    margin: 12px 0;
     color: #94a3b8;
-    font-size: 14px;
+    font-size: 13px;
 }
 
 .google-divider::before,

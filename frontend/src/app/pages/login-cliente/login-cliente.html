@@ -16,7 +16,11 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Contraseña</label>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <label style="margin-bottom: 0;">Contraseña</label>
+                        <a routerLink="/recuperar-password"
+                            style="color: #3b82f6; font-size: 13px; text-decoration: none; font-weight: 500;">¿Olvidaste tu contraseña?</a>
+                    </div>
                     <input type="password" [(ngModel)]="password" name="password" placeholder="••••••••" required>
                 </div>
 
@@ -24,7 +28,7 @@
                     ⚠️ {{ error }}
                 </div>
 
-                <div class="form-group" style="margin-bottom: 20px; display: flex; justify-content: center;">
+                <div class="form-group" style="margin-bottom: 15px; display: flex; justify-content: center; transform: scale(0.9); transform-origin: center;">
                     <re-captcha (resolved)="onCaptchaResolved($event)"
                         siteKey="6LfgSlssAAAAALlGb4Fnu9-AoIkKNGOCAGydHwOB"></re-captcha>
                 </div>
@@ -33,11 +37,6 @@
                     <span *ngIf="!loading">Iniciar Sesión</span>
                     <span *ngIf="loading">Validando...</span>
                 </button>
-
-                <div style="text-align: center; margin-top: 15px;">
-                    <a routerLink="/recuperar-password"
-                        style="color: #666; font-size: 14px; text-decoration: none;">Olvidé mi contraseña</a>
-                </div>
 
                 <div class="google-divider">
                     <span>O continuá con</span>
