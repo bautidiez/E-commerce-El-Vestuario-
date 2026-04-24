@@ -5,6 +5,12 @@
   width: 100%;
 }
 
+.admin-content-wrapper {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
 /* NEW PREMIUM HEADER */
 .admin-header {
   background: #000;

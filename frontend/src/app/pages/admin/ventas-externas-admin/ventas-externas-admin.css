@@ -11,8 +11,10 @@
     width: 100%;
 }
 
-.ventas-content-wrapper {
+.admin-content-wrapper {
     padding: 1.5rem 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
 
