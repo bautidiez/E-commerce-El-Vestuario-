@@ -4,8 +4,16 @@
       <a routerLink="/admin/gestion" class="btn-back" title="Volver al Panel de Gestión">
         <i class="fas fa-arrow-left"></i>
       </a>
-      <h1>📋 Gestión de Pedidos</h1>
+      <h1>📋 GESTIÓN DE PEDIDOS</h1>
     </div>
+
+    <div class="header-stats">
+      <div class="stat-card info">
+        <span class="stat-number">{{ totalOrders }}</span>
+        <span class="stat-label">Pedidos</span>
+      </div>
+    </div>
+
     <div class="actions">
       <div class="search-box">
         <input type="text" [(ngModel)]="busquedaCliente" (keyup.enter)="buscar()"
@@ -24,93 +32,95 @@
     </div>
   </div>
 
-  <!-- LISTA DE PEDIDOS -->
-  <div *ngIf="loading" class="loading">
-    <p>Cargando pedidos...</p>
-  </div>
-
-  <div *ngIf="!loading && pedidosFiltrados.length === 0" class="empty-state">
-    <p>📭 No se encontraron pedidos</p>
-  </div>
-
-  <div *ngIf="!loading && pedidosFiltrados.length > 0" class="pedidos-table-container">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>N° Pedido</th>
-          <th>Cliente / Ref</th>
-          <th>Items</th>
-          <th>Total</th>
-          <th>Estado</th>
-          <th>Aprobación</th>
-          <th>Fecha</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let pedido of pedidosFiltrados" [class.row-externa]="pedido.tipo === 'externa'">
-          <td>
-            <span *ngIf="pedido.tipo === 'externa'" class="badge badge-externa">EXTERNA</span>
-            <strong *ngIf="pedido.tipo === 'web'">{{ pedido.numero_pedido }}</strong>
-          </td>
-          <td>
-            <div class="cliente-info">
-              <div>{{ pedido.cliente_nombre }}</div>
-              <small>{{ pedido.cliente_email }}</small>
-            </div>
-          </td>
-          <td>
-            <span *ngIf="pedido.tipo === 'externa'">{{ pedido.item_count }} un.</span>
-            <span *ngIf="pedido.tipo === 'web'">{{ getTotalItems(pedido) }} items</span>
-          </td>
-          <td><strong>${{ pedido.total | number:'1.0-0' }}</strong></td>
-          <td>
-            <span class="badge" [ngClass]="getEstadoClass(pedido.estado)">
-              {{ getEstadoLabel(pedido.estado) }}
-            </span>
-          </td>
-          <td>
-            <div *ngIf="!pedido.aprobado">
-              <span class="badge badge-warning">Pendiente</span>
-            </div>
-            <span *ngIf="pedido.aprobado" class="badge badge-success">✓ Aprobado</span>
-          </td>
-          <td>
-            <small>{{ formatFecha(pedido.created_at) }}</small>
-          </td>
-          <td>
-            <button class="btn-icon" (click)="verDetalle(pedido)" title="Ver Detalle">👁️</button>
-            <ng-container *ngIf="pedido.tipo === 'web'">
-              <button *ngIf="!pedido.aprobado" class="btn-icon btn-aprobar" (click)="aprobarPedido(pedido)"
-                [disabled]="isExpirando(pedido) && getDiasRestantes(pedido.fecha_expiracion!) < 0"
-                title="Aprobar Pedido">✓</button>
-              <button *ngIf="pedido.estado !== 'cancelado'" class="btn-icon btn-cancelar" (click)="cancelarPedido(pedido)"
-                title="Cancelar Pedido">✕</button>
-            </ng-container>
-            <ng-container *ngIf="pedido.tipo === 'externa'">
-                <button class="btn-icon btn-delete" (click)="eliminarVentaExterna(pedido)" title="Eliminar Registro">🗑️</button>
-            </ng-container>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- PAGINACIÓN -->
-  <div class="pagination-container" *ngIf="!loading && pedidos.length > 0">
-    <div class="pagination-info">
-      <span>Página <strong>{{ currentPage }}</strong> de <strong>{{ totalPages }}</strong></span>
-      <span class="total-count">(Total: {{ totalOrders }} pedidos)</span>
+  <div class="admin-content-wrapper">
+    <!-- LISTA DE PEDIDOS -->
+    <div *ngIf="loading" class="loading">
+      <p>Cargando pedidos...</p>
     </div>
-    <div class="pagination-controls">
-      <button class="btn-page" (click)="anteriorPagina()" [disabled]="currentPage === 1">« Anterior</button>
-      <ng-container *ngFor="let p of pagesArray">
-        <button class="btn-page-number" [class.active]="p === currentPage" (click)="cambiarPagina(p)">{{ p }}</button>
-      </ng-container>
-      <button class="btn-page" (click)="siguientePagina()" [disabled]="currentPage === totalPages">Siguiente »</button>
+  
+    <div *ngIf="!loading && pedidosFiltrados.length === 0" class="empty-state">
+      <p>📭 No se encontraron pedidos</p>
+    </div>
+  
+    <div *ngIf="!loading && pedidosFiltrados.length > 0" class="pedidos-table-container">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>N° Pedido</th>
+            <th>Cliente / Ref</th>
+            <th>Items</th>
+            <th>Total</th>
+            <th>Estado</th>
+            <th>Aprobación</th>
+            <th>Fecha</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let pedido of pedidosFiltrados" [class.row-externa]="pedido.tipo === 'externa'">
+            <td>
+              <span *ngIf="pedido.tipo === 'externa'" class="badge badge-externa">EXTERNA</span>
+              <strong *ngIf="pedido.tipo === 'web'">{{ pedido.numero_pedido }}</strong>
+            </td>
+            <td>
+              <div class="cliente-info">
+                <div>{{ pedido.cliente_nombre }}</div>
+                <small>{{ pedido.cliente_email }}</small>
+              </div>
+            </td>
+            <td>
+              <span *ngIf="pedido.tipo === 'externa'">{{ pedido.item_count }} un.</span>
+              <span *ngIf="pedido.tipo === 'web'">{{ getTotalItems(pedido) }} items</span>
+            </td>
+            <td><strong>${{ pedido.total | number:'1.0-0' }}</strong></td>
+            <td>
+              <span class="badge" [ngClass]="getEstadoClass(pedido.estado)">
+                {{ getEstadoLabel(pedido.estado) }}
+              </span>
+            </td>
+            <td>
+              <div *ngIf="!pedido.aprobado">
+                <span class="badge badge-warning">Pendiente</span>
+              </div>
+              <span *ngIf="pedido.aprobado" class="badge badge-success">✓ Aprobado</span>
+            </td>
+            <td>
+              <small>{{ formatFecha(pedido.created_at) }}</small>
+            </td>
+            <td>
+              <button class="btn-icon" (click)="verDetalle(pedido)" title="Ver Detalle">👁️</button>
+              <ng-container *ngIf="pedido.tipo === 'web'">
+                <button *ngIf="!pedido.aprobado" class="btn-icon btn-aprobar" (click)="aprobarPedido(pedido)"
+                  [disabled]="isExpirando(pedido) && getDiasRestantes(pedido.fecha_expiracion!) < 0"
+                  title="Aprobar Pedido">✓</button>
+                <button *ngIf="pedido.estado !== 'cancelado'" class="btn-icon btn-cancelar" (click)="cancelarPedido(pedido)"
+                  title="Cancelar Pedido">✕</button>
+              </ng-container>
+              <ng-container *ngIf="pedido.tipo === 'externa'">
+                  <button class="btn-icon btn-delete" (click)="eliminarVentaExterna(pedido)" title="Eliminar Registro">🗑️</button>
+              </ng-container>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  
+    <!-- PAGINACIÓN -->
+    <div class="pagination-container" *ngIf="!loading && pedidos.length > 0">
+      <div class="pagination-info">
+        <span>Página <strong>{{ currentPage }}</strong> de <strong>{{ totalPages }}</strong></span>
+        <span class="total-count">(Total: {{ totalOrders }} pedidos)</span>
+      </div>
+      <div class="pagination-controls">
+        <button class="btn-page" (click)="anteriorPagina()" [disabled]="currentPage === 1">« Anterior</button>
+        <ng-container *ngFor="let p of pagesArray">
+          <button class="btn-page-number" [class.active]="p === currentPage" (click)="cambiarPagina(p)">{{ p }}</button>
+        </ng-container>
+        <button class="btn-page" (click)="siguientePagina()" [disabled]="currentPage === totalPages">Siguiente »</button>
+      </div>
     </div>
   </div>
-
+  
   <!-- DETALLE DEL PEDIDO (MODAL) -->
   <div *ngIf="pedidoSeleccionado" class="modal-overlay" (click)="cerrarDetalle()">
     <div class="modal-content" (click)="$event.stopPropagation()">

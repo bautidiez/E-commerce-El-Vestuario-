@@ -169,13 +169,24 @@ export class VentasExternasAdminComponent implements OnInit, OnDestroy {
         // Cargar categorías para el filtro
         this.apiService.getCategorias(false, undefined, true).subscribe({
             next: (data: any) => {
-                // Solo categorías principales (sin padre)
-                this.categorias = data.filter((cat: any) => !cat.categoria_padre_id);
+                // Normalizar IDs y nombres para que el filtro funcione y se vea la jerarquía (ej: Argentina, Liverpool)
+                this.categorias = data.map((cat: any) => ({
+                    ...cat,
+                    id: Number(cat.id),
+                    nombre_formateado: this.getCategoryPath(cat, data)
+                })).sort((a: any, b: any) => a.nombre_formateado.localeCompare(b.nombre_formateado));
             },
             error: (error: any) => {
                 console.error('Error cargando categorías:', error);
             }
         });
+    }
+
+    private getCategoryPath(cat: any, allCats: any[]): string {
+        if (!cat.categoria_padre_id) return `🏠 ${cat.nombre}`;
+        const padre = allCats.find(c => Number(c.id) === Number(cat.categoria_padre_id));
+        if (padre) return `${this.getCategoryPath(padre, allCats)} > ${cat.nombre}`;
+        return cat.nombre;
     }
 
     loadTalles() {

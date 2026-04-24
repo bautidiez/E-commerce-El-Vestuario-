@@ -1,14 +1,12 @@
-<div class="productos-admin-page">
-  <div class="panel-header">
-    <div class="container">
-      <div class="header-content">
-        <div class="header-title">
-          <a class="btn-back" routerLink="/admin/gestion" title="Volver al Panel de Gestión">
-            <i class="fas fa-arrow-left"></i>
-          </a>
-          <h1>Gestión de Productos</h1>
-        </div>
-        <div class="header-actions">
+<div class="admin-container">
+  <div class="admin-header">
+    <div class="header-title">
+      <a class="btn-back" routerLink="/admin/gestion" title="Volver al Panel de Gestión">
+        <i class="fas fa-arrow-left"></i>
+      </a>
+      <h1>👕 GESTIÓN DE PRODUCTOS</h1>
+    </div>
+    <div class="header-actions">
           <!-- Bulk Actions -->
           <div class="bulk-actions" *ngIf="productosSeleccionados.length > 0">
             <button class="btn btn-stock-bulk" (click)="abrirModalBulkStock()">
@@ -19,12 +17,10 @@
             </button>
           </div>
           <button class="btn btn-primary" (click)="nuevo()">+ Nuevo Producto</button>
-        </div>
-      </div>
     </div>
   </div>
 
-  <div class="container">
+  <div class="admin-content-wrapper">
     <!-- Filtros y Búsqueda -->
     <div *ngIf="!mostrarFormulario" class="filters-bar">
       <div class="filters-grid">
@@ -405,6 +401,5 @@
           </button>
         </div>
       </div>
-    </div>
   </div>
 </div>

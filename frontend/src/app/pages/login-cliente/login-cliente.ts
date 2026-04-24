@@ -6,6 +6,8 @@ import { AuthService } from '../../services/auth.service';
 import { RecaptchaModule } from 'ng-recaptcha';
 import Swal from 'sweetalert2';
 
+import { GoogleAuthService } from '../../services/google-auth.service';
+
 @Component({
     selector: 'app-login-cliente',
     standalone: true,
@@ -22,10 +24,15 @@ export class LoginClienteComponent {
 
     constructor(
         private authService: AuthService,
+        private googleAuthService: GoogleAuthService,
         private router: Router,
         private cdr: ChangeDetectorRef,
         private zone: NgZone
     ) { }
+
+    loginConGoogle() {
+        this.googleAuthService.loginWithGoogle();
+    }
 
     onCaptchaResolved(token: string | null) {
         this.recaptcha_token = token || '';

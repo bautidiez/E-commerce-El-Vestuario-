@@ -8,12 +8,18 @@ import localeEsAr from '@angular/common/locales/es-AR';
 
 registerLocaleData(localeEsAr);
 
+import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
+import { provideAuth, getAuth } from '@angular/fire/auth';
+import { environment } from '../environments/environment';
+
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
     provideHttpClient(withInterceptorsFromDi()),
+    provideFirebaseApp(() => initializeApp(environment.firebase)),
+    provideAuth(() => getAuth()),
     {
       provide: 'RECAPTCHA_SETTINGS',
       useValue: {

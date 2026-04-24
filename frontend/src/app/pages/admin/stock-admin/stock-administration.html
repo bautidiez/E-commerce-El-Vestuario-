@@ -4,9 +4,10 @@
       <a class="btn-back" routerLink="/admin/gestion" title="Volver al Panel de Gestión">
         <i class="fas fa-arrow-left"></i>
       </a>
-      <h1>📦 Gestión de Stock</h1>
+      <h1>{{ activeTab === 'ventas-externas' ? '🛍️ GESTIÓN DE VENTAS EXTERNAS' : '📦 GESTIÓN DE STOCK' }}</h1>
+      <p class="header-subtitle" *ngIf="activeTab === 'ventas-externas'">Registra ventas realizadas fuera de la tienda web</p>
     </div>
-    <div class="header-stats">
+    <div class="header-stats" *ngIf="activeTab === 'stock'">
       <div class="stat-card warning" *ngIf="productosConStockBajo > 0">
         <span class="stat-number">{{productosConStockBajo}}</span>
         <span class="stat-label">Stock Bajo</span>
@@ -20,23 +21,24 @@
         <span class="stat-label">Variantes</span>
       </div>
     </div>
-    <button class="btn btn-primary" (click)="abrirAgregarStock()">
+    <button class="btn btn-primary" (click)="abrirAgregarStock()" *ngIf="activeTab === 'stock'">
       ➕ Agregar Stock
     </button>
   </div>
 
-  <!-- TABS NAVIGATION -->
-  <div class="tabs-container">
-    <button class="tab-button" [class.active]="activeTab === 'stock'" (click)="activeTab = 'stock'">
-      📦 Gestión de Stock
-    </button>
-    <button class="tab-button" [class.active]="activeTab === 'ventas-externas'" (click)="activeTab = 'ventas-externas'">
-      🛍️ Ventas Externas
-    </button>
-  </div>
-
-  <!-- TAB CONTENT: STOCK MANAGEMENT -->
-  <div *ngIf="activeTab === 'stock'">
+  <div class="admin-content-wrapper">
+    <!-- TABS NAVIGATION -->
+    <div class="tabs-container">
+      <button class="tab-button" [class.active]="activeTab === 'stock'" (click)="activeTab = 'stock'">
+        📦 GESTIÓN DE STOCK
+      </button>
+      <button class="tab-button" [class.active]="activeTab === 'ventas-externas'" (click)="activeTab = 'ventas-externas'">
+        🛍️ VENTAS EXTERNAS
+      </button>
+    </div>
+  
+    <!-- TAB CONTENT: STOCK MANAGEMENT -->
+    <div *ngIf="activeTab === 'stock'">
 
     <!-- FILTROS Y BÚSQUEDA -->
     <div class="filters-bar">
@@ -251,4 +253,5 @@
   <div *ngIf="activeTab === 'ventas-externas'">
     <app-ventas-externas-admin></app-ventas-externas-admin>
   </div>
+</div>
 </div>

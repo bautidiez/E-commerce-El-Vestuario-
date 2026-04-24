@@ -7,6 +7,8 @@ import { AuthService } from '../../services/auth.service';
 import { RecaptchaModule } from 'ng-recaptcha';
 import Swal from 'sweetalert2';
 
+import { GoogleAuthService } from '../../services/google-auth.service';
+
 @Component({
     selector: 'app-registro',
     standalone: true,
@@ -54,6 +56,7 @@ export class RegistroComponent implements OnInit {
     constructor(
         private apiService: ApiService,
         private authService: AuthService,
+        private googleAuthService: GoogleAuthService,
         private router: Router,
         private route: ActivatedRoute,
         private cdr: ChangeDetectorRef,
@@ -83,6 +86,10 @@ export class RegistroComponent implements OnInit {
                 localStorage.removeItem('pending_registration');
             }
         }
+    }
+
+    loginConGoogle() {
+        this.googleAuthService.loginWithGoogle();
     }
 
     @HostListener('document:click', ['$event'])

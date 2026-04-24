@@ -1,14 +1,14 @@
 <div class="admin-container">
-    <!-- Header -->
     <div class="admin-header">
         <div class="header-title">
             <a class="btn-back" routerLink="/admin/gestion" title="Volver al Panel de Gestión">
                 <i class="fas fa-arrow-left"></i>
             </a>
-            <h1>🛍️ Gestión de Ventas Externas</h1>
+            <h1>🛍️ VENTAS EXTERNAS</h1>
         </div>
-        <p class="subtitle">Registra ventas realizadas fuera de la tienda web</p>
     </div>
+    
+    <div class="admin-content-wrapper">
 
     <!-- Alerts -->
     <div *ngIf="error" class="alert alert-error">
@@ -124,10 +124,10 @@
         <div class="filtros-form">
             <div class="form-group">
                 <label for="filtroCategoria">Categoría</label>
-                <select id="filtroCategoria" [(ngModel)]="filtroCategoriaId">
+                <select id="filtroCategoria" [(ngModel)]="filtroCategoriaId" (change)="aplicarFiltros()">
                     <option [ngValue]="null">Todas las categorías</option>
                     <option *ngFor="let cat of categorias" [ngValue]="cat.id">
-                        🏠 {{ cat.nombre }}
+                        {{ cat.nombre_formateado }}
                     </option>
                 </select>
             </div>
@@ -144,7 +144,7 @@
 
             <div class="filtros-actions">
                 <button (click)="aplicarFiltros()" class="btn btn-primary">Aplicar</button>
-                <button (click)="limpiarFiltros()" class="btn btn-secondary">Limpiar</button>
+                <button (click)="limpiarFiltros()" class="btn btn-limpiar">✕ Limpiar</button>
             </div>
         </div>
     </div>
@@ -214,5 +214,5 @@
                 Siguiente →
             </button>
         </div>
-    </div>
+    </div><!-- end admin-content-wrapper -->
 </div>

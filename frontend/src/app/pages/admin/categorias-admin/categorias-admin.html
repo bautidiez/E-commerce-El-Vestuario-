@@ -4,7 +4,7 @@
             <a class="btn-back" routerLink="/admin/gestion" title="Volver al Panel de Gestión">
                 <i class="fas fa-arrow-left"></i>
             </a>
-            <h1>📂 Gestión de Categorías</h1>
+            <h1>📂 GESTIÓN DE CATEGORÍAS</h1>
         </div>
         <div class="actions">
             <button class="btn btn-view" (click)="fixSequences()"
@@ -24,237 +24,237 @@
         </div>
     </div>
 
-    <!-- VISTA ÁRBOL -->
-    <div *ngIf="vistaActual === 'arbol' && !mostrarFormulario" class="tree-view">
-        <div class="tree-container">
-            <div *ngFor="let cat of arbolCategorias" class="tree-item nivel-1">
-                <div class="tree-node">
-                    <span class="toggle" (click)="toggleExpand(cat.id!)">
-                        {{ isExpandido(cat.id!) ? '▼' : '▶' }}
-                    </span>
-                    <span class="cat-name">{{ cat.nombre }}</span>
-                    <span class="badge">{{cat.subcategorias?.length || 0}} sub</span>
-                    <span *ngIf="!cat.activa" class="badge-inactive">Inactiva</span>
-                    <div class="node-actions">
-                        <button class="btn-icon" (click)="editar(cat)" title="Editar">✏️</button>
-                        <button class="btn-icon" (click)="eliminar(cat)" title="Eliminar">🗑️</button>
-                    </div>
-                </div>
-
-                <!-- Subcategorías (Nivel 2) -->
-                <div *ngIf="isExpandido(cat.id!) && cat.subcategorias" class="tree-children">
-                    <div *ngFor="let sub of cat.subcategorias" class="tree-item nivel-2">
-                        <div class="tree-node">
-                            <span class="toggle" *ngIf="sub.subcategorias && sub.subcategorias.length > 0"
-                                (click)="toggleExpand(sub.id!)">
-                                {{ isExpandido(sub.id!) ? '▼' : '▶' }}
-                            </span>
-                            <span class="toggle-placeholder"
-                                *ngIf="!sub.subcategorias || sub.subcategorias.length === 0">•</span>
-                            <span class="cat-name">{{ sub.nombre }}</span>
-                            <span class="badge" *ngIf="sub.subcategorias">{{sub.subcategorias.length}} sub</span>
-                            <span *ngIf="!sub.activa" class="badge-inactive">Inactiva</span>
-                            <div class="node-actions">
-                                <button class="btn-icon" (click)="editar(sub)" title="Editar">✏️</button>
-                                <button class="btn-icon" (click)="eliminar(sub)" title="Eliminar">🗑️</button>
-                            </div>
+    <div class="admin-content-wrapper">
+        <!-- VISTA ÁRBOL -->
+        <div *ngIf="vistaActual === 'arbol' && !mostrarFormulario" class="tree-view">
+            <div class="tree-container">
+                <div *ngFor="let cat of arbolCategorias" class="tree-item nivel-1">
+                    <div class="tree-node">
+                        <span class="toggle" (click)="toggleExpand(cat.id!)">
+                            {{ isExpandido(cat.id!) ? '▼' : '▶' }}
+                        </span>
+                        <span class="cat-name">{{ cat.nombre }}</span>
+                        <span class="badge">{{cat.subcategorias?.length || 0}} sub</span>
+                        <span *ngIf="!cat.activa" class="badge-inactive">Inactiva</span>
+                        <div class="node-actions">
+                            <button class="btn-icon" (click)="editar(cat)" title="Editar">✏️</button>
+                            <button class="btn-icon" (click)="eliminar(cat)" title="Eliminar">🗑️</button>
                         </div>
-
-                        <!-- Sub-subcategorías (Nivel 3) -->
-                        <div *ngIf="isExpandido(sub.id!) && sub.subcategorias" class="tree-children">
-                            <div *ngFor="let subsub of sub.subcategorias" class="tree-item nivel-3">
-                                <div class="tree-node">
-                                    <span class="toggle-placeholder">•</span>
-                                    <span class="cat-name">{{ subsub.nombre }}</span>
-                                    <span *ngIf="!subsub.activa" class="badge-inactive">Inactiva</span>
-                                    <div class="node-actions">
-                                        <button class="btn-icon" (click)="editar(subsub)" title="Editar">✏️</button>
-                                        <button class="btn-icon" (click)="eliminar(subsub)"
-                                            title="Eliminar">🗑️</button>
+                    </div>
+    
+                    <!-- Subcategorías (Nivel 2) -->
+                    <div *ngIf="isExpandido(cat.id!) && cat.subcategorias" class="tree-children">
+                        <div *ngFor="let sub of cat.subcategorias" class="tree-item nivel-2">
+                            <div class="tree-node">
+                                <span class="toggle" *ngIf="sub.subcategorias && sub.subcategorias.length > 0"
+                                    (click)="toggleExpand(sub.id!)">
+                                    {{ isExpandido(sub.id!) ? '▼' : '▶' }}
+                                </span>
+                                <span class="toggle-placeholder"
+                                    *ngIf="!sub.subcategorias || sub.subcategorias.length === 0">•</span>
+                                <span class="cat-name">{{ sub.nombre }}</span>
+                                <span class="badge" *ngIf="sub.subcategorias">{{sub.subcategorias.length}} sub</span>
+                                <span *ngIf="!sub.activa" class="badge-inactive">Inactiva</span>
+                                <div class="node-actions">
+                                    <button class="btn-icon" (click)="editar(sub)" title="Editar">✏️</button>
+                                    <button class="btn-icon" (click)="eliminar(sub)" title="Eliminar">🗑️</button>
+                                </div>
+                            </div>
+    
+                            <!-- Sub-subcategorías (Nivel 3) -->
+                            <div *ngIf="isExpandido(sub.id!) && sub.subcategorias" class="tree-children">
+                                <div *ngFor="let subsub of sub.subcategorias" class="tree-item nivel-3">
+                                    <div class="tree-node">
+                                        <span class="toggle-placeholder">•</span>
+                                        <span class="cat-name">{{ subsub.nombre }}</span>
+                                        <span *ngIf="!subsub.activa" class="badge-inactive">Inactiva</span>
+                                        <div class="node-actions">
+                                            <button class="btn-icon" (click)="editar(subsub)" title="Editar">✏️</button>
+                                            <button class="btn-icon" (click)="eliminar(subsub)"
+                                                title="Eliminar">🗑️</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Estado de carga -->
-            <div *ngIf="cargandoCategorias" class="loading-state">
-                <div class="spinner"></div>
-                <p>⏳ Cargando categorías...</p>
-            </div>
-
-            <!-- Estado vacío (solo si no está cargando Y no hay categorías) -->
-            <div *ngIf="!cargandoCategorias && arbolCategorias.length === 0" class="empty-state">
-                <p>📭 No hay categorías aún</p>
-                <button class="btn btn-primary" (click)="nueva()">Crear Primera Categoría</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- VISTA LISTA -->
-    <div *ngIf="vistaActual === 'lista' && !mostrarFormulario" class="list-view">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Nombre</th>
-                    <th>Nivel</th>
-                    <th>Padre</th>
-                    <th>Orden</th>
-                    <th>Estado</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr *ngFor="let cat of categorias" [class]="getNivelClass(cat.nivel || 1)">
-                    <td><strong>{{ cat.nombre }}</strong></td>
-                    <td>
-                        <span class="badge-nivel">Nivel {{ cat.nivel || 1 }}</span>
-                    </td>
-                    <td>{{ getCategoriaPadreNombre(cat.categoria_padre_id) }}</td>
-                    <td>{{ cat.orden }}</td>
-                    <td>
-                        <span class="badge" [class.badge-success]="cat.activa" [class.badge-inactive]="!cat.activa">
-                            {{ cat.activa ? 'Activa' : 'Inactiva' }}
-                        </span>
-                    </td>
-                    <td>
-                        <button class="btn-icon" (click)="editar(cat)">✏️</button>
-                        <button class="btn-icon" (click)="eliminar(cat)">🗑️</button>
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
-    <!-- FORMULARIO / WIZARD -->
-    <div *ngIf="mostrarFormulario" class="wizard-container">
-        <div class="wizard-header">
-            <h2>{{ modoEdicion ? 'Editar Categoría' : 'Nueva Categoría' }}</h2>
-            <div class="steps">
-                <div class="step" [class.active]="pasoActual === 1" [class.completed]="pasoActual > 1">
-                    <span class="step-number">1</span>
-                    <span class="step-label">Información Básica</span>
+    
+                <!-- Estado de carga -->
+                <div *ngIf="cargandoCategorias" class="loading-state">
+                    <div class="spinner"></div>
+                    <p>⏳ Cargando categorías...</p>
                 </div>
-                <div class="step" [class.active]="pasoActual === 2" [class.completed]="pasoActual > 2">
-                    <span class="step-number">2</span>
-                    <span class="step-label">Subcategorías</span>
-                </div>
-                <div class="step" [class.active]="pasoActual === 3">
-                    <span class="step-number">3</span>
-                    <span class="step-label">Confirmar</span>
+    
+                <!-- Estado vacío (solo si no está cargando Y no hay categorías) -->
+                <div *ngIf="!cargandoCategorias && arbolCategorias.length === 0" class="empty-state">
+                    <p>📭 No hay categorías aún</p>
+                    <button class="btn btn-primary" (click)="nueva()">Crear Primera Categoría</button>
                 </div>
             </div>
         </div>
-
-        <!-- PASO 1: Información Básica -->
-        <div class="wizard-content" *ngIf="pasoActual === 1">
-            <div class="form-group">
-                <label>Nombre *</label>
-                <input type="text" [(ngModel)]="categoriaActual.nombre" class="form-control" placeholder="Ej: Remeras">
-            </div>
-
-
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Categoría Padre (opcional)</label>
-                    <select [(ngModel)]="categoriaActual.categoria_padre_id" class="form-control">
-                        <option [ngValue]="null">-- Sin categoría padre (Nivel 1) --</option>
-                        <option *ngFor="let cat of categoriasDisponibles" [ngValue]="cat.id"
-                            [disabled]="cat.id === categoriaActual.id">
-                            {{ getCategoriaPadreLabel(cat) }}
-                        </option>
-                    </select>
-                    <small class="help-text">Si seleccionas una categoría padre, esta será una subcategoría</small>
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label class="checkbox-inline">
-                    <input type="checkbox" [(ngModel)]="categoriaActual.activa">
-                    Categoría activa
-                </label>
-            </div>
+    
+        <!-- VISTA LISTA -->
+        <div *ngIf="vistaActual === 'lista' && !mostrarFormulario" class="list-view">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Nivel</th>
+                        <th>Padre</th>
+                        <th>Orden</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let cat of categorias" [class]="getNivelClass(cat.nivel || 1)">
+                        <td><strong>{{ cat.nombre }}</strong></td>
+                        <td>
+                            <span class="badge-nivel">Nivel {{ cat.nivel || 1 }}</span>
+                        </td>
+                        <td>{{ getCategoriaPadreNombre(cat.categoria_padre_id) }}</td>
+                        <td>{{ cat.orden }}</td>
+                        <td>
+                            <span class="badge" [class.badge-success]="cat.activa" [class.badge-inactive]="!cat.activa">
+                                {{ cat.activa ? 'Activa' : 'Inactiva' }}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn-icon" (click)="editar(cat)">✏️</button>
+                            <button class="btn-icon" (click)="eliminar(cat)">🗑️</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
-
-        <!-- PASO 2: Subcategorías -->
-        <div class="wizard-content" *ngIf="pasoActual === 2">
-            <div class="subcategory-section" *ngIf="getCategoriaActualNivel() < 3; else noSubcats">
-                <h3>Crear Nuevas Subcategorías</h3>
-                <p class="help-text">Agrega subcategorías que pertenecerán a esta categoría</p>
-
-                <button class="btn btn-secondary" (click)="agregarNuevaSubcategoria()" style="margin-bottom: 1.5rem;">
-                    ➕ Agregar Nueva Subcategoría
-                </button>
-
-                <div *ngFor="let sub of nuevasSubcategorias; let i = index" class="nueva-sub-form">
-                    <div class="form-row">
-                        <div class="form-group flex-2">
-                            <input type="text" [(ngModel)]="sub.nombre" class="form-control"
-                                placeholder="Nombre de la subcategoría">
-                        </div>
-                        <div class="form-group flex-3">
-                            <input type="text" [(ngModel)]="sub.descripcion" class="form-control"
-                                placeholder="Descripción (opcional)">
-                        </div>
-                        <button class="btn-icon btn-danger" (click)="eliminarNuevaSubcategoria(i)">🗑️</button>
+    
+        <!-- FORMULARIO / WIZARD -->
+        <div *ngIf="mostrarFormulario" class="wizard-container">
+            <div class="wizard-header">
+                <h2>{{ modoEdicion ? 'Editar Categoría' : 'Nueva Categoría' }}</h2>
+                <div class="steps">
+                    <div class="step" [class.active]="pasoActual === 1" [class.completed]="pasoActual > 1">
+                        <span class="step-number">1</span>
+                        <span class="step-label">Información Básica</span>
+                    </div>
+                    <div class="step" [class.active]="pasoActual === 2" [class.completed]="pasoActual > 2">
+                        <span class="step-number">2</span>
+                        <span class="step-label">Subcategorías</span>
+                    </div>
+                    <div class="step" [class.active]="pasoActual === 3">
+                        <span class="step-number">3</span>
+                        <span class="step-label">Confirmar</span>
                     </div>
                 </div>
             </div>
-        </div>
-
-        <ng-template #noSubcats>
-            <div class="empty-state"
-                style="padding: 2rem; border: 2px dashed #e2e8f0; border-radius: 8px; margin-top: 1rem; text-align: center;">
-                <p style="font-size: 1.2rem; color: #64748b; margin-bottom: 0.5rem;">⚠️ Esta categoría es de Nivel 3
-                </p>
-                <p style="color: #94a3b8;">No puede tener subcategorías (límite de 3 niveles).</p>
-            </div>
-        </ng-template>
-
-        <!-- PASO 3: Confirmar -->
-        <div class="wizard-content" *ngIf="pasoActual === 3">
-            <div class="confirmation">
-                <h3>📋 Resumen</h3>
-
-                <div class="summary-item">
-                    <strong>Nombre:</strong> {{ categoriaActual.nombre }}
+    
+            <!-- PASO 1: Información Básica -->
+            <div class="wizard-content" *ngIf="pasoActual === 1">
+                <div class="form-group">
+                    <label>Nombre *</label>
+                    <input type="text" [(ngModel)]="categoriaActual.nombre" class="form-control" placeholder="Ej: Remeras">
                 </div>
-                <div class="summary-item" *ngIf="categoriaActual.descripcion">
-                    <strong>Descripción:</strong> {{ categoriaActual.descripcion }}
+    
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Categoría Padre (opcional)</label>
+                        <select [(ngModel)]="categoriaActual.categoria_padre_id" class="form-control">
+                            <option [ngValue]="null">-- Sin categoría padre (Nivel 1) --</option>
+                            <option *ngFor="let cat of categoriasDisponibles" [ngValue]="cat.id"
+                                [disabled]="cat.id === categoriaActual.id">
+                                {{ getCategoriaPadreLabel(cat) }}
+                            </option>
+                        </select>
+                        <small class="help-text">Si seleccionas una categoría padre, esta será una subcategoría</small>
+                    </div>
                 </div>
-                <div class="summary-item">
-                    <strong>Nivel:</strong> {{ categoriaActual.categoria_padre_id ? 'Subcategoría' : 'Categoría
-                    Principal' }}
-                </div>
-                <div class="summary-item">
-                    <strong>Estado:</strong> {{ categoriaActual.activa ? 'Activa' : 'Inactiva' }}
-                </div>
-
-                <div class="summary-item" *ngIf="nuevasSubcategorias.length > 0">
-                    <strong>Nuevas subcategorías:</strong>
-                    <ul>
-                        <li *ngFor="let sub of nuevasSubcategorias">{{ sub.nombre }}</li>
-                    </ul>
+    
+                <div class="form-group">
+                    <label class="checkbox-inline">
+                        <input type="checkbox" [(ngModel)]="categoriaActual.activa">
+                        Categoría activa
+                    </label>
                 </div>
             </div>
-        </div>
-
-        <!-- WIZARD FOOTER -->
-        <div class="wizard-footer">
-            <button class="btn btn-secondary" (click)="cancelar()">Cancelar</button>
-            <div class="footer-right">
-                <button class="btn btn-secondary" *ngIf="pasoActual > 1" (click)="pasoAnterior()">
-                    ← Anterior
-                </button>
-                <button class="btn btn-primary" *ngIf="pasoActual < totalPasos" (click)="siguientePaso()">
-                    Siguiente →
-                </button>
-                <button class="btn btn-success" *ngIf="pasoActual === totalPasos" (click)="guardar()">
-                    💾 Guardar
-                </button>
+    
+            <!-- PASO 2: Subcategorías -->
+            <div class="wizard-content" *ngIf="pasoActual === 2">
+                <div class="subcategory-section" *ngIf="getCategoriaActualNivel() < 3; else noSubcats">
+                    <h3>Crear Nuevas Subcategorías</h3>
+                    <p class="help-text">Agrega subcategorías que pertenecerán a esta categoría</p>
+    
+                    <button class="btn btn-secondary" (click)="agregarNuevaSubcategoria()" style="margin-bottom: 1.5rem;">
+                        ➕ Agregar Nueva Subcategoría
+                    </button>
+    
+                    <div *ngFor="let sub of nuevasSubcategorias; let i = index" class="nueva-sub-form">
+                        <div class="form-row">
+                            <div class="form-group flex-2">
+                                <input type="text" [(ngModel)]="sub.nombre" class="form-control"
+                                    placeholder="Nombre de la subcategoría">
+                            </div>
+                            <div class="form-group flex-3">
+                                <input type="text" [(ngModel)]="sub.descripcion" class="form-control"
+                                    placeholder="Descripción (opcional)">
+                            </div>
+                            <button class="btn-icon btn-danger" (click)="eliminarNuevaSubcategoria(i)">🗑️</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+            <ng-template #noSubcats>
+                <div class="empty-state"
+                    style="padding: 2rem; border: 2px dashed #e2e8f0; border-radius: 8px; margin-top: 1rem; text-align: center;">
+                    <p style="font-size: 1.2rem; color: #64748b; margin-bottom: 0.5rem;">⚠️ Esta categoría es de Nivel 3
+                    </p>
+                    <p style="color: #94a3b8;">No puede tener subcategorías (límite de 3 niveles).</p>
+                </div>
+            </ng-template>
+    
+            <!-- PASO 3: Confirmar -->
+            <div class="wizard-content" *ngIf="pasoActual === 3">
+                <div class="confirmation">
+                    <h3>📋 Resumen</h3>
+    
+                    <div class="summary-item">
+                        <strong>Nombre:</strong> {{ categoriaActual.nombre }}
+                    </div>
+                    <div class="summary-item" *ngIf="categoriaActual.descripcion">
+                        <strong>Descripción:</strong> {{ categoriaActual.descripcion }}
+                    </div>
+                    <div class="summary-item">
+                        <strong>Nivel:</strong> {{ categoriaActual.categoria_padre_id ? 'Subcategoría' : 'Categoría
+                        Principal' }}
+                    </div>
+                    <div class="summary-item">
+                        <strong>Estado:</strong> {{ categoriaActual.activa ? 'Activa' : 'Inactiva' }}
+                    </div>
+    
+                    <div class="summary-item" *ngIf="nuevasSubcategorias.length > 0">
+                        <strong>Nuevas subcategorías:</strong>
+                        <ul>
+                            <li *ngFor="let sub of nuevasSubcategorias">{{ sub.nombre }}</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+    
+            <!-- WIZARD FOOTER -->
+            <div class="wizard-footer">
+                <button class="btn btn-secondary" (click)="cancelar()">Cancelar</button>
+                <div class="footer-right">
+                    <button class="btn btn-secondary" *ngIf="pasoActual > 1" (click)="pasoAnterior()">
+                        ← Anterior
+                    </button>
+                    <button class="btn btn-primary" *ngIf="pasoActual < totalPasos" (click)="siguientePaso()">
+                        Siguiente →
+                    </button>
+                    <button class="btn btn-success" *ngIf="pasoActual === totalPasos" (click)="guardar()">
+                        💾 Guardar
+                    </button>
+                </div>
             </div>
         </div>
     </div>

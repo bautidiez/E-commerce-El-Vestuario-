@@ -1,9 +1,15 @@
 .admin-container {
-  padding: 2rem;
-  max-width: 1600px;
-  margin: 0 auto;
+  padding: 0;
+  max-width: 100%;
+  margin: 0;
   min-height: 100vh;
   width: 100%;
+}
+
+.admin-content-wrapper {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .admin-header {
@@ -14,11 +20,12 @@
   padding: 1.2rem 2rem;
   background: #000;
   color: #fff;
-  border-radius: 12px;
+  border-radius: 0;
   box-shadow: 0 4px 20px rgba(0,0,0,0.3);
   position: sticky;
   top: 0;
   z-index: 1000;
+  width: 100%;
 }
 
 .admin-header h1 {
@@ -26,18 +33,34 @@
   font-size: 1.8rem;
   color: #fff;
   font-weight: 800;
-  letter-spacing: -0.5px;
+  font-family: 'Bebas Neue', sans-serif;
+  letter-spacing: 1px;
+}
+
+.header-subtitle {
+  margin: 4px 0 0 0;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 400;
 }
 
 .btn-back {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   color: #fff !important;
-  font-size: 1.2rem;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-right: 1rem;
-  transition: transform 0.2s;
+  transition: all 0.3s;
 }
 
 .btn-back:hover {
-  transform: translateX(-3px);
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
 }
 
 .header-stats {
@@ -657,6 +680,43 @@
   .grupo-items {
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   }
+}
+
+/* --- Content padding wrapper --- */
+.tabs-container,
+.filters-bar,
+.stock-table-container,
+.stock-grouped,
+.empty-state,
+.loading,
+.modal-overlay,
+.pagination-controls {
+  margin-left: 1.5rem;
+  margin-right: 1.5rem;
+}
+
+/* Limpiar Button - Modern Style */
+.btn-limpiar {
+  padding: 0.5rem 1.1rem;
+  border: 1.5px solid #e11d48;
+  border-radius: 20px;
+  background: #fff0f3;
+  color: #e11d48;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.btn-limpiar:hover {
+  background: #e11d48;
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 10px rgba(225, 29, 72, 0.25);
 }
 
 @media (max-width: 768px) {

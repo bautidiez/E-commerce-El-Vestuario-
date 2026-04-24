@@ -67,6 +67,12 @@ body.admin-layout {
   padding: 0 20px;
 }
 
+.admin-content-wrapper {
+  padding: 2rem;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
 /* ... rest of buttons and components ... */
 .btn {
   display: inline-block;

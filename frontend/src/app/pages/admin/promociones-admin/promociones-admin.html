@@ -4,7 +4,7 @@
       <a class="btn-back" routerLink="/admin/gestion" title="Volver al Panel de Gestión">
         <i class="fas fa-arrow-left"></i>
       </a>
-      <h1>🎁 Gestión de Promociones</h1>
+      <h1>🎁 GESTIÓN DE PROMOCIONES</h1>
     </div>
     <div class="header-stats">
       <div class="stat-card success">
@@ -25,8 +25,9 @@
     </button>
   </div>
 
-  <!-- FILTROS -->
-  <div class="filters-bar">
+  <div class="admin-content-wrapper">
+    <!-- FILTROS -->
+    <div class="filters-bar">
     <input type="text" [(ngModel)]="busqueda" placeholder="🔍 Buscar producto..." class="search-input">
 
     <div class="filter-tabs">
@@ -272,5 +273,6 @@
         <button class="btn-icon" (click)="eliminar(promo.id)" title="Eliminar">🗑️</button>
       </div>
     </div>
+  </div>
   </div>
 </div>

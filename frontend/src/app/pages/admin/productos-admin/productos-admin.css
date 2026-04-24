@@ -1,10 +1,12 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
+
 .productos-admin-page {
   min-height: 100vh;
   width: 100%;
 }
 
 /* NEW PREMIUM HEADER */
-.panel-header {
+.admin-header {
   background: #000;
   color: #fff;
   padding: 1.2rem 0;
@@ -15,12 +17,10 @@
   z-index: 1000;
 }
 
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1.5rem;
+.header-title {
+  display: flex !important;
+  align-items: center !important;
+  gap: 1rem !important;
 }
 
 .header-title {
@@ -29,11 +29,17 @@
   gap: 1rem;
 }
 
-.header-title h1 {
-  margin: 0;
-  font-size: 1.8rem;
-  font-family: 'Bebas Neue', sans-serif;
-  letter-spacing: 1px;
+.admin-header h1 {
+  margin: 0 !important;
+  font-size: 1.8rem !important;
+  color: #fff !important;
+  font-weight: 800 !important;
+  font-family: 'Bebas Neue', sans-serif !important;
+  letter-spacing: 1px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  text-transform: uppercase !important;
 }
 
 .header-actions {
@@ -43,16 +49,17 @@
 }
 
 .btn-back {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: #fff;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s;
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #fff !important;
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.3s !important;
+  text-decoration: none !important;
 }
 
 .btn-back:hover {
