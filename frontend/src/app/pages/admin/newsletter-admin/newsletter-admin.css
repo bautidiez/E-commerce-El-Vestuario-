@@ -41,6 +41,26 @@
     display: flex !important;
     align-items: center !important;
     gap: 1rem !important;
+    flex-wrap: wrap !important;
+}
+
+.subscriber-badge {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+    padding: 0.5rem 1rem !important;
+    border-radius: 50px !important;
+    color: #fff !important;
+    font-size: 0.9rem !important;
+    font-weight: 700 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    cursor: default !important;
+}
+
+.subscriber-badge i {
+    font-size: 1rem !important;
 }
 
 .btn-back {

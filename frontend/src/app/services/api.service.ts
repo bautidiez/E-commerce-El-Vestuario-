@@ -521,6 +521,11 @@ export class ApiService {
     return this.http.delete(url, { headers: this.getHeaders(url) });
   }
 
+  getNewsletterStats(): Observable<any> {
+    const url = `${this.apiUrl}/admin/newsletter/stats`;
+    return this.http.get(url, { headers: this.getHeaders(url) });
+  }
+
   // Stock Bulk
   updateStockBulk(data: { product_ids: number[], talle_id: number, cantidad: number }): Observable<any> {
     const url = `${this.apiUrl}/admin/stock/bulk`;

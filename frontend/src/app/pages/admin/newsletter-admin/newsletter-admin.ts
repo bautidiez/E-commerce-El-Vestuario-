@@ -29,6 +29,7 @@ export class NewsletterAdminComponent implements OnInit {
     history: any[] = [];
     scheduled: any[] = [];
     lastStats: any = null;
+    totalSubscribers: number = 0;
 
     diasSemana = [
         { id: 0, nombre: 'Lunes' },
@@ -57,6 +58,7 @@ export class NewsletterAdminComponent implements OnInit {
     ngOnInit() {
         this.loadHistory();
         this.loadScheduled();
+        this.loadStats();
     }
 
     loadHistory() {
@@ -72,6 +74,15 @@ export class NewsletterAdminComponent implements OnInit {
         this.apiService.getScheduledNewsletters().subscribe({
             next: (res) => {
                 this.scheduled = res;
+                this.cdr.detectChanges();
+            }
+        });
+    }
+
+    loadStats() {
+        this.apiService.getNewsletterStats().subscribe({
+            next: (res) => {
+                this.totalSubscribers = res.total_subscribers;
                 this.cdr.detectChanges();
             }
         });
