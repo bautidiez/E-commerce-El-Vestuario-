@@ -156,14 +156,14 @@
 
                         <div class="divider"></div>
 
-                        <div class="send-section">
+                        <div class="send-actions">
                             <div class="warning-box" *ngIf="tipoProgramacion === 'inmediato'">
-                                <p>⚠️ <strong>¡Atención!</strong> Se enviará a todos los suscriptores de inmediato.</p>
+                                <p>⚠️ <strong>¡Atención!</strong> El envío se realizará a todos los suscriptores registrados de forma inmediata.</p>
                             </div>
-                            <button class="btn btn-send-all" (click)="send(false)" [disabled]="isLoading" [class.btn-schedule]="tipoProgramacion !== 'inmediato'">
+                            <button class="btn btn-send-all" [class.btn-schedule]="tipoProgramacion !== 'inmediato'" (click)="send(false)" [disabled]="isLoading">
                                 <span *ngIf="!isLoading">
-                                    <i class="fas" [class.fa-rocket]="tipoProgramacion === 'inmediato'" [class.fa-calendar-alt]="tipoProgramacion !== 'inmediato'"></i>
-                                    {{ tipoProgramacion === 'inmediato' ? '🚀 ENVIAR A TODOS' : '📅 PROGRAMAR ENVÍO' }}
+                                    <i class="fas" [ngClass]="tipoProgramacion === 'inmediato' ? 'fa-paper-plane' : 'fa-calendar-check'"></i>
+                                    {{ tipoProgramacion === 'inmediato' ? 'ENVIAR A TODOS AHORA' : 'PROGRAMAR ENVÍO' }}
                                 </span>
                                 <span *ngIf="isLoading">⏳ PROCESANDO...</span>
                             </button>

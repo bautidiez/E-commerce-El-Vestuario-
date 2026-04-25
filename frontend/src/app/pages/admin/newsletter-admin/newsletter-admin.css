@@ -56,11 +56,26 @@
     gap: 8px !important;
     box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3) !important;
     border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    cursor: default !important;
+    cursor: pointer !important;
 }
 
 .subscriber-badge i {
     font-size: 1rem !important;
+}
+
+.refresh-icon {
+    font-size: 0.8rem;
+    margin-left: 5px;
+    opacity: 0.7;
+}
+
+.spinning {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
 .btn-back {
@@ -167,19 +182,28 @@
 /* TEST SECTION */
 .test-input-wrapper {
     display: flex;
-    gap: 0.5rem;
+    gap: 8px;
     margin-top: 0.5rem;
+    align-items: center;
+}
+
+.test-input-wrapper .form-control {
+    flex: 1;
 }
 
 .btn-test {
     padding: 0 1.25rem;
+    height: 42px;
     background: #f1f5f9;
     color: #475569;
-    border: 2px solid #e2e8f0;
+    border: 1px solid #e2e8f0;
     border-radius: 8px;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .btn-test:hover:not(:disabled) {
@@ -226,6 +250,10 @@
     cursor: pointer;
     transition: all 0.3s;
     box-shadow: 0 4px 6px rgba(118, 75, 162, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
 .btn-send-all:hover:not(:disabled) {
@@ -239,42 +267,165 @@
     transform: none;
 }
 
-.stats-box {
-    margin-top: 1.5rem;
-    padding: 1rem;
-    background: #f0fdf4;
-    border: 1px solid #86efac;
+.btn-schedule {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2) !important;
+}
+
+/* SCHEDULING STYLES */
+.schedule-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.option-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
     border-radius: 8px;
-    color: #166534;
+    cursor: pointer;
+    transition: all 0.2s;
 }
 
-.stats-box h4 {
-    margin: 0 0 0.25rem 0;
-    font-size: 0.9rem;
+.option-row:hover {
+    border-color: #3b82f6;
+    background: #f0f4ff;
 }
 
-.stats-box p {
+.option-row input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #3b82f6;
+}
+
+.option-row label {
     margin: 0;
-    font-size: 1.1rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
 }
 
-/* Quill Editor adjustment */
-.editor-container {
-    background: white;
-    border-radius: 8px;
+.schedule-details {
+    background: #f8fafc;
+    padding: 12px 15px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    animation: fadeIn 0.3s ease-out;
 }
 
-::ng-deep .ql-toolbar {
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-    border-color: #e2e8f0 !important;
+.schedule-row {
+    display: flex;
+    gap: 15px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    margin-bottom: 5px;
 }
 
-::ng-deep .ql-container {
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
-    border-color: #e2e8f0 !important;
-    font-family: inherit;
+@media (max-width: 600px) {
+    .schedule-row {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+.compact-date, .compact-select {
+    width: 150px !important;
+    min-width: 150px !important;
+    padding: 0.5rem !important;
+    height: 40px !important;
+}
+
+.monthly-inputs {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.monthly-inputs .compact-select {
+    width: 105px !important;
+    min-width: 105px !important;
+}
+
+.date-group, .time-group, .select-group {
+    flex: 0 0 auto;
+    margin-bottom: 10px !important;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* CUSTOM TIME PICKER REFINADO */
+.custom-time-picker {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: #ffffff;
+    padding: 8px 15px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    width: fit-content;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+.time-part {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.time-part button {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    width: 28px;
+    height: 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    font-size: 0.8rem;
+}
+
+.time-part button:hover:not(:disabled) {
+    background: #f1f5f9;
+    color: #3b82f6;
+}
+
+.time-part button:disabled {
+    opacity: 0.2;
+    cursor: not-allowed;
+}
+
+.time-part input {
+    width: 45px;
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: 700;
+    border: none;
+    background: transparent;
+    color: #1e293b;
+    font-family: 'Inter', sans-serif;
+    padding: 0;
+    margin: 0;
+}
+
+.time-separator {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #cbd5e1;
+    margin-bottom: 2px;
 }
 
 /* HISTORY SECTION */
@@ -348,136 +499,6 @@
     color: #1e293b;
 }
 
-.empty-history {
-    padding: 3rem;
-    text-align: center;
-    color: #94a3b8;
-}
-
-/* NEW SCHEDULING STYLES */
-.schedule-section {
-    margin-top: 0.5rem;
-}
-
-.schedule-options {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin: 15px 0;
-}
-
-.option-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.option-row:hover {
-    border-color: #667eea;
-    background: #f0f4ff;
-}
-
-.option-row input[type="radio"] {
-    width: 18px;
-    height: 18px;
-    accent-color: #667eea;
-}
-
-.option-row label {
-    margin: 0;
-    cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 500;
-}
-
-.schedule-details {
-    background: #f8fafc;
-    padding: 12px 15px;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    margin-bottom: 20px;
-    animation: fadeIn 0.3s ease-out;
-}
-
-.schedule-row {
-    display: flex;
-    gap: 25px;
-    align-items: center;
-    flex-wrap: nowrap;
-    margin-bottom: 5px;
-}
-
-@media (max-width: 600px) {
-    .schedule-row {
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-}
-
-.compact-date, .compact-select {
-    width: 150px !important;
-    min-width: 150px !important;
-    padding: 0.5rem !important;
-    height: 40px !important;
-}
-
-.monthly-inputs .compact-select {
-    width: 120px !important;
-    min-width: 120px !important;
-}
-
-.date-group, .time-group, .select-group {
-    flex: 0 0 auto;
-    margin-bottom: 10px !important;
-}
-
-.refresh-icon {
-    font-size: 0.8rem;
-    margin-left: 5px;
-    opacity: 0.7;
-    cursor: pointer;
-}
-
-.spinning {
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.monthly-inputs {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-
-.btn-schedule {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
-    box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2) !important;
-}
-
-.scheduled-container {
-    margin-top: 30px !important;
-    border-color: #10b981 !important;
-}
-
-.scheduled-item {
-    border-left: 4px solid #10b981;
-}
-
 .badge {
     display: inline-block;
     padding: 4px 10px;
@@ -490,12 +511,6 @@
 .badge.unica { background: #dcfce7; color: #166534; }
 .badge.semanal { background: #dbeafe; color: #1e40af; }
 .badge.mensual { background: #fef9c3; color: #854d0e; }
-
-.schedule-text {
-    font-size: 0.9rem;
-    color: #475569;
-    font-weight: 500;
-}
 
 .btn-delete-scheduled {
     padding: 8px 15px;
@@ -512,70 +527,4 @@
 .btn-delete-scheduled:hover {
     background: #ef4444;
     color: #fff;
-}
-
-/* CUSTOM TIME PICKER REFINADO */
-.custom-time-picker {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    background: #ffffff;
-    padding: 8px 15px;
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    width: fit-content;
-    margin: 5px 0;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-}
-
-.time-part {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 2px;
-}
-
-.time-part button {
-    background: transparent;
-    border: none;
-    color: #94a3b8;
-    width: 28px;
-    height: 24px;
-    border-radius: 6px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-    font-size: 0.8rem;
-}
-
-.time-part button:hover:not(:disabled) {
-    background: #f1f5f9;
-    color: #3b82f6;
-}
-
-.time-part button:disabled {
-    opacity: 0.2;
-    cursor: not-allowed;
-}
-
-.time-part input {
-    width: 45px;
-    text-align: center;
-    font-size: 1.25rem;
-    font-weight: 700;
-    border: none;
-    background: transparent;
-    color: #1e293b;
-    font-family: 'Inter', sans-serif;
-    padding: 0;
-    margin: 0;
-}
-
-.time-separator {
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: #cbd5e1;
-    margin-bottom: 2px;
 }
