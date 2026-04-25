@@ -104,24 +104,75 @@ def send_marketing_newsletter():
             recipients = [{'email': test_email, 'nombre': 'Admin Test'}]
 
         from services.notification_service import NotificationService
-        sent_count = NotificationService.send_newsletter(subject, content, recipients, test_email)
+        from datetime import datetime, timedelta
+        import json
 
-        # Guardar en historial (solo si no es un envío de prueba)
         if not test_email:
-            try:
-                historial = NewsletterHistory(
-                    asunto=subject,
-                    contenido=content,
-                    sent_count=sent_count
-                )
+            # Obtener todos los suscriptores ordenados por ID desc (últimos registrados primero)
+            clientes = Cliente.query.filter_by(acepta_newsletter=True).order_by(Cliente.id.desc()).all()
+            all_recipients = [{'email': c.email, 'nombre': c.nombre} for c in clientes]
+            
+            if not all_recipients:
+                return jsonify({'error': 'No hay suscriptores para enviar'}), 400
+
+            # Si son menos de 300, enviar todo ahora
+            if len(all_recipients) <= 300:
+                sent_count = NotificationService.send_newsletter(subject, content, all_recipients, test_email)
+                
+                # Guardar en historial
+                historial = NewsletterHistory(asunto=subject, contenido=content, sent_count=sent_count)
                 db.session.add(historial)
                 db.session.commit()
-            except Exception as hist_err:
-                print(f"Error guardando historial newsletter: {hist_err}")
-                db.session.rollback()
+                
+                return jsonify({'message': 'Newsletter enviado exitosamente', 'sent_count': sent_count}), 200
+            
+            else:
+                # LÓGICA DE GOTEO (Drip) - Más de 300 destinatarios
+                # Grupo 1: Primeros 300 (enviar ahora)
+                grupo_ahora = all_recipients[:300]
+                restantes = all_recipients[300:]
+                
+                sent_count = NotificationService.send_newsletter(subject, content, grupo_ahora)
+                
+                # Guardar primer envío en historial
+                historial = NewsletterHistory(asunto=subject, contenido=f"[Grupo 1/Gotéo] {content[:50]}...", sent_count=sent_count)
+                db.session.add(historial)
+                
+                # Programar el resto en bloques de 300 para los días siguientes
+                from models import ScheduledNewsletter
+                chunk_size = 300
+                dias_offset = 1
+                
+                for i in range(0, len(restantes), chunk_size):
+                    chunk = restantes[i:i + chunk_size]
+                    proximo_envio = datetime.utcnow() + timedelta(days=dias_offset)
+                    
+                    programado = ScheduledNewsletter(
+                        asunto=f"(Continuación) {subject}",
+                        contenido=content,
+                        tipo='unica',
+                        scheduled_at=proximo_envio,
+                        destinatarios=json.dumps(chunk),
+                        activa=True
+                    )
+                    db.session.add(programado)
+                    dias_offset += 1
+                
+                db.session.commit()
+                return jsonify({
+                    'message': f'Se enviaron 300 emails ahora. Los restantes {len(restantes)} se programaron automáticamente en bloques diarios para respetar el límite de 300/día.',
+                    'sent_now': sent_count,
+                    'total_scheduled': len(restantes)
+                }), 200
 
-        return jsonify({'message': 'Newsletter procesado', 'sent_count': sent_count, 'total_targets': len(recipients)}), 200
+        else:
+            # Envío de prueba (siempre ahora)
+            recipients = [{'email': test_email, 'nombre': 'Admin Test'}]
+            sent_count = NotificationService.send_newsletter(subject, content, recipients, test_email)
+            return jsonify({'message': 'Newsletter de prueba enviado', 'sent_count': sent_count}), 200
+
     except Exception as e:
+        db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
 

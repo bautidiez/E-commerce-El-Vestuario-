@@ -43,6 +43,9 @@ class ScheduledNewsletter(db.Model):
     # Hora común para recurrentes (HH:MM)
     hora_envio = db.Column(db.String(5), nullable=True)
     
+    # Lista de emails específicos (opcional, si es NULL se envía a todos los activos)
+    destinatarios = db.Column(db.Text, nullable=True)
+    
     activa = db.Column(db.Boolean, default=True)
     last_run_at = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -57,6 +60,7 @@ class ScheduledNewsletter(db.Model):
             'dia_semana': self.dia_semana,
             'posicion_mes': self.posicion_mes,
             'hora_envio': self.hora_envio,
+            'destinatarios': self.destinatarios,
             'activa': self.activa,
             'last_run_at': self.last_run_at.isoformat() if self.last_run_at else None,
             'created_at': self.created_at.isoformat() if self.created_at else None

@@ -61,8 +61,18 @@ def process_scheduled_newsletters(app):
                     print(f"DEBUG SCHEDULER: Ejecutando newsletter programado ID {item.id} - {item.asunto}")
                     
                     # Obtener destinatarios
-                    clientes = Cliente.query.filter_by(acepta_newsletter=True).all()
-                    recipients = [{'email': c.email, 'nombre': c.nombre} for c in clientes]
+                    recipients = []
+                    if item.destinatarios:
+                        import json
+                        try:
+                            # Formato: [{"email": "...", "nombre": "..."}, ...]
+                            recipients = json.loads(item.destinatarios)
+                        except:
+                            print(f"ERROR: No se pudo parsear destinatarios del programado {item.id}")
+                    
+                    if not recipients:
+                        clientes = Cliente.query.filter_by(acepta_newsletter=True).all()
+                        recipients = [{'email': c.email, 'nombre': c.nombre} for c in clientes]
                     
                     if recipients:
                         sent_count = NotificationService.send_newsletter(item.asunto, item.contenido, recipients)
