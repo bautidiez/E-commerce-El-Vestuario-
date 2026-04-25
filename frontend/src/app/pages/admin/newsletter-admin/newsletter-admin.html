@@ -85,8 +85,8 @@
                             <div class="schedule-details" *ngIf="tipoProgramacion !== 'inmediato'">
                                 <!-- Una vez -->
                                 <div class="form-group" *ngIf="tipoProgramacion === 'unica'">
-                                    <label>Fecha y Hora</label>
-                                    <input type="datetime-local" [(ngModel)]="fechaUnica" class="form-control">
+                                    <label>Fecha de envío</label>
+                                    <input type="date" [(ngModel)]="fechaUnica" class="form-control">
                                 </div>
 
                                 <!-- Semanal -->
@@ -110,20 +110,20 @@
                                     </div>
                                 </div>
 
-                                <!-- Hora común para recurrentes -->
-                                <div class="form-group" *ngIf="tipoProgramacion === 'semanal' || tipoProgramacion === 'mensual'">
+                                <!-- Selector de Hora Universal -->
+                                <div class="form-group">
                                     <label>Hora de envío</label>
                                     <div class="custom-time-picker">
                                         <div class="time-part">
-                                            <button (click)="changeHour(1)"><i class="fas fa-chevron-up"></i></button>
+                                            <button (click)="changeHour(1)" [disabled]="hourSelected === 23"><i class="fas fa-chevron-up"></i></button>
                                             <input type="text" [value]="hourSelected | number:'2.0-0'" readonly>
-                                            <button (click)="changeHour(-1)"><i class="fas fa-chevron-down"></i></button>
+                                            <button (click)="changeHour(-1)" [disabled]="hourSelected === 0"><i class="fas fa-chevron-down"></i></button>
                                         </div>
                                         <div class="time-separator">:</div>
                                         <div class="time-part">
-                                            <button (click)="changeMinute(1)"><i class="fas fa-chevron-up"></i></button>
+                                            <button (click)="changeMinute(1)" [disabled]="minuteSelected === 59"><i class="fas fa-chevron-up"></i></button>
                                             <input type="text" [value]="minuteSelected | number:'2.0-0'" readonly>
-                                            <button (click)="changeMinute(-1)"><i class="fas fa-chevron-down"></i></button>
+                                            <button (click)="changeMinute(-1)" [disabled]="minuteSelected === 0"><i class="fas fa-chevron-down"></i></button>
                                         </div>
                                     </div>
                                 </div>

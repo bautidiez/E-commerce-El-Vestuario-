@@ -63,6 +63,10 @@ export class NewsletterAdminComponent implements OnInit {
         this.loadHistory();
         this.loadScheduled();
         this.loadStats();
+        
+        // Inicializar fecha por defecto
+        const today = new Date();
+        this.fechaUnica = today.toISOString().split('T')[0];
     }
 
     loadHistory() {
@@ -171,13 +175,19 @@ export class NewsletterAdminComponent implements OnInit {
     }
 
     changeHour(delta: number) {
-        this.hourSelected = (this.hourSelected + delta + 24) % 24;
-        this.updateHoraEnvio();
+        const newVal = this.hourSelected + delta;
+        if (newVal >= 0 && newVal <= 23) {
+            this.hourSelected = newVal;
+            this.updateHoraEnvio();
+        }
     }
 
     changeMinute(delta: number) {
-        this.minuteSelected = (this.minuteSelected + delta + 60) % 60;
-        this.updateHoraEnvio();
+        const newVal = this.minuteSelected + delta;
+        if (newVal >= 0 && newVal <= 59) {
+            this.minuteSelected = newVal;
+            this.updateHoraEnvio();
+        }
     }
 
     private scheduleEmail() {
@@ -191,11 +201,16 @@ export class NewsletterAdminComponent implements OnInit {
 
         this.updateHoraEnvio(); // Asegurar que horaEnvio esté sincronizada
 
+        let scheduledAt = null;
+        if (this.tipoProgramacion === 'unica') {
+            scheduledAt = `${this.fechaUnica}T${this.horaEnvio}:00`;
+        }
+
         const payload = {
             subject: this.subject,
             content: this.content,
             tipo: this.tipoProgramacion,
-            scheduled_at: this.tipoProgramacion === 'unica' ? this.fechaUnica : null,
+            scheduled_at: scheduledAt,
             dia_semana: (this.tipoProgramacion === 'semanal' || this.tipoProgramacion === 'mensual') ? this.diaSemana : null,
             posicion_mes: this.tipoProgramacion === 'mensual' ? this.posicionMes : null,
             hora_envio: this.horaEnvio

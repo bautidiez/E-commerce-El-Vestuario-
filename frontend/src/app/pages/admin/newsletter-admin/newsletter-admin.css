@@ -500,11 +500,17 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
-.time-part button:hover {
+.time-part button:hover:not(:disabled) {
     background: #667eea;
     color: #fff;
     border-color: #667eea;
     transform: translateY(-1px);
+}
+
+.time-part button:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    background: #f1f5f9;
 }
 
 .time-part input {
