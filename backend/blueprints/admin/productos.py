@@ -223,10 +223,19 @@ def upload_imagen(producto_id):
             webp_filename = f"{uuid.uuid4()}.webp"
             filepath = os.path.join(current_app.config['UPLOAD_FOLDER'], webp_filename)
             img.save(filepath, 'WEBP', quality=85)
+            es_principal = request.form.get('es_principal') == 'true'
+            orden = int(request.form.get('orden', 0))
+            
+            # Si la nueva imagen va a ser principal, desmarcar las anteriores
+            if es_principal:
+                ImagenProducto.query.filter_by(producto_id=producto_id).update({'es_principal': False})
+                db.session.flush()
+            
             imagen = ImagenProducto(
                 producto_id=producto_id,
                 url=f"/static/uploads/{webp_filename}",
-                es_principal=request.form.get('es_principal') == 'true'
+                es_principal=es_principal,
+                orden=orden
             )
             db.session.add(imagen)
             db.session.commit()

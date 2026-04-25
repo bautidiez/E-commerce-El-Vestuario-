@@ -1,29 +1,31 @@
 <div class="admin-container">
   <div class="admin-header">
-    <div class="header-title">
-      <a class="btn-back" routerLink="/admin/gestion" title="Volver al Panel de Gestión">
-        <i class="fas fa-arrow-left"></i>
-      </a>
-      <h1>{{ activeTab === 'ventas-externas' ? '🛍️ GESTIÓN DE VENTAS EXTERNAS' : '📦 GESTIÓN DE STOCK' }}</h1>
-      <p class="header-subtitle" *ngIf="activeTab === 'ventas-externas'">Registra ventas realizadas fuera de la tienda web</p>
+    <div class="admin-header-container">
+      <div class="header-title">
+        <a class="btn-back" routerLink="/admin/gestion" title="Volver al Panel de Gestión">
+          <i class="fas fa-arrow-left"></i>
+        </a>
+        <h1>{{ activeTab === 'ventas-externas' ? '🛍️ GESTIÓN DE VENTAS EXTERNAS' : '📦 GESTIÓN DE STOCK' }}</h1>
+        <p class="header-subtitle" *ngIf="activeTab === 'ventas-externas'">Registra ventas realizadas fuera de la tienda web</p>
+      </div>
+      <div class="header-stats" *ngIf="activeTab === 'stock'">
+        <div class="stat-card warning" *ngIf="productosConStockBajo > 0">
+          <span class="stat-number">{{productosConStockBajo}}</span>
+          <span class="stat-label">Stock Bajo</span>
+        </div>
+        <div class="stat-card danger" *ngIf="productosAgotados > 0">
+          <span class="stat-number">{{ productosAgotados}}</span>
+          <span class="stat-label">Agotados</span>
+        </div>
+        <div class="stat-card info">
+          <span class="stat-number">{{ stock.length }}</span>
+          <span class="stat-label">Variantes</span>
+        </div>
+      </div>
+      <button class="btn btn-primary" (click)="abrirAgregarStock()" *ngIf="activeTab === 'stock'">
+        ➕ Agregar Stock
+      </button>
     </div>
-    <div class="header-stats" *ngIf="activeTab === 'stock'">
-      <div class="stat-card warning" *ngIf="productosConStockBajo > 0">
-        <span class="stat-number">{{productosConStockBajo}}</span>
-        <span class="stat-label">Stock Bajo</span>
-      </div>
-      <div class="stat-card danger" *ngIf="productosAgotados > 0">
-        <span class="stat-number">{{ productosAgotados}}</span>
-        <span class="stat-label">Agotados</span>
-      </div>
-      <div class="stat-card info">
-        <span class="stat-number">{{ stock.length }}</span>
-        <span class="stat-label">Variantes</span>
-      </div>
-    </div>
-    <button class="btn btn-primary" (click)="abrirAgregarStock()" *ngIf="activeTab === 'stock'">
-      ➕ Agregar Stock
-    </button>
   </div>
 
   <div class="admin-content-wrapper">

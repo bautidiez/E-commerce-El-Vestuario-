@@ -1,26 +1,28 @@
 <div class="admin-container">
     <div class="admin-header">
-        <div class="header-title">
-            <a class="btn-back" routerLink="/admin/gestion" title="Volver al Panel de Gestión">
-                <i class="fas fa-arrow-left"></i>
-            </a>
-            <h1>📂 GESTIÓN DE CATEGORÍAS</h1>
-        </div>
-        <div class="actions">
-            <button class="btn btn-view" (click)="fixSequences()"
-                title="Sincronizar secuencias de ID (soluciona error de ID duplicado)"
-                style="background: #6c757d; color: white; margin-right: 10px;">
-                🔄 Sincronizar
-            </button>
-            <button class="btn btn-view" (click)="vistaActual = 'arbol'" [class.active]="vistaActual === 'arbol'">
-                🌳 Vista Árbol
-            </button>
-            <button class="btn btn-view" (click)="vistaActual = 'lista'" [class.active]="vistaActual === 'lista'">
-                📋 Vista Lista
-            </button>
-            <button class="btn btn-primary" (click)="nueva()">
-                ➕ Nueva Categoría
-            </button>
+        <div class="admin-header-container">
+            <div class="header-title">
+                <a class="btn-back" routerLink="/admin/gestion" title="Volver al Panel de Gestión">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <h1>📂 GESTIÓN DE CATEGORÍAS</h1>
+            </div>
+            <div class="actions">
+                <button class="btn btn-view" (click)="fixSequences()"
+                    title="Sincronizar secuencias de ID (soluciona error de ID duplicado)"
+                    style="background: #6c757d; color: white; margin-right: 10px;">
+                    🔄 Sincronizar
+                </button>
+                <button class="btn btn-view" (click)="vistaActual = 'arbol'" [class.active]="vistaActual === 'arbol'">
+                    🌳 Vista Árbol
+                </button>
+                <button class="btn btn-view" (click)="vistaActual = 'lista'" [class.active]="vistaActual === 'lista'">
+                    📋 Vista Lista
+                </button>
+                <button class="btn btn-primary" (click)="nueva()">
+                    ➕ Nueva Categoría
+                </button>
+            </div>
         </div>
     </div>
 

@@ -19,10 +19,7 @@
 
 
 .admin-header {
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    padding: 1.2rem 2rem !important;
+    padding: 1.2rem 0 !important;
     background: #000 !important;
     color: #fff !important;
     position: sticky !important;

@@ -13,6 +13,8 @@ import os
 import time
 import logging
 from extensions import jwt, mail, compress, cors, limiter
+import firebase_admin
+from firebase_admin import credentials
 
 # Cargar variables de entorno
 load_dotenv()
@@ -89,6 +91,30 @@ cors.init_app(app)
 compress.init_app(app)
 limiter.init_app(app)
 
+# Inicializar Firebase
+firebase_creds_path = os.environ.get('FIREBASE_CREDENTIALS_PATH', 'backend/firebase-service-account.json')
+if os.path.exists(firebase_creds_path):
+    try:
+        cred = credentials.Certificate(firebase_creds_path)
+        firebase_admin.initialize_app(cred)
+        print("✓ Firebase Admin SDK inicializado exitosamente")
+    except Exception as e:
+        print(f"⚠ Error inicializando Firebase: {e}")
+else:
+    # Fallback para Vercel o entornos sin archivo físico (usando variables de entorno)
+    firebase_config = os.environ.get('FIREBASE_CONFIG_JSON')
+    if firebase_config:
+        import json
+        try:
+            cred_dict = json.loads(firebase_config)
+            cred = credentials.Certificate(cred_dict)
+            firebase_admin.initialize_app(cred)
+            print("✓ Firebase Admin SDK inicializado (vía ENV)")
+        except Exception as e:
+            print(f"⚠ Error inicializando Firebase vía ENV: {e}")
+    else:
+        print("⚠ Firebase no inicializado: falta el archivo de credenciales")
+
 # Importar modelos y rutas
 from models import *
 # Legacy routes removed in favor of modular Blueprints
@@ -101,6 +127,7 @@ from blueprints.auth import auth_bp
 from blueprints.store_public import store_public_bp
 from blueprints.clients import clients_bp
 from blueprints.payments import payments_bp
+from blueprints.google_auth import google_auth_bp
 
 # Blueprints de admin — módulos por dominio
 from blueprints.admin import admin_blueprints
@@ -109,6 +136,7 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(store_public_bp)
 app.register_blueprint(clients_bp)
 app.register_blueprint(payments_bp, url_prefix='/api/payments')
+app.register_blueprint(google_auth_bp)
 
 for bp in admin_blueprints:
     app.register_blueprint(bp)

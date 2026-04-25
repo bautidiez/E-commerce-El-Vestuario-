@@ -15,11 +15,14 @@ class Cliente(db.Model):
     telefono_verificado = db.Column(db.Boolean, default=False)
     metodo_verificacion = db.Column(db.String(20), default='telefono')
     codigo_verificacion = db.Column(db.String(6), nullable=True)
+    google_id = db.Column(db.String(255), unique=True, nullable=True)
+    imagen_url = db.Column(db.String(500), nullable=True)
     acepta_newsletter = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     __table_args__ = (
         db.Index('idx_cliente_email', 'email', unique=True),
+        db.Index('idx_cliente_google', 'google_id', unique=True),
     )
 
     def set_password(self, password):
@@ -38,6 +41,8 @@ class Cliente(db.Model):
             'telefono': self.telefono,
             'metodo_verificacion': self.metodo_verificacion,
             'acepta_newsletter': self.acepta_newsletter,
+            'imagen_url': self.imagen_url,
+            'google_logged': bool(self.google_id),
             'created_at': self.created_at.isoformat() if self.created_at else None
         }
 

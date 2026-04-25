@@ -13,11 +13,8 @@
 }
 
 .admin-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-bottom: 2rem;
-  padding: 1.2rem 2rem;
+  padding: 1.2rem 0;
   background: #000;
   color: #fff;
   border-radius: 0;
