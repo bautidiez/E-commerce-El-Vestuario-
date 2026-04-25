@@ -201,12 +201,11 @@ def get_scheduled_newsletters():
 @misc_bp.route('/api/admin/newsletter/stats', methods=['GET'])
 @jwt_required()
 def get_newsletter_stats():
-    """Retorna estadísticas de suscriptores"""
+    """Retorna estadísticas de usuarios registrados únicos"""
     try:
         from models import Cliente
-        # Contar clientes únicos que aceptan newsletter
-        # Como email es unique en la DB, count() es suficiente para "usuarios únicos"
-        count = Cliente.query.filter_by(acepta_newsletter=True).count()
+        # Contamos todos los clientes únicos registrados
+        count = Cliente.query.count()
         return jsonify({'total_subscribers': count}), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500

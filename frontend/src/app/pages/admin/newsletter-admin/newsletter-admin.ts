@@ -24,6 +24,10 @@ export class NewsletterAdminComponent implements OnInit {
     diaSemana: number = 0; // 0=Lunes
     posicionMes: number = 1; // 1=Primero, 5=Último
     horaEnvio: string = '10:00';
+    
+    // Selectores de hora custom
+    hourSelected: number = 10;
+    minuteSelected: number = 0;
 
     isLoading: boolean = false;
     history: any[] = [];
@@ -160,6 +164,22 @@ export class NewsletterAdminComponent implements OnInit {
         });
     }
 
+    updateHoraEnvio() {
+        const h = this.hourSelected.toString().padStart(2, '0');
+        const m = this.minuteSelected.toString().padStart(2, '0');
+        this.horaEnvio = `${h}:${m}`;
+    }
+
+    changeHour(delta: number) {
+        this.hourSelected = (this.hourSelected + delta + 24) % 24;
+        this.updateHoraEnvio();
+    }
+
+    changeMinute(delta: number) {
+        this.minuteSelected = (this.minuteSelected + delta + 60) % 60;
+        this.updateHoraEnvio();
+    }
+
     private scheduleEmail() {
         if (this.tipoProgramacion === 'unica' && !this.fechaUnica) {
             this.toastService.show('Elegí una fecha para programar', 'error');
@@ -168,6 +188,8 @@ export class NewsletterAdminComponent implements OnInit {
 
         this.isLoading = true;
         this.cdr.detectChanges();
+
+        this.updateHoraEnvio(); // Asegurar que horaEnvio esté sincronizada
 
         const payload = {
             subject: this.subject,
