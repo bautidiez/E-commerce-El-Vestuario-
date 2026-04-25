@@ -134,3 +134,70 @@ def get_newsletter_history():
         return jsonify([h.to_dict() for h in history]), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+
+@misc_bp.route('/api/admin/newsletter/scheduled', methods=['GET'])
+@jwt_required()
+def get_scheduled_newsletters():
+    try:
+        from models import ScheduledNewsletter
+        scheduled = ScheduledNewsletter.query.order_by(ScheduledNewsletter.created_at.desc()).all()
+        return jsonify([s.to_dict() for s in scheduled]), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@misc_bp.route('/api/admin/newsletter/schedule', methods=['POST'])
+@jwt_required()
+def schedule_newsletter():
+    try:
+        from models import ScheduledNewsletter, db
+        from datetime import datetime
+
+        data = request.get_json()
+        subject = data.get('subject')
+        content = data.get('content')
+        tipo = data.get('tipo', 'unica') # 'unica', 'semanal', 'mensual'
+        
+        if not subject or not content:
+            return jsonify({'error': 'Asunto y contenido son requeridos'}), 400
+
+        scheduled = ScheduledNewsletter(
+            asunto=subject,
+            contenido=content,
+            tipo=tipo,
+            hora_envio=data.get('hora_envio')
+        )
+
+        if tipo == 'unica':
+            # Formato esperado: "YYYY-MM-DDTHH:MM"
+            if data.get('scheduled_at'):
+                scheduled.scheduled_at = datetime.fromisoformat(data['scheduled_at'].replace('Z', ''))
+        
+        elif tipo == 'semanal':
+            scheduled.dia_semana = data.get('dia_semana') # 0-6
+        
+        elif tipo == 'mensual':
+            scheduled.dia_semana = data.get('dia_semana') # 0-6
+            scheduled.posicion_mes = data.get('posicion_mes') # 1-5
+
+        db.session.add(scheduled)
+        db.session.commit()
+        return jsonify(scheduled.to_dict()), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
+
+@misc_bp.route('/api/admin/newsletter/scheduled/<int:id>', methods=['DELETE'])
+@jwt_required()
+def delete_scheduled_newsletter(id):
+    try:
+        from models import ScheduledNewsletter, db
+        item = ScheduledNewsletter.query.get_or_404(id)
+        db.session.delete(item)
+        db.session.commit()
+        return jsonify({'message': 'Programación eliminada'}), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500

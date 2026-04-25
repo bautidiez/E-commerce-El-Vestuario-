@@ -39,9 +39,10 @@
                 <!-- Actions Card -->
                 <div class="actions-card">
                     <div class="card-header">
-                        <h3>⚡ Acciones</h3>
+                        <h3>⚡ Configurar y Enviar</h3>
                     </div>
                     <div class="card-body">
+                        <!-- Enviar Prueba -->
                         <div class="test-section">
                             <label>📧 Enviar Prueba</label>
                             <div class="test-input-wrapper">
@@ -50,17 +51,80 @@
                                     {{ isLoading ? '⌛' : 'Probar' }}
                                 </button>
                             </div>
-                            <small class="hint">Recibirás una copia exacta antes del envío masivo.</small>
+                        </div>
+
+                        <div class="divider"></div>
+
+                        <!-- Programación -->
+                        <div class="schedule-section">
+                            <label>📅 Cuándo enviar</label>
+                            <div class="schedule-options">
+                                <div class="option-row">
+                                    <input type="radio" id="opt-now" name="tipo" [(ngModel)]="tipoProgramacion" value="inmediato">
+                                    <label for="opt-now">Enviar ahora</label>
+                                </div>
+                                <div class="option-row">
+                                    <input type="radio" id="opt-once" name="tipo" [(ngModel)]="tipoProgramacion" value="unica">
+                                    <label for="opt-once">Fecha específica</label>
+                                </div>
+                                <div class="option-row">
+                                    <input type="radio" id="opt-weekly" name="tipo" [(ngModel)]="tipoProgramacion" value="semanal">
+                                    <label for="opt-weekly">Recurrente semanal</label>
+                                </div>
+                                <div class="option-row">
+                                    <input type="radio" id="opt-monthly" name="tipo" [(ngModel)]="tipoProgramacion" value="mensual">
+                                    <label for="opt-monthly">Recurrente mensual</label>
+                                </div>
+                            </div>
+
+                            <!-- Campos dinámicos según elección -->
+                            <div class="schedule-details" *ngIf="tipoProgramacion !== 'inmediato'">
+                                <!-- Una vez -->
+                                <div class="form-group" *ngIf="tipoProgramacion === 'unica'">
+                                    <label>Fecha y Hora</label>
+                                    <input type="datetime-local" [(ngModel)]="fechaUnica" class="form-control">
+                                </div>
+
+                                <!-- Semanal -->
+                                <div class="form-group" *ngIf="tipoProgramacion === 'semanal'">
+                                    <label>Día de la semana</label>
+                                    <select [(ngModel)]="diaSemana" class="form-control">
+                                        <option *ngFor="let d of diasSemana" [value]="d.id">{{ d.nombre }}</option>
+                                    </select>
+                                </div>
+
+                                <!-- Mensual -->
+                                <div class="form-group" *ngIf="tipoProgramacion === 'mensual'">
+                                    <label>Frecuencia</label>
+                                    <div class="monthly-inputs">
+                                        <select [(ngModel)]="posicionMes" class="form-control">
+                                            <option *ngFor="let p of posicionesMes" [value]="p.id">{{ p.nombre }}</option>
+                                        </select>
+                                        <select [(ngModel)]="diaSemana" class="form-control">
+                                            <option *ngFor="let d of diasSemana" [value]="d.id">{{ d.nombre }}</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Hora común para recurrentes -->
+                                <div class="form-group" *ngIf="tipoProgramacion === 'semanal' || tipoProgramacion === 'mensual'">
+                                    <label>Hora de envío</label>
+                                    <input type="time" [(ngModel)]="horaEnvio" class="form-control">
+                                </div>
+                            </div>
                         </div>
 
                         <div class="divider"></div>
 
                         <div class="send-section">
-                            <div class="warning-box">
-                                <p>⚠️ <strong>¡Atención!</strong> Esta acción enviará el correo a todos los suscritos.</p>
+                            <div class="warning-box" *ngIf="tipoProgramacion === 'inmediato'">
+                                <p>⚠️ <strong>¡Atención!</strong> Se enviará a todos los suscriptores de inmediato.</p>
                             </div>
-                            <button class="btn btn-send-all" (click)="send(false)" [disabled]="isLoading">
-                                <span *ngIf="!isLoading">🚀 ENVIAR A TODOS</span>
+                            <button class="btn btn-send-all" (click)="send(false)" [disabled]="isLoading" [class.btn-schedule]="tipoProgramacion !== 'inmediato'">
+                                <span *ngIf="!isLoading">
+                                    <i class="fas" [class.fa-rocket]="tipoProgramacion === 'inmediato'" [class.fa-calendar-alt]="tipoProgramacion !== 'inmediato'"></i>
+                                    {{ tipoProgramacion === 'inmediato' ? '🚀 ENVIAR A TODOS' : '📅 PROGRAMAR ENVÍO' }}
+                                </span>
                                 <span *ngIf="isLoading">⏳ PROCESANDO...</span>
                             </button>
                         </div>
@@ -71,6 +135,40 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Scheduled Section -->
+            <div class="history-section-container scheduled-container" *ngIf="scheduled.length > 0">
+                <div class="card-header">
+                    <h3>🕒 Envíos Programados</h3>
+                </div>
+                <div class="history-list">
+                    <div class="history-item scheduled-item" *ngFor="let item of scheduled">
+                        <div class="history-info">
+                            <span class="badge" [ngClass]="item.tipo">
+                                {{ item.tipo === 'unica' ? 'Una vez' : (item.tipo === 'semanal' ? 'Semanal' : 'Mensual') }}
+                            </span>
+                            <span class="history-subject">{{ item.asunto }}</span>
+                            <span class="schedule-text">
+                                <ng-container *ngIf="item.tipo === 'unica'">
+                                    {{ item.scheduled_at | date:'dd/MM HH:mm' }}
+                                </ng-container>
+                                <ng-container *ngIf="item.tipo === 'semanal'">
+                                    Todos los {{ getDiaNombre(item.dia_semana) }} a las {{ item.hora_envio }}
+                                </ng-container>
+                                <ng-container *ngIf="item.tipo === 'mensual'">
+                                    El {{ getPosicionNombre(item.posicion_mes) }} {{ getDiaNombre(item.dia_semana) }} a las {{ item.hora_envio }}
+                                </ng-container>
+                            </span>
+                        </div>
+                        <div class="history-actions">
+                            <button class="btn btn-delete-scheduled" (click)="deleteScheduled(item.id)" title="Cancelar programación">
+                                🗑️ Cancelar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
             </div>
 
             <!-- History Section -->

@@ -156,30 +156,45 @@ def debug_promotions():
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 # ==================== BACKGROUND SCHEDULER ====================
-# Configurar tareas programadas (auto-limpieza de pedidos expirados)
-# TEMPORARILY DISABLED - Install apscheduler if you need this feature: pip install apscheduler
-# from apscheduler.schedulers.background import BackgroundScheduler
-# from cleanup_jobs import eliminar_pedidos_expirados
-# import atexit
-# 
-# scheduler = BackgroundScheduler()
-# # Ejecutar cleanup cada 1 hora
-# scheduler.add_job(
-#     func=eliminar_pedidos_expirados,
-#     trigger="interval",
-#     hours=1,
-#     id='cleanup_expired_orders',
-#     name='Eliminar pedidos expirados no aprobados',
-#     replace_existing=True
-# )
-# 
-# # Iniciar scheduler solo si no está ya corriendo
-# if not scheduler.running:
-#     scheduler.start()
-#     print("✓ Background scheduler iniciado")
-# 
-# # Apagar scheduler al cerrar la app
-# atexit.register(lambda: scheduler.shutdown())
+from apscheduler.schedulers.background import BackgroundScheduler
+from cleanup_jobs import eliminar_pedidos_expirados
+from newsletter_jobs import process_scheduled_newsletters
+import atexit
+
+scheduler = BackgroundScheduler()
+
+# 1. Limpieza de pedidos cada 1 hora
+scheduler.add_job(
+    func=eliminar_pedidos_expirados,
+    trigger="interval",
+    hours=1,
+    args=[app],
+    id='cleanup_expired_orders',
+    name='Eliminar pedidos expirados no aprobados',
+    replace_existing=True
+)
+
+# 2. Procesamiento de Newsletter cada 1 minuto
+scheduler.add_job(
+    func=process_scheduled_newsletters,
+    trigger="interval",
+    minutes=1,
+    args=[app],
+    id='process_newsletters',
+    name='Enviar newsletters programados',
+    replace_existing=True
+)
+
+# Iniciar scheduler solo si no está ya corriendo y evitar duplicados en modo debug
+if not scheduler.running:
+    if os.environ.get('WERKZEUG_RUN_MAIN') == 'true' or not app.debug:
+        scheduler.start()
+        print("✓ Background scheduler iniciado (Cleanup & Newsletter)")
+    else:
+        print("✓ Background scheduler esperando al proceso principal...")
+
+# Apagar scheduler al cerrar la app
+atexit.register(lambda: scheduler.shutdown())
 
 # Crear tablas
 with app.app_context():

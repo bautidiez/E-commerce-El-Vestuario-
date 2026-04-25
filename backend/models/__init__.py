@@ -41,7 +41,7 @@ from .promociones import (
 from .ventas import VentaExterna
 
 # ── Marketing ─────────────────────────────────────────────────────────────────
-from .marketing import NewsletterHistory
+from .marketing import NewsletterHistory, ScheduledNewsletter
 
 __all__ = [
     'db',
@@ -62,5 +62,5 @@ __all__ = [
     # Ventas
     'VentaExterna',
     # Marketing
-    'NewsletterHistory',
+    'NewsletterHistory', 'ScheduledNewsletter',
 ]
