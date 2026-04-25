@@ -6,9 +6,10 @@
                     <i class="fas fa-arrow-left"></i>
                 </a>
                 <h1>📧 GESTIÓN DE NEWSLETTER</h1>
-                <div class="subscriber-badge" title="Total de usuarios únicos suscritos">
+                <div class="subscriber-badge" (click)="loadStats()" title="Click para actualizar">
                     <i class="fas fa-users"></i>
                     <span>{{ totalSubscribers }} Suscriptores</span>
+                    <i class="fas fa-sync-alt refresh-icon" [class.spinning]="isLoading"></i>
                 </div>
             </div>
         </div>
@@ -84,49 +85,68 @@
                             <!-- Campos dinámicos según elección -->
                             <div class="schedule-details" *ngIf="tipoProgramacion !== 'inmediato'">
                                 <!-- Una vez -->
-                                <div class="form-group" *ngIf="tipoProgramacion === 'unica'">
-                                    <label>Fecha de envío</label>
-                                    <input type="date" [(ngModel)]="fechaUnica" class="form-control">
+                                <div class="schedule-row" *ngIf="tipoProgramacion === 'unica'">
+                                    <div class="form-group date-group">
+                                        <label>Fecha de envío</label>
+                                        <input type="date" [(ngModel)]="fechaUnica" class="form-control compact-date">
+                                    </div>
+                                    <div class="form-group time-group">
+                                        <label>Hora de envío</label>
+                                        <div class="custom-time-picker">
+                                            <div class="time-part">
+                                                <button (click)="changeHour(1)" [disabled]="hourSelected === 23"><i class="fas fa-chevron-up"></i></button>
+                                                <input type="text" [value]="hourSelected | number:'2.0-0'" readonly>
+                                                <button (click)="changeHour(-1)" [disabled]="hourSelected === 0"><i class="fas fa-chevron-down"></i></button>
+                                            </div>
+                                            <div class="time-separator">:</div>
+                                            <div class="time-part">
+                                                <button (click)="changeMinute(1)" [disabled]="minuteSelected === 59"><i class="fas fa-chevron-up"></i></button>
+                                                <input type="text" [value]="minuteSelected | number:'2.0-0'" readonly>
+                                                <button (click)="changeMinute(-1)" [disabled]="minuteSelected === 0"><i class="fas fa-chevron-down"></i></button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <!-- Semanal -->
-                                <div class="form-group" *ngIf="tipoProgramacion === 'semanal'">
-                                    <label>Día de la semana</label>
-                                    <select [(ngModel)]="diaSemana" class="form-control">
-                                        <option *ngFor="let d of diasSemana" [value]="d.id">{{ d.nombre }}</option>
-                                    </select>
-                                </div>
-
-                                <!-- Mensual -->
-                                <div class="form-group" *ngIf="tipoProgramacion === 'mensual'">
-                                    <label>Frecuencia</label>
-                                    <div class="monthly-inputs">
-                                        <select [(ngModel)]="posicionMes" class="form-control">
-                                            <option *ngFor="let p of posicionesMes" [value]="p.id">{{ p.nombre }}</option>
-                                        </select>
+                                <!-- Semanal / Mensual -->
+                                <ng-container *ngIf="tipoProgramacion === 'semanal' || tipoProgramacion === 'mensual'">
+                                    <div class="form-group" *ngIf="tipoProgramacion === 'semanal'">
+                                        <label>Día de la semana</label>
                                         <select [(ngModel)]="diaSemana" class="form-control">
                                             <option *ngFor="let d of diasSemana" [value]="d.id">{{ d.nombre }}</option>
                                         </select>
                                     </div>
-                                </div>
 
-                                <!-- Selector de Hora Universal -->
-                                <div class="form-group">
-                                    <label>Hora de envío</label>
-                                    <div class="custom-time-picker">
-                                        <div class="time-part">
-                                            <button (click)="changeHour(1)" [disabled]="hourSelected === 23"><i class="fas fa-chevron-up"></i></button>
-                                            <input type="text" [value]="hourSelected | number:'2.0-0'" readonly>
-                                            <button (click)="changeHour(-1)" [disabled]="hourSelected === 0"><i class="fas fa-chevron-down"></i></button>
-                                        </div>
-                                        <div class="time-separator">:</div>
-                                        <div class="time-part">
-                                            <button (click)="changeMinute(1)" [disabled]="minuteSelected === 59"><i class="fas fa-chevron-up"></i></button>
-                                            <input type="text" [value]="minuteSelected | number:'2.0-0'" readonly>
-                                            <button (click)="changeMinute(-1)" [disabled]="minuteSelected === 0"><i class="fas fa-chevron-down"></i></button>
+                                    <div class="form-group" *ngIf="tipoProgramacion === 'mensual'">
+                                        <label>Frecuencia</label>
+                                        <div class="monthly-inputs">
+                                            <select [(ngModel)]="posicionMes" class="form-control">
+                                                <option *ngFor="let p of posicionesMes" [value]="p.id">{{ p.nombre }}</option>
+                                            </select>
+                                            <select [(ngModel)]="diaSemana" class="form-control">
+                                                <option *ngFor="let d of diasSemana" [value]="d.id">{{ d.nombre }}</option>
+                                            </select>
                                         </div>
                                     </div>
-                                </div>
+
+                                    <!-- Selector de Hora (cuando no es 'unica') -->
+                                    <div class="form-group">
+                                        <label>Hora de envío</label>
+                                        <div class="custom-time-picker">
+                                            <div class="time-part">
+                                                <button (click)="changeHour(1)" [disabled]="hourSelected === 23"><i class="fas fa-chevron-up"></i></button>
+                                                <input type="text" [value]="hourSelected | number:'2.0-0'" readonly>
+                                                <button (click)="changeHour(-1)" [disabled]="hourSelected === 0"><i class="fas fa-chevron-down"></i></button>
+                                            </div>
+                                            <div class="time-separator">:</div>
+                                            <div class="time-part">
+                                                <button (click)="changeMinute(1)" [disabled]="minuteSelected === 59"><i class="fas fa-chevron-up"></i></button>
+                                                <input type="text" [value]="minuteSelected | number:'2.0-0'" readonly>
+                                                <button (click)="changeMinute(-1)" [disabled]="minuteSelected === 0"><i class="fas fa-chevron-down"></i></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </ng-container>
                             </div>
                         </div>
 

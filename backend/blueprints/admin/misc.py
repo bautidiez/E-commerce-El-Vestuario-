@@ -204,10 +204,28 @@ def get_newsletter_stats():
     """Retorna estadísticas de usuarios registrados únicos"""
     try:
         from models import Cliente
-        # Contamos todos los clientes únicos registrados
-        count = Cliente.query.count()
-        return jsonify({'total_subscribers': count}), 200
+        # Intentar varias formas de conteo por si acaso
+        count_orm = Cliente.query.count()
+        
+        # Conteo crudo por si el ORM tiene algún filtro global (poco probable pero posible)
+        from sqlalchemy import text
+        result = db.session.execute(text("SELECT COUNT(*) FROM clientes")).fetchone()
+        count_raw = result[0] if result else 0
+        
+        # Usar el mayor por las dudas, o el que funcione
+        final_count = max(count_orm, count_raw)
+        
+        print(f"DEBUG STATS: ORM={count_orm}, RAW={count_raw}")
+        
+        return jsonify({
+            'total_subscribers': final_count,
+            'debug_info': {
+                'orm': count_orm,
+                'raw': count_raw
+            }
+        }), 200
     except Exception as e:
+        print(f"ERROR IN STATS: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 
