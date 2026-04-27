@@ -1,34 +1,92 @@
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap');
 
 .admin-header {
-  padding: 1.2rem 0 !important;
-  background: #000 !important;
+  padding: 1.5rem 0 !important;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
   color: #fff !important;
   position: sticky !important;
   top: 0 !important;
   z-index: 1000 !important;
   width: 100% !important;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4) !important;
   margin-bottom: 2rem !important;
+  backdrop-filter: blur(10px) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.admin-header-container {
+  max-width: 1600px !important;
+  margin: 0 auto !important;
+  padding: 0 2rem !important;
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  gap: 2rem !important;
+  flex-wrap: wrap !important;
 }
 
 .admin-header h1 {
   margin: 0 !important;
-  font-size: 1.8rem !important;
+  font-size: 2.2rem !important;
   color: #fff !important;
   font-weight: 800 !important;
   font-family: 'Bebas Neue', sans-serif !important;
-  letter-spacing: 1px !important;
+  letter-spacing: 2px !important;
   display: flex !important;
   align-items: center !important;
-  gap: 10px !important;
+  gap: 12px !important;
   text-transform: uppercase !important;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3) !important;
 }
 
 .header-title {
   display: flex !important;
   align-items: center !important;
-  gap: 1rem !important;
+  gap: 1.5rem !important;
+}
+
+.header-stats {
+  display: flex !important;
+  gap: 15px !important;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  padding: 8px 20px !important;
+  border-radius: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  cursor: default !important;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1) !important;
+}
+
+.stat-card:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  transform: translateY(-3px) scale(1.05) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 12px 20px rgba(0,0,0,0.3) !important;
+}
+
+.stat-card.info .stat-number {
+  color: #38bdf8 !important; /* Sky Blue */
+}
+
+.stat-number {
+  font-family: 'Bebas Neue', sans-serif !important;
+  font-size: 2rem !important;
+  line-height: 1 !important;
+  font-weight: 400 !important;
+}
+
+.stat-label {
+  font-size: 0.85rem !important;
+  text-transform: uppercase !important;
+  letter-spacing: 1.5px !important;
+  font-weight: 700 !important;
+  color: rgba(255, 255, 255, 0.7) !important;
 }
 
 .btn-back {
@@ -57,49 +115,72 @@
 }
 
 .search-box {
-  display: flex;
-  align-items: center;
-  background: white;
-  border: 2px solid #e2e8f0;
-  border-radius: 8px;
-  overflow: hidden;
-  transition: border-color 0.2s;
-  flex: 1;
-  min-width: 250px;
+  display: flex !important;
+  align-items: center !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 10px !important;
+  overflow: hidden !important;
+  transition: all 0.3s ease !important;
+  flex: 1 !important;
+  min-width: 280px !important;
+  backdrop-filter: blur(5px) !important;
 }
 
 .search-box:focus-within {
-  border-color: #2563eb;
+  border-color: #38bdf8 !important;
+  background: rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.2) !important;
 }
 
 .search-input {
+  background: transparent !important;
   border: none !important;
-  padding: 0.6rem 1rem;
-  flex: 1;
-  font-size: 0.95rem;
-  outline: none;
+  padding: 0.7rem 1.2rem !important;
+  flex: 1 !important;
+  font-size: 0.9rem !important;
+  outline: none !important;
+  color: #fff !important;
+}
+
+.search-input::placeholder {
+  color: rgba(255, 255, 255, 0.4) !important;
 }
 
 .btn-search-icon {
-  background: none;
-  border: none;
-  padding: 0 15px;
-  cursor: pointer;
-  font-size: 1.1rem;
-  color: #64748b;
-  transition: color 0.2s;
+  background: none !important;
+  border: none !important;
+  padding: 0 15px !important;
+  cursor: pointer !important;
+  font-size: 1rem !important;
+  color: rgba(255, 255, 255, 0.5) !important;
+  transition: all 0.3s ease !important;
 }
 
 .btn-search-icon:hover {
-  color: #2563eb;
+  color: #38bdf8 !important;
 }
 
 .filter-select {
-  padding: 0.6rem 1rem;
-  border: 2px solid #e2e8f0;
-  border-radius: 6px;
-  background: white;
-  cursor: pointer;
+  padding: 0.7rem 1.2rem !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 10px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #fff !important;
+  cursor: pointer !important;
+  outline: none !important;
+  transition: all 0.3s ease !important;
+  font-size: 0.9rem !important;
+}
+
+.filter-select:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.filter-select option {
+  background: #1e293b !important;
+  color: #fff !important;
 }
 
 /* Buttons */
@@ -158,33 +239,44 @@
 
 /* Data Table */
 .pedidos-table-container {
-  background: white;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background: #fff !important;
+  border-radius: 15px !important;
+  overflow: hidden !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid #edf2f7 !important;
 }
 
 .data-table {
-  width: 100%;
-  border-collapse: collapse;
+  width: 100% !important;
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
 }
 
 .data-table th {
-  background: #e2e8f0;
-  padding: 1rem;
-  text-align: left;
-  font-weight: 700;
-  color: #1e293b;
-  border-bottom: 2px solid #cbd5e1;
+  background: #f8fafc !important;
+  padding: 1.2rem 1rem !important;
+  text-align: left !important;
+  font-weight: 700 !important;
+  color: #64748b !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  text-transform: uppercase !important;
+  font-size: 0.75rem !important;
+  letter-spacing: 1px !important;
 }
 
 .data-table td {
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid #f1f5f9;
+  padding: 1.2rem 1rem !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  vertical-align: middle !important;
+}
+
+.data-table tr {
+  transition: all 0.2s ease !important;
 }
 
 .data-table tr:hover {
-  background: #fdfdfd;
+  background: #f8fafc !important;
+  transform: scale(1.001) !important;
 }
 
 .cliente-info div {

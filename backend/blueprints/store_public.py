@@ -32,9 +32,45 @@ def get_productos():
     filters = request.args.to_dict()
     
     pagination = ProductService.get_catalog(filters, page, page_size)
+    productos_db = pagination.items
+    
+    # --- OPTIMIZACIÓN: Pre-fetch de promociones para evitar N+1 ---
+    from models.promociones import PromocionProducto
+    ahora = datetime.utcnow()
+    
+    # 1. Promociones Globales (una sola consulta)
+    global_promos = PromocionProducto.query.filter(
+        PromocionProducto.alcance == 'tienda',
+        PromocionProducto.activa == True,
+        PromocionProducto.fecha_inicio <= ahora,
+        or_(PromocionProducto.fecha_fin >= ahora, PromocionProducto.fecha_fin == None)
+    ).all()
+    
+    # 2. Promociones por Categoría (una sola consulta para todas las categorías en la página)
+    cat_ids = list(set([p.categoria_id for p in productos_db]))
+    category_promos_list = PromocionProducto.query.filter(
+        PromocionProducto.activa == True,
+        PromocionProducto.fecha_inicio <= ahora,
+        or_(PromocionProducto.fecha_fin >= ahora, PromocionProducto.fecha_fin == None),
+        PromocionProducto.categorias.any(Categoria.id.in_(cat_ids))
+    ).all()
+    
+    # Mapear promociones a sus categorías
+    cat_promos_map = {}
+    for promo in category_promos_list:
+        for cat in promo.categorias:
+            if cat.id not in cat_promos_map: cat_promos_map[cat.id] = []
+            cat_promos_map[cat.id].append(promo)
+
+    # 3. Serialización con contexto pre-cargado
+    items_dict = []
+    for p in productos_db:
+        # Calcular promos activas combinando directas, categoría y globales
+        active_promos = p.get_promociones_activas(global_promos=global_promos, category_promos=cat_promos_map)
+        items_dict.append(p.to_dict(active_promos=active_promos))
     
     result = {
-        'items': [p.to_dict() for p in pagination.items],
+        'items': items_dict,
         'total': pagination.total,
         'page': page,
         'page_size': page_size,

@@ -3,6 +3,8 @@ from sqlalchemy import or_, case, select, exists, and_
 from extensions import limiter
 from cache_utils import cached
 
+from sqlalchemy.orm import joinedload
+
 class ProductService:
     @staticmethod
     @cached(ttl_seconds=300) # Cache por 5 minutos
@@ -10,7 +12,7 @@ class ProductService:
         """
         Lógica centralizada para obtener productos con filtros complejos.
         """
-        query = Producto.query
+        query = Producto.query.options(joinedload(Producto.categoria))
         
         # Filtro de activos por defecto
         if filters.get('activos') != 'false':

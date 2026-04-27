@@ -88,8 +88,7 @@ export class ApiService {
     }
 
     const queryString = Object.keys(params).map(key => `${key}=${encodeURIComponent(params[key])}`).join('&');
-    if (queryString) url += `?${queryString}&_v=${Date.now()}`;
-    else url += `?_v=${Date.now()}`;
+    if (queryString) url += `?${queryString}`;
 
     return this.http.get(url);
   }

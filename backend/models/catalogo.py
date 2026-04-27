@@ -240,26 +240,44 @@ class Producto(db.Model):
     def get_precio_actual(self):
         return self.precio_descuento if self.precio_descuento and self.precio_descuento > 0 else self.precio_base
 
-    def get_promociones_activas(self):
+    def get_promociones_activas(self, global_promos=None, category_promos=None):
         from .promociones import PromocionProducto
         ahora = datetime.utcnow()
-        promociones = [p for p in self.promociones if p.esta_activa()]
-        promociones_cat = PromocionProducto.query.filter(
-            PromocionProducto.activa == True,
-            PromocionProducto.fecha_inicio <= ahora,
-            or_(PromocionProducto.fecha_fin >= ahora, PromocionProducto.fecha_fin == None),
-            PromocionProducto.categorias.any(id=self.categoria_id)
-        ).all()
-        promociones_global = PromocionProducto.query.filter(
-            PromocionProducto.alcance == 'tienda',
-            PromocionProducto.activa == True,
-            PromocionProducto.fecha_inicio <= ahora,
-            or_(PromocionProducto.fecha_fin >= ahora, PromocionProducto.fecha_fin == None)
-        ).all()
-        todas = {p.id: p for p in (promociones + promociones_cat + promociones_global)}
+        
+        # 1. Promociones directas del producto
+        # 'self.promociones' es una relación Many-to-Many
+        promos_directas = [p for p in self.promociones if p.esta_activa()]
+        
+        # 2. Promociones por categoría
+        if category_promos is not None:
+            # Usar las pre-cargadas si existen
+            promos_cat = category_promos.get(self.categoria_id, [])
+        else:
+            promos_cat = PromocionProducto.query.filter(
+                PromocionProducto.activa == True,
+                PromocionProducto.fecha_inicio <= ahora,
+                or_(PromocionProducto.fecha_fin >= ahora, PromocionProducto.fecha_fin == None),
+                PromocionProducto.categorias.any(id=self.categoria_id)
+            ).all()
+            
+        # 3. Promociones globales (tienda)
+        if global_promos is not None:
+            promos_global = global_promos
+        else:
+            promos_global = PromocionProducto.query.filter(
+                PromocionProducto.alcance == 'tienda',
+                PromocionProducto.activa == True,
+                PromocionProducto.fecha_inicio <= ahora,
+                or_(PromocionProducto.fecha_fin >= ahora, PromocionProducto.fecha_fin == None)
+            ).all()
+            
+        todas = {p.id: p for p in (promos_directas + promos_cat + promos_global)}
         return list(todas.values())
 
-    def to_dict(self, include_stock=True):
+    def to_dict(self, include_stock=True, active_promos=None):
+        # Si no se pasan promociones, se calculan (legacy support)
+        promos_finales = active_promos if active_promos is not None else self.get_promociones_activas()
+        
         data = {
             'id': self.id,
             'nombre': self.nombre,
@@ -267,7 +285,7 @@ class Producto(db.Model):
             'precio_base': self.precio_base,
             'precio_descuento': self.precio_descuento,
             'precio_actual': self.get_precio_actual(),
-            'en_oferta': self.en_oferta,
+            'en_oferta': self.precio_descuento and self.precio_descuento > 0 or len(promos_finales) > 0,
             'categoria_id': self.categoria_id,
             'categoria_nombre': self.categoria.nombre if self.categoria else None,
             'categoria_principal': (
@@ -293,7 +311,7 @@ class Producto(db.Model):
             'tiene_stock_bajo': self.tiene_stock_bajo(),
             'esta_agotado': self.esta_agotado(),
             'imagenes': [img.to_dict() for img in sorted(self.imagenes, key=lambda x: x.orden or 0)],
-            'promociones': [p.to_dict() for p in self.get_promociones_activas()],
+            'promociones': [p.to_dict() for p in promos_finales],
             'created_at': self.created_at.isoformat() if self.created_at else None,
             'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }

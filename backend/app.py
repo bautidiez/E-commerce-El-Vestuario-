@@ -97,9 +97,9 @@ if os.path.exists(firebase_creds_path):
     try:
         cred = credentials.Certificate(firebase_creds_path)
         firebase_admin.initialize_app(cred)
-        print("✓ Firebase Admin SDK inicializado exitosamente")
+        print("[OK] Firebase Admin SDK inicializado exitosamente")
     except Exception as e:
-        print(f"⚠ Error inicializando Firebase: {e}")
+        print(f"[!] Error inicializando Firebase: {e}")
 else:
     # Fallback para Vercel o entornos sin archivo físico (usando variables de entorno)
     firebase_config = os.environ.get('FIREBASE_CONFIG_JSON')
@@ -109,11 +109,11 @@ else:
             cred_dict = json.loads(firebase_config)
             cred = credentials.Certificate(cred_dict)
             firebase_admin.initialize_app(cred)
-            print("✓ Firebase Admin SDK inicializado (vía ENV)")
+            print("[OK] Firebase Admin SDK inicializado (vía ENV)")
         except Exception as e:
-            print(f"⚠ Error inicializando Firebase vía ENV: {e}")
+            print(f"[!] Error inicializando Firebase vía ENV: {e}")
     else:
-        print("⚠ Firebase no inicializado: falta el archivo de credenciales")
+        print("[!] Firebase no inicializado: falta el archivo de credenciales")
 
 # Importar modelos y rutas
 from models import *
@@ -189,9 +189,9 @@ scheduler.add_job(
 if not scheduler.running:
     if os.environ.get('WERKZEUG_RUN_MAIN') == 'true' or not app.debug:
         scheduler.start()
-        print("✓ Background scheduler iniciado (Cleanup & Newsletter)")
+        print("[OK] Background scheduler iniciado (Cleanup & Newsletter)")
     else:
-        print("✓ Background scheduler esperando al proceso principal...")
+        print("[OK] Background scheduler esperando al proceso principal...")
 
 # Apagar scheduler al cerrar la app
 atexit.register(lambda: scheduler.shutdown())
@@ -443,7 +443,7 @@ def register_hooks(app):
             duration = (time.time() - g.start_time) * 1000
             print(f"DEBUG OUT: {request.method} {request.path} - {duration:.1f}ms", flush=True)
             if duration > 100: # Solo avisar si es realmente lento > 100ms
-                logger.warning(f"⚠️ SLOW: {request.method} {request.path} {duration:.1f}ms")
+                logger.warning(f"[!] SLOW: {request.method} {request.path} {duration:.1f}ms")
         return response
     
     app._hooks_registered = True
