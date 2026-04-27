@@ -31,41 +31,43 @@
             <button class="change-cp-btn" (click)="cambiarCodigoPostal()">Cambiar código postal</button>
         </div>
 
-        <!-- Envío a domicilio -->
-        <div class="shipping-section" *ngIf="getOpcionesDomicilio().length > 0">
-            <h5 class="section-title">📦 Envío a domicilio</h5>
-            <div class="shipping-options">
-                <div class="shipping-item" *ngFor="let opcion of getOpcionesDomicilio(); let i = index"
-                    [class.hidden]="!mostrarTodasOpciones && i >= 5">
-                    <div class="item-main">
-                        <span class="metodo-nombre">{{ opcion.nombre }}</span>
-                        <span class="metodo-tiempo">{{ opcion.tiempo }}</span>
-                    </div>
-                    <div class="item-price">
-                        <span class="price-val">${{ opcion.costo | number:'1.0-0' }}</span>
+        <div class="results-scroll-container">
+            <!-- Envío a domicilio -->
+            <div class="shipping-section" *ngIf="getOpcionesDomicilio().length > 0">
+                <h5 class="section-title">📦 Envío a domicilio</h5>
+                <div class="shipping-options">
+                    <div class="shipping-item" *ngFor="let opcion of getOpcionesDomicilio(); let i = index"
+                        [class.hidden]="!mostrarTodasOpciones && i >= 5">
+                        <div class="item-main">
+                            <span class="metodo-nombre">{{ opcion.nombre }}</span>
+                            <span class="metodo-tiempo">{{ opcion.tiempo }}</span>
+                        </div>
+                        <div class="item-price">
+                            <span class="price-val">${{ opcion.costo | number:'1.0-0' }}</span>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Retirar por -->
-        <div class="shipping-section" *ngIf="getOpcionesRetiro().length > 0">
-            <h5 class="section-title">🏪 Retirar por</h5>
-            <div class="shipping-options">
-                <div class="shipping-item" *ngFor="let opcion of getOpcionesRetiro()">
-                    <div class="item-main">
-                        <span class="metodo-nombre">{{ opcion.nombre }}</span>
-                        <span class="metodo-tiempo">{{ opcion.tiempo }}</span>
-                        <a *ngIf="opcion.nombre.toLowerCase().includes('correo') && !opcion.nombre.toLowerCase().includes('local')"
-                            href="https://www.correoargentino.com.ar/formularios/sucursales" target="_blank"
-                            class="ver-direcciones-link">📍 Ver direcciones</a>
-                        <a *ngIf="opcion.nombre.toLowerCase().includes('andreani') && !opcion.nombre.toLowerCase().includes('local')"
-                            href="https://www.andreani.com/buscar-sucursal" target="_blank"
-                            class="ver-direcciones-link">📍 Ver direcciones</a>
-                    </div>
-                    <div class="item-price">
-                        <span class="price-val" *ngIf="opcion.costo > 0">${{ opcion.costo | number:'1.0-0' }}</span>
-                        <span class="price-val free" *ngIf="opcion.costo === 0">Gratis</span>
+            <!-- Retirar por -->
+            <div class="shipping-section" *ngIf="getOpcionesRetiro().length > 0">
+                <h5 class="section-title">🏪 Retirar por</h5>
+                <div class="shipping-options">
+                    <div class="shipping-item" *ngFor="let opcion of getOpcionesRetiro()">
+                        <div class="item-main">
+                            <span class="metodo-nombre">{{ opcion.nombre }}</span>
+                            <span class="metodo-tiempo">{{ opcion.tiempo }}</span>
+                            <a *ngIf="opcion.nombre.toLowerCase().includes('correo') && !opcion.nombre.toLowerCase().includes('local')"
+                                href="https://www.correoargentino.com.ar/formularios/sucursales" target="_blank"
+                                class="ver-direcciones-link">📍 Ver direcciones</a>
+                            <a *ngIf="opcion.nombre.toLowerCase().includes('andreani') && !opcion.nombre.toLowerCase().includes('local')"
+                                href="https://www.andreani.com/buscar-sucursal" target="_blank"
+                                class="ver-direcciones-link">📍 Ver direcciones</a>
+                        </div>
+                        <div class="item-price">
+                            <span class="price-val" *ngIf="opcion.costo > 0">${{ opcion.costo | number:'1.0-0' }}</span>
+                            <span class="price-val free" *ngIf="opcion.costo === 0">Gratis</span>
+                        </div>
                     </div>
                 </div>
             </div>

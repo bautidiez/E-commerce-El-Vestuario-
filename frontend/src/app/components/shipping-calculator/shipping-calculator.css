@@ -95,10 +95,32 @@
 }
 
 .calculator-results {
-    margin-top: 25px;
-    padding-top: 20px;
+    margin-top: 15px;
+    padding-top: 15px;
     border-top: 1px solid #f0f0f0;
     animation: fadeIn 0.4s ease-out;
+}
+
+.results-scroll-container {
+    max-height: 180px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+/* Scrollbar styling */
+.results-scroll-container::-webkit-scrollbar {
+    width: 6px;
+}
+.results-scroll-container::-webkit-scrollbar-track {
+    background: #f1f1f1; 
+    border-radius: 4px;
+}
+.results-scroll-container::-webkit-scrollbar-thumb {
+    background: #ccc; 
+    border-radius: 4px;
+}
+.results-scroll-container::-webkit-scrollbar-thumb:hover {
+    background: #999; 
 }
 
 @keyframes fadeIn {
@@ -164,9 +186,9 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px;
+    padding: 10px; /* Reduced from 15px */
     background: #f8f9fa;
-    border-radius: 10px;
+    border-radius: 8px; /* Slightly reduced */
     border: 1px solid transparent;
     transition: all 0.2s;
 }
