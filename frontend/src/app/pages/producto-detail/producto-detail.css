@@ -10,7 +10,7 @@
 .product-detail-wrapper {
   display: flex;
   gap: 10px;
-  max-width: 1300px;
+  max-width: 1500px; /* Made wider as requested */
   margin: 0 auto;
 }
 
@@ -62,7 +62,7 @@
 
 .product-detail-content {
   display: grid;
-  grid-template-columns: 1fr 1.2fr;
+  grid-template-columns: 1fr 1.4fr; /* Give more space to right column */
   gap: 20px;
   flex: 1;
   background: #fff;
@@ -165,10 +165,23 @@
   letter-spacing: 1px;
 }
 
+.price-and-shipping-row {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  margin-top: 10px;
+}
+
 .product-price-section {
   display: flex;
   flex-direction: column;
   gap: 5px; /* Reduced from 15px */
+  flex: 1;
+}
+
+.shipping-calculator-wrapper {
+  flex: 1;
+  min-width: 280px; /* Ensure shipping calculator doesn't get too squeezed */
 }
 
 .price-main {

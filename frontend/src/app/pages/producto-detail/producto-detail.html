@@ -27,24 +27,31 @@
 
           <p class="product-category">{{ producto.categoria_nombre }}</p>
 
-          <div class="product-price-section">
-            <div class="price-main">
-              <span class="product-price"
-                [class.discount-price]="producto.precio_descuento || (producto.promociones && producto.promociones.length > 0)">
-                ${{ getPrecioFinal() | number:'1.0-0' }}
-              </span>
-              <span class="product-price-old"
-                *ngIf="producto.precio_descuento || (producto.promociones && producto.promociones.length > 0)">
-                ${{ producto.precio_base | number:'1.0-0' }}
-              </span>
-            </div>
-            <div class="price-descuento-transferencia">
-              <p class="price-label">En efectivo o transferencia:</p>
-              <div class="transfer-price-wrapper">
-                <p class="price-descuento">${{ getPrecioConDescuento() | number:'1.0-0' }}</p>
-                <span class="promo-badge">{{ getTransferenciaDiscountText() }}</span>
+          <div class="price-and-shipping-row">
+            <div class="product-price-section">
+              <div class="price-main">
+                <span class="product-price"
+                  [class.discount-price]="producto.precio_descuento || (producto.promociones && producto.promociones.length > 0)">
+                  ${{ getPrecioFinal() | number:'1.0-0' }}
+                </span>
+                <span class="product-price-old"
+                  *ngIf="producto.precio_descuento || (producto.promociones && producto.promociones.length > 0)">
+                  ${{ producto.precio_base | number:'1.0-0' }}
+                </span>
               </div>
-              <p class="price-cuotas">3 cuotas sin interés de ${{ getPrecioCuotas() | number:'1.0-0' }}</p>
+              <div class="price-descuento-transferencia">
+                <p class="price-label">En efectivo o transferencia:</p>
+                <div class="transfer-price-wrapper">
+                  <p class="price-descuento">${{ getPrecioConDescuento() | number:'1.0-0' }}</p>
+                  <span class="promo-badge">{{ getTransferenciaDiscountText() }}</span>
+                </div>
+                <p class="price-cuotas">3 cuotas sin interés de ${{ getPrecioCuotas() | number:'1.0-0' }}</p>
+              </div>
+            </div>
+
+            <div class="shipping-calculator-wrapper">
+              <app-shipping-calculator
+                [precioBase]="producto.precio_descuento || producto.precio_base"></app-shipping-calculator>
             </div>
           </div>
 
@@ -100,8 +107,6 @@
             </button>
           </div>
 
-          <app-shipping-calculator
-            [precioBase]="producto.precio_descuento || producto.precio_base"></app-shipping-calculator>
 
           <div class="product-stock-status" *ngIf="!producto.tiene_stock">
             <p class="error">Este producto está agotado</p>
