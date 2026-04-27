@@ -77,6 +77,7 @@ def create_producto():
             db.session.add(producto)
             db.session.commit()
             invalidate_cache(pattern='productos')
+            invalidate_cache(pattern='get_catalog')
             return jsonify(producto.to_dict()), 201
         except Exception as e:
             db.session.rollback()
@@ -138,6 +139,7 @@ def bulk_delete_productos():
     try:
         db.session.commit()
         invalidate_cache(pattern='productos')
+        invalidate_cache(pattern='get_catalog')
     except Exception as e:
         db.session.rollback()
         return jsonify({'error': f'Error al confirmar cambios: {str(e)}'}), 500
@@ -164,6 +166,7 @@ def manage_product(id):
             db.session.delete(producto)
             db.session.commit()
             invalidate_cache(pattern='productos')
+            invalidate_cache(pattern='get_catalog')
             return jsonify({'message': 'Producto eliminado'}), 200
         except Exception as e:
             db.session.rollback()
@@ -201,6 +204,7 @@ def manage_product(id):
             producto.relacionados = nuevos_relacionados
         db.session.commit()
         invalidate_cache(pattern='productos')
+        invalidate_cache(pattern='get_catalog')
         return jsonify(producto.to_dict()), 200
     except Exception as e:
         db.session.rollback()
@@ -240,6 +244,7 @@ def upload_imagen(producto_id):
             db.session.add(imagen)
             db.session.commit()
             invalidate_cache(pattern='productos')
+            invalidate_cache(pattern='get_catalog')
             return jsonify(imagen.to_dict()), 201
         except Exception as e:
             logger.error(f"Error processing image: {e}")
@@ -256,6 +261,7 @@ def manage_imagen(imagen_id):
         db.session.delete(imagen)
         db.session.commit()
         invalidate_cache(pattern='productos')
+        invalidate_cache(pattern='get_catalog')
         return jsonify({'message': 'Deleted'}), 200
 
     data = request.get_json()
@@ -272,6 +278,7 @@ def manage_imagen(imagen_id):
 
         db.session.commit()
         invalidate_cache(pattern='productos')
+        invalidate_cache(pattern='get_catalog')
         return jsonify(imagen.to_dict()), 200
     except Exception as e:
         db.session.rollback()

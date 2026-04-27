@@ -97,9 +97,9 @@ def get_categorias():
     padre_id = request.args.get('categoria_padre_id', type=int)
     flat = request.args.get('flat', 'false') == 'true'
     
-    query = Categoria.query
+    query = Categoria.query.options(joinedload(Categoria.categoria_padre))
     if padre_id:
-        query = query.filter_by(categoria_padre_id=padre_id)
+        query = query.filter_by(id=padre_id) if flat else query.filter_by(categoria_padre_id=padre_id)
     elif not flat:
         query = query.filter_by(categoria_padre_id=None)
         

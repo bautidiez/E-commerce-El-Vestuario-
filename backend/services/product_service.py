@@ -3,7 +3,7 @@ from sqlalchemy import or_, case, select, exists, and_
 from extensions import limiter
 from cache_utils import cached
 
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, selectinload
 
 class ProductService:
     @staticmethod
@@ -12,7 +12,11 @@ class ProductService:
         """
         Lógica centralizada para obtener productos con filtros complejos.
         """
-        query = Producto.query.options(joinedload(Producto.categoria))
+        query = Producto.query.options(
+            joinedload(Producto.categoria).joinedload(Categoria.categoria_padre),
+            selectinload(Producto.imagenes),
+            selectinload(Producto.stock_talles)
+        )
         
         # Filtro de activos por defecto
         if filters.get('activos') != 'false':
@@ -115,15 +119,16 @@ class ProductService:
         if filters.get('version'):
             query = query.filter(Producto.version == filters['version'])
 
-        # Ordenamiento GLOBAL: Agotados siempre al final (Strict)
-        # Estrategia: Obtener IDs de productos con stock > 0
-        productos_con_stock_query = db.session.query(StockTalle.producto_id).filter(
-            StockTalle.cantidad > 0
-        ).distinct()
+        # Ordenamiento GLOBAL: Agotados siempre al final (Strict) - OPTIMIZADO con JOIN
+        stock_subquery = db.session.query(
+            StockTalle.producto_id,
+            db.func.sum(StockTalle.cantidad).label('total_stock')
+        ).group_by(StockTalle.producto_id).subquery()
         
-        # This creates a CASE expression: CASE WHEN id IN (...) THEN 1 ELSE 2 END
+        query = query.outerjoin(stock_subquery, Producto.id == stock_subquery.c.producto_id)
+        
         stock_priority = case(
-            (Producto.id.in_(productos_con_stock_query), 1),
+            (stock_subquery.c.total_stock > 0, 1),
             else_=2
         )
         
