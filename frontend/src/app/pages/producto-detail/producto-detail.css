@@ -167,7 +167,7 @@
 
 .price-and-shipping-row {
   display: flex;
-  justify-content: space-between; /* Push items to the edges */
+  justify-content: flex-start; /* Keep them together on the left */
   gap: 20px;
   align-items: flex-start;
   margin-top: 10px;
@@ -183,7 +183,6 @@
 .shipping-calculator-wrapper {
   flex: 0 1 350px; /* Give it a fixed basis but let it shrink */
   min-width: 280px;
-  margin-left: auto; /* Push specifically to the right */
 }
 
 .price-main {
