@@ -6,6 +6,7 @@
     max-width: 500px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
     margin: 0; /* Removed margin so it aligns perfectly inside the flex row */
+    position: relative; /* Base for absolute dropdown */
 }
 
 .calculator-header {
@@ -95,14 +96,22 @@
 }
 
 .calculator-results {
-    margin-top: 15px;
-    padding-top: 15px;
-    border-top: 1px solid #f0f0f0;
-    animation: fadeIn 0.4s ease-out;
+    position: absolute;
+    top: 100%; /* Just below the calculator box */
+    left: 0;
+    width: 100%;
+    margin-top: 10px;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    z-index: 999; /* Float over everything */
+    animation: fadeIn 0.3s ease-out;
 }
 
 .results-scroll-container {
-    max-height: 180px;
+    max-height: 280px; /* Increased since it's floating now */
     overflow-y: auto;
     padding-right: 5px;
 }
@@ -157,9 +166,25 @@
     text-decoration: underline;
     cursor: pointer;
     transition: color 0.3s;
+    padding: 0;
 }
 
 .change-cp-btn:hover {
+    color: #000;
+}
+
+.close-results-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    line-height: 1;
+    color: #999;
+    cursor: pointer;
+    padding: 0 5px;
+    transition: color 0.2s;
+}
+
+.close-results-btn:hover {
     color: #000;
 }
 

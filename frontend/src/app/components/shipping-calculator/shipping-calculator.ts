@@ -132,6 +132,10 @@ export class ShippingCalculatorComponent {
         this.codigoPostal = '';
     }
 
+    cerrarResultados() {
+        this.mostrarResultados = false;
+    }
+
     toggleOpciones() {
         this.mostrarTodasOpciones = !this.mostrarTodasOpciones;
     }

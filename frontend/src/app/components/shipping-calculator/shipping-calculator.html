@@ -27,8 +27,11 @@
     <!-- Resultados: mostrar opciones agrupadas -->
     <div class="calculator-results" *ngIf="mostrarResultados && !editandoCodigoPostal">
         <div class="results-header">
-            <h4>Entregas para el CP: {{ codigoPostalCalculado }}</h4>
-            <button class="change-cp-btn" (click)="cambiarCodigoPostal()">Cambiar código postal</button>
+            <div>
+                <h4>Entregas para el CP: {{ codigoPostalCalculado }}</h4>
+                <button class="change-cp-btn" (click)="cambiarCodigoPostal()">Cambiar código postal</button>
+            </div>
+            <button class="close-results-btn" (click)="cerrarResultados()">✕</button>
         </div>
 
         <div class="results-scroll-container">
@@ -36,8 +39,7 @@
             <div class="shipping-section" *ngIf="getOpcionesDomicilio().length > 0">
                 <h5 class="section-title">📦 Envío a domicilio</h5>
                 <div class="shipping-options">
-                    <div class="shipping-item" *ngFor="let opcion of getOpcionesDomicilio(); let i = index"
-                        [class.hidden]="!mostrarTodasOpciones && i >= 5">
+                    <div class="shipping-item" *ngFor="let opcion of getOpcionesDomicilio(); let i = index">
                         <div class="item-main">
                             <span class="metodo-nombre">{{ opcion.nombre }}</span>
                             <span class="metodo-tiempo">{{ opcion.tiempo }}</span>
@@ -72,11 +74,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Toggle para ver más/menos opciones -->
-        <button class="toggle-options-btn" (click)="toggleOpciones()" *ngIf="getOpcionesDomicilio().length > 5">
-            {{ mostrarTodasOpciones ? 'Ver menos opciones de envío' : 'Ver más opciones de envío' }}
-        </button>
 
 
     </div>
