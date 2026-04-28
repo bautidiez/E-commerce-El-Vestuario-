@@ -6,6 +6,7 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required
 from models import StockTalle, Producto, Talle, db
 
+from sqlalchemy import case
 stock_bp = Blueprint('admin_stock', __name__)
 
 
@@ -66,8 +67,18 @@ def manage_stock():
         umbral = request.args.get('umbral', 3, type=int)
         query = query.filter(StockTalle.cantidad > 0, StockTalle.cantidad <= umbral)
 
-    ordenar_por = request.args.get('ordenar_por', 'alfabetico')
-    if ordenar_por == 'alfabetico':
+    ordenar_por = request.args.get('ordenar_por', 'default')
+    
+    # Priority sorting logic: 0 first, then 1-3, then rest
+    stock_priority = case(
+        (StockTalle.cantidad == 0, 1),
+        (StockTalle.cantidad <= 3, 2),
+        else_=3
+    )
+
+    if ordenar_por == 'default':
+        query = query.order_by(stock_priority.asc(), Producto.nombre.asc())
+    elif ordenar_por == 'alfabetico':
         query = query.order_by(Producto.nombre.asc())
     elif ordenar_por == 'alfabetico_desc':
         query = query.order_by(Producto.nombre.desc())
@@ -77,6 +88,9 @@ def manage_stock():
         query = query.order_by(StockTalle.cantidad.asc())
     elif ordenar_por == 'stock_desc':
         query = query.order_by(StockTalle.cantidad.desc())
+    else:
+        # Fallback to default if unknown
+        query = query.order_by(stock_priority.asc(), Producto.nombre.asc())
 
     pagination = query.paginate(page=page, per_page=page_size)
     return jsonify({

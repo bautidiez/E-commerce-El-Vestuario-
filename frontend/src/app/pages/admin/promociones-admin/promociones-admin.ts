@@ -183,15 +183,27 @@ export class PromocionesAdminComponent implements OnInit {
   loadCategorias() {
     this.apiService.getCategorias(true, undefined, true).subscribe({
       next: (data: any[]) => {
+        console.log('DEBUG: Categorías para promociones:', data);
+        if (!data || data.length === 0) {
+          console.warn('DEBUG: No se recibieron categorías');
+        }
         // Asegurar que los IDs sean números
         this.categorias = data.map(c => ({
           ...c,
           id: Number(c.id),
           categoria_padre_id: c.categoria_padre_id ? Number(c.categoria_padre_id) : null
         }));
+        this.cdr.detectChanges();
       },
       error: (error: any) => {
         console.error('Error cargando categorías:', error);
+        // Fallback: tratar de cargar sin el parámetro flat por si acaso
+        this.apiService.getCategorias(true).subscribe(data => {
+            if (data) {
+                this.categorias = data.map((c: any) => ({ ...c, id: Number(c.id) }));
+                this.cdr.detectChanges();
+            }
+        });
       }
     });
   }
@@ -272,8 +284,8 @@ export class PromocionesAdminComponent implements OnInit {
         Swal.fire({ title: 'Requerido', text: 'Por favor selecciona al menos una categoría', icon: 'warning' });
         return;
       }
-      if (!this.nuevaPromocion.tipo_promocion_id) {
-        Swal.fire({ title: 'Requerido', text: 'Por favor selecciona el tipo de promoción', icon: 'warning' });
+      if (!this.nuevaPromocion.tipo_promocion_id && !this.nuevaPromocion.envio_gratis) {
+        Swal.fire({ title: 'Requerido', text: 'Por favor selecciona el tipo de promoción o activa Envío Gratis', icon: 'warning' });
         return;
       }
       if (this.mostrarCampoValor() && !this.nuevaPromocion.valor) {

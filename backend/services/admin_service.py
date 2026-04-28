@@ -6,8 +6,18 @@ class AdminService:
     @staticmethod
     def get_dashboard_stats():
         """
-        Calcula las estadísticas principales para el dashboard.
+        Calcula las estadísticas principales para el dashboard con desglose de ventas.
         """
+        ahora = datetime.utcnow() - timedelta(hours=3)  # Argentina Time
+        hoy_inicio = ahora.replace(hour=0, minute=0, second=0, microsecond=0)
+        
+        # Inicio de semana (domingo anterior o hoy si es domingo)
+        dia_semana = (ahora.weekday() + 1) % 7
+        semana_inicio = hoy_inicio - timedelta(days=dia_semana)
+        
+        # Inicio de mes
+        mes_inicio = ahora.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+
         total_productos = Producto.query.count()
         productos_activos = Producto.query.filter_by(activo=True).count()
         
@@ -18,22 +28,40 @@ class AdminService:
         
         total_pedidos = Pedido.query.filter(Pedido.estado != 'cancelado').count()
         pedidos_pendientes_aprobacion = Pedido.query.filter_by(aprobado=False, estado='pendiente_aprobacion').count()
-        # Pendientes a Entregar: Todos los que no estén Entregados ni Cancelados
         pedidos_pendientes = Pedido.query.filter(Pedido.estado.notin_(['entregado', 'cancelado'])).count()
         
-        # Ventas totales (Pedidos APROBADOS que no estén cancelados/fallidos)
+        # --- Cálculo de Ventas por Períodos ---
+        def get_ventas_periodo(inicio, fin=None):
+            # Web
+            q_web = db.session.query(func.sum(Pedido.total)).filter(
+                Pedido.aprobado == True,
+                Pedido.estado.in_(['pendiente', 'confirmado', 'en_preparacion', 'enviado', 'entregado']),
+                Pedido.created_at >= inicio
+            )
+            if fin: q_web = q_web.filter(Pedido.created_at <= fin)
+            v_web = q_web.scalar() or 0
+            
+            # Externas
+            q_ext = db.session.query(func.sum(VentaExterna.ganancia_total)).filter(
+                VentaExterna.fecha >= inicio
+            )
+            if fin: q_ext = q_ext.filter(VentaExterna.fecha <= fin)
+            v_ext = q_ext.scalar() or 0
+            
+            return float(v_web) + float(v_ext)
+
+        ventas_hoy = get_ventas_periodo(hoy_inicio)
+        ventas_semana = get_ventas_periodo(semana_inicio)
+        ventas_mes = get_ventas_periodo(mes_inicio)
+        
+        # Ventas totales (histórico completo)
         total_ventas_web = db.session.query(func.sum(Pedido.total)).filter(
             Pedido.aprobado == True,
             Pedido.estado.in_(['pendiente', 'confirmado', 'en_preparacion', 'enviado', 'entregado'])
         ).scalar() or 0
-        
-        # Ventas externas (todas cuentan)
         total_ventas_externas = db.session.query(func.sum(VentaExterna.ganancia_total)).scalar() or 0
-        
-        # Total combinado
         total_ventas = float(total_ventas_web) + float(total_ventas_externas)
         
-        # Ventas externas count
         total_ventas_externas_count = VentaExterna.query.count()
         
         return {
@@ -50,7 +78,10 @@ class AdminService:
                 'pendientes_aprobacion': pedidos_pendientes_aprobacion
             },
             'ventas': {
-                'total': float(total_ventas)
+                'total': total_ventas,
+                'hoy': ventas_hoy,
+                'semana': ventas_semana,
+                'mes': ventas_mes
             }
         }
 

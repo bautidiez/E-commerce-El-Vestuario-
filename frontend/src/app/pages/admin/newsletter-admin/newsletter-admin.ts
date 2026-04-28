@@ -88,9 +88,17 @@ export class NewsletterAdminComponent implements OnInit {
     }
 
     loadStats() {
+        this.isLoading = true;
+        this.cdr.detectChanges();
+
         this.apiService.getNewsletterStats().subscribe({
             next: (res) => {
                 this.totalSubscribers = res.total_subscribers;
+                this.isLoading = false;
+                this.cdr.detectChanges();
+            },
+            error: () => {
+                this.isLoading = false;
                 this.cdr.detectChanges();
             }
         });

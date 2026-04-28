@@ -63,7 +63,25 @@
         <div class="stat-card destacado">
           <div class="stat-icon">💰</div>
           <h3>Ganancia Total</h3>
-          <div class="stat-value">${{ estadisticas.ventas.total | number:'1.0-0' }}</div>
+          
+          <!-- Botones de filtro de ganancia -->
+          <div class="ganancia-filter">
+            <button [class.active]="periodoGananciaSeleccionado === 'hoy'" (click)="periodoGananciaSeleccionado = 'hoy'">Hoy</button>
+            <button [class.active]="periodoGananciaSeleccionado === 'semana'" (click)="periodoGananciaSeleccionado = 'semana'">Semana</button>
+            <button [class.active]="periodoGananciaSeleccionado === 'mes'" (click)="periodoGananciaSeleccionado = 'mes'">Mes</button>
+            <button [class.active]="periodoGananciaSeleccionado === 'todo'" (click)="periodoGananciaSeleccionado = 'todo'">Todo</button>
+          </div>
+
+          <div class="stat-value" *ngIf="periodoGananciaSeleccionado === 'todo'">${{ estadisticas.ventas.total | number:'1.0-0' }}</div>
+          <div class="stat-value" *ngIf="periodoGananciaSeleccionado === 'hoy'">${{ estadisticas.ventas.hoy | number:'1.0-0' }}</div>
+          <div class="stat-value" *ngIf="periodoGananciaSeleccionado === 'semana'">${{ estadisticas.ventas.semana | number:'1.0-0' }}</div>
+          <div class="stat-value" *ngIf="periodoGananciaSeleccionado === 'mes'">${{ estadisticas.ventas.mes | number:'1.0-0' }}</div>
+          
+          <div class="stat-label-periodo">
+            {{ periodoGananciaSeleccionado === 'hoy' ? 'Ganancia de hoy' : 
+               periodoGananciaSeleccionado === 'semana' ? 'Ganancia de esta semana' :
+               periodoGananciaSeleccionado === 'mes' ? 'Ganancia de este mes' : 'Ganancia histórica total' }}
+          </div>
         </div>
       </div>
 

@@ -20,6 +20,7 @@ export class DashboardComponent implements OnInit {
   isAuthenticated = false;
   errorMessage = ''; // Para mostrar el error en pantalla
   periodoSeleccionado = 'dia'; // dia, semana, mes, anio
+  periodoGananciaSeleccionado: 'hoy' | 'semana' | 'mes' | 'todo' = 'todo';
 
   // Navegación para estadísticas
   semanaOffset = 0; // Cuántos bloques de 8 semanas retroceder

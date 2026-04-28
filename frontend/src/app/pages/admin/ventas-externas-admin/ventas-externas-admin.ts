@@ -359,21 +359,22 @@ export class VentasExternasAdminComponent implements OnInit, OnDestroy {
             .pipe(takeUntil(this.destroy$))
             .subscribe({
                 next: (response: any) => {
-                    this.success = 'Venta externa registrada exitosamente. Stock descontado.';
                     this.submitting = false;
                     this.cdr.detectChanges(); // Forzar actualización inmediata
+
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: 'Venta externa registrada exitosamente. El stock ha sido actualizado.',
+                        icon: 'success',
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
 
                     // Resetear formulario
                     this.resetFormulario();
 
                     // Recargar ventas
                     this.loadVentas();
-
-                    // Limpiar mensaje después de 3 segundos
-                    setTimeout(() => {
-                        this.success = '';
-                        this.cdr.detectChanges();
-                    }, 3000);
                 },
                 error: (error) => {
                     console.error('Error registrando venta:', error);

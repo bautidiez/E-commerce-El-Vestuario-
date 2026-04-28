@@ -37,7 +37,7 @@ class PromocionProducto(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     alcance = db.Column(db.String(20), default='producto')  # 'producto', 'categoria', 'tienda'
-    tipo_promocion_id = db.Column(db.Integer, db.ForeignKey('tipos_promocion.id'), nullable=False)
+    tipo_promocion_id = db.Column(db.Integer, db.ForeignKey('tipos_promocion.id'), nullable=True)
     valor = db.Column(db.Float)
     es_cupon = db.Column(db.Boolean, default=False)
     codigo = db.Column(db.String(50), unique=True, nullable=True)

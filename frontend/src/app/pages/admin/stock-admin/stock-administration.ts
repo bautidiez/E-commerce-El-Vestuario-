@@ -52,7 +52,7 @@ export class StockAdminComponent implements OnInit, OnDestroy {
   categoriaFiltro: number | null = null;
   categorias: any[] = [];
   busqueda = '';
-  ordenarPor = 'alfabetico';
+  ordenarPor = 'default';
   mostrarSoloStockBajo = false;
   mostrarSoloAgotado = false;
   talleFiltro: string | null = null;

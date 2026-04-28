@@ -205,11 +205,11 @@ def get_newsletter_stats():
     try:
         from models import Cliente
         # Intentar varias formas de conteo por si acaso
-        count_orm = Cliente.query.count()
+        count_orm = Cliente.query.filter_by(acepta_newsletter=True).count()
         
-        # Conteo crudo por si el ORM tiene algún filtro global (poco probable pero posible)
+        # Conteo crudo
         from sqlalchemy import text
-        result = db.session.execute(text("SELECT COUNT(*) FROM clientes")).fetchone()
+        result = db.session.execute(text("SELECT COUNT(*) FROM clientes WHERE acepta_newsletter = true")).fetchone()
         count_raw = result[0] if result else 0
         
         # Usar el mayor por las dudas, o el que funcione

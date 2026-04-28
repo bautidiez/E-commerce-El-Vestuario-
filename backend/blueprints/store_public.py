@@ -5,6 +5,7 @@ from flask_mail import Message
 from cache_utils import cache, invalidate_cache, cached
 from models import *
 from sqlalchemy import or_, and_, desc
+from sqlalchemy.orm import joinedload
 from datetime import datetime
 import uuid
 import os
