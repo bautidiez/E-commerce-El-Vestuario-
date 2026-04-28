@@ -110,13 +110,34 @@
 
               <div class="form-group" *ngIf="nuevaPromocion.alcance === 'categoria'">
                 <label>Categorías Seleccionadas: {{ categoriasSeleccionadas.length }}</label>
-                <div class="category-grid-compact">
-                  <div *ngFor="let cat of categorias" class="cat-item-minimal" 
-                       [class.selected]="isCategoriaSelected(cat.id)" (click)="toggleCategoria(cat.id)">
-                    <input type="checkbox" [checked]="isCategoriaSelected(cat.id)" (click)="$event.stopPropagation()">
-                    {{ cat.nombre }}
-                  </div>
+                <div class="category-tree-container">
+                  <ng-container *ngTemplateOutlet="categoryTree; context:{ $implicit: categorias }"></ng-container>
                 </div>
+
+                <!-- Template Recursivo para el Árbol -->
+                <ng-template #categoryTree let-nodes>
+                  <div class="tree-level">
+                    <div *ngFor="let node of nodes" class="tree-node-wrapper">
+                      <div class="tree-node" [class.selected]="isCategoriaSelected(node.id)" (click)="toggleCategoria(node.id)">
+                        <div class="node-main">
+                          <div class="custom-checkbox" [class.checked]="isCategoriaSelected(node.id)">
+                            <i class="fas fa-check" *ngIf="isCategoriaSelected(node.id)"></i>
+                          </div>
+                          <span class="node-icon">{{ node.subcategorias?.length ? '📂' : '📁' }}</span>
+                          <span class="node-name">{{ node.nombre }}</span>
+                        </div>
+                        <span class="node-badge" *ngIf="node.subcategorias?.length">
+                          {{ node.subcategorias.length }}
+                        </span>
+                      </div>
+                      
+                      <!-- Recursión -->
+                      <div class="tree-children" *ngIf="node.subcategorias?.length">
+                        <ng-container *ngTemplateOutlet="categoryTree; context:{ $implicit: node.subcategorias }"></ng-container>
+                      </div>
+                    </div>
+                  </div>
+                </ng-template>
               </div>
 
               <div class="info-box-tienda" *ngIf="nuevaPromocion.alcance === 'tienda'">

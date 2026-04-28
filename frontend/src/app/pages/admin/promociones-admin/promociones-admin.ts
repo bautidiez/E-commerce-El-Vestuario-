@@ -181,26 +181,21 @@ export class PromocionesAdminComponent implements OnInit {
   }
 
   loadCategorias() {
-    this.apiService.getCategorias(true, undefined, true).subscribe({
+    this.apiService.getCategoriasTree().subscribe({
       next: (data: any[]) => {
-        console.log('DEBUG: Categorías para promociones:', data);
+        console.log('DEBUG: Árbol de categorías para promociones:', data);
         if (!data || data.length === 0) {
           console.warn('DEBUG: No se recibieron categorías');
         }
-        // Asegurar que los IDs sean números
-        this.categorias = data.map(c => ({
-          ...c,
-          id: Number(c.id),
-          categoria_padre_id: c.categoria_padre_id ? Number(c.categoria_padre_id) : null
-        }));
+        this.categorias = data;
         this.cdr.detectChanges();
       },
       error: (error: any) => {
-        console.error('Error cargando categorías:', error);
-        // Fallback: tratar de cargar sin el parámetro flat por si acaso
-        this.apiService.getCategorias(true).subscribe(data => {
+        console.error('Error cargando árbol de categorías:', error);
+        // Fallback: tratar de cargar plano si el árbol falla
+        this.apiService.getCategorias(true, undefined, true).subscribe(data => {
             if (data) {
-                this.categorias = data.map((c: any) => ({ ...c, id: Number(c.id) }));
+                this.categorias = data;
                 this.cdr.detectChanges();
             }
         });
@@ -546,16 +541,20 @@ export class PromocionesAdminComponent implements OnInit {
   }
 
   getCategoryLabel(catId: number): string {
-    // Obtenemos el path sin iconos
-    const path = this.getCleanCategoryPath(catId);
+    // Si la lista es un árbol, necesitamos buscar recursivamente para el resumen
+    const findInTree = (nodes: any[], id: number): any => {
+      for (const node of nodes) {
+        if (node.id === id) return node;
+        if (node.subcategorias && node.subcategorias.length > 0) {
+          const found = findInTree(node.subcategorias, id);
+          if (found) return found;
+        }
+      }
+      return null;
+    };
 
-    // Verificamos si es una categoría principal
-    const cat = this.categorias.find(c => c.id === catId);
-    if (cat && !cat.categoria_padre_id) {
-      return `🏠 ${path}`;
-    }
-
-    return path || '-';
+    const cat = findInTree(this.categorias, catId);
+    return cat ? cat.nombre : `Cat #${catId}`;
   }
 
   getAlcanceResumen(): string {

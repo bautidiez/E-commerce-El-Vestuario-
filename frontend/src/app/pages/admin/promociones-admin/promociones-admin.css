@@ -726,33 +726,108 @@
   letter-spacing: 0.5px;
 }
 
-.category-grid-compact {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 0.5rem;
-  max-height: 180px;
+/* Category Tree Design - Premium */
+.category-tree-container {
+  max-height: 350px;
   overflow-y: auto;
-  padding: 0.5rem;
-  background: white;
+  padding: 1rem;
+  background: #fff;
   border: 2px solid #e2e8f0;
-  border-radius: 8px;
+  border-radius: 12px;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
 }
 
-.cat-item-minimal {
-  padding: 0.5rem;
-  border: 1px solid #f1f5f9;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  cursor: pointer;
+.tree-level {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tree-node-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.tree-node {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid transparent;
+  user-select: none;
 }
 
-.cat-item-minimal.selected {
+.tree-node:hover {
+  background: #f8fafc;
+  transform: translateX(4px);
+  border-color: #cbd5e1;
+}
+
+.tree-node.selected {
   background: #eff6ff;
+  border-color: #3b82f6;
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.1);
+}
+
+.node-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.custom-checkbox {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #cbd5e1;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  background: white;
+}
+
+.custom-checkbox.checked {
+  background: #2563eb;
   border-color: #2563eb;
+  color: white;
+  font-size: 0.7rem;
+}
+
+.node-icon {
+  font-size: 1.1rem;
+  opacity: 0.8;
+}
+
+.node-name {
+  font-weight: 500;
+  color: #334155;
+  font-size: 0.95rem;
+}
+
+.tree-node.selected .node-name {
   color: #1e40af;
+  font-weight: 600;
+}
+
+.node-badge {
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.tree-children {
+  margin-left: 2rem;
+  padding-left: 1rem;
+  border-left: 2px dashed #e2e8f0;
+  margin-top: 0.25rem;
+  margin-bottom: 0.5rem;
 }
 
 .logic-column {
