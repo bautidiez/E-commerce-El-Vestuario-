@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 import os
 import time
 import logging
+from threading import Thread
 from extensions import jwt, mail, compress, cors, limiter, cache
 import firebase_admin
 from firebase_admin import credentials
@@ -400,8 +401,68 @@ with app.app_context():
                 print("[OK] Password de admin ya esta sincronizado y validado.")
             
     # Limpiamos imports incorrectos previos
-# Health check simple que no usa BD
-# Health check simple que no usa BD
+# ==================== PRECARGA DE PRODUCTOS EN BACKGROUND ====================
+PRODUCTOS_CACHE = None
+PRECARGA_EN_CURSO = False
+PRECARGA_COMPLETADA_EN = None
+
+def precarga_productos_background():
+    """Ejecuta en thread separado para NO bloquear el servidor"""
+    global PRODUCTOS_CACHE, PRECARGA_EN_CURSO, PRECARGA_COMPLETADA_EN
+    
+    try:
+        print("⏳ [PRECARGA] Iniciando en background thread...", flush=True)
+        PRECARGA_EN_CURSO = True
+        
+        with app.app_context():
+            from models import Producto
+            
+            # Cargar SOLO los campos necesarios (optimizado)
+            productos = db.session.query(
+                Producto
+            ).filter_by(activo=True).order_by(Producto.id).limit(1000).all()
+            
+            # Serializar una sola vez
+            PRODUCTOS_CACHE = [p.to_dict(include_stock=False) for p in productos]
+            PRECARGA_COMPLETADA_EN = time.time()
+            
+            print(f"✅ [PRECARGA] {len(PRODUCTOS_CACHE)} productos listos en RAM", flush=True)
+            PRECARGA_EN_CURSO = False
+            
+    except Exception as e:
+        print(f"❌ [PRECARGA] Error: {e}", flush=True)
+        PRECARGA_EN_CURSO = False
+        PRODUCTOS_CACHE = []
+
+# Iniciar precarga apenas la app inicia
+@app.after_request
+def iniciar_precarga_si_no_existe(response):
+    """Se ejecuta después del primer request para iniciar precarga"""
+    global PRODUCTOS_CACHE, PRECARGA_EN_CURSO
+    
+    if PRODUCTOS_CACHE is None and not PRECARGA_EN_CURSO:
+        # Iniciar en thread daemon (no bloquea nada)
+        thread = Thread(target=precarga_productos_background, daemon=True)
+        thread.start()
+        print("🚀 [PRECARGA] Iniciada en background thread", flush=True)
+    
+    return response
+
+# ==================== API ULTRA RÁPIDA ====================
+
+@app.route('/api/health')
+def health_check():
+    """⚡ Responde inmediatamente sin tocar BD"""
+    db_type = "PostgreSQL" if app.config['SQLALCHEMY_DATABASE_URI'].startswith('postgres') else "SQLite"
+    return jsonify({
+        "status": "ok",
+        "database": db_type,
+        "precarga_lista": PRODUCTOS_CACHE is not None,
+        "time": time.time()
+    }), 200, {
+        'Cache-Control': 'public, max-age=60'
+    }
+
 @app.route('/')
 def home():
     """Ruta raíz para verificar que el servidor responde"""
@@ -411,47 +472,43 @@ def home():
         "database_engine": db_type,
         "message": "Backend de El Vestuario",
         "endpoints": ["/api/health", "/api/productos", "/api/auth/login"]
-    }), 200
+    }), 200, {
+        'Cache-Control': 'public, max-age=300'
+    }
 
-# ==================== PRECARGA DE PRODUCTOS ====================
-PRODUCTOS_CACHE = None
-
-@app.before_request
-def inicializar_precarga():
-    global PRODUCTOS_CACHE
-    # Solo precargar si no estamos en una ruta de salud o estáticos
-    from flask import request
-    if request.path.startswith('/api/health') or request.path.startswith('/static'):
-        return
-
+# ENDPOINT CRÍTICO: Productos básicos desde caché
+@app.route('/api/productos/precargados', methods=['GET'])
+@cache.cached(timeout=3600)
+def get_productos_precargados():
+    """⚡ ULTRA RÁPIDO: Retorna desde caché en RAM (<10ms)"""
+    
     if PRODUCTOS_CACHE is None:
-        try:
-            with app.app_context():
-                print("⏳ Precargando productos en memoria (CRÍTICO)...", flush=True)
-                from models import Producto
-                # Cargar los campos esenciales para el catálogo
-                PRODUCTOS_CACHE = db.session.query(
-                    Producto
-                ).filter_by(activo=True).limit(1000).all()
-                
-                # Serializar de una vez para que el retorno sea instantáneo
-                # Usamos to_dict() sin stock para el catálogo general para ahorrar RAM
-                PRODUCTOS_CACHE = [p.to_dict(include_stock=False) for p in PRODUCTOS_CACHE]
-                
-                print(f"✅ {len(PRODUCTOS_CACHE)} productos cargados en RAM")
-        except Exception as e:
-            print(f"❌ Error en precarga: {e}")
-            PRODUCTOS_CACHE = []
-
-# Health check con tipo de base de datos
-@app.route('/api/health')
-def health_check():
-    db_type = "PostgreSQL" if app.config['SQLALCHEMY_DATABASE_URI'].startswith('postgres') else "SQLite"
+        # Si la precarga aún no terminó, retornar vacío (Angular espera)
+        return jsonify({
+            'success': True,
+            'items': [],
+            'total': 0,
+            'preloading': PRECARGA_EN_CURSO
+        }), 200
+    
+    # Paginación: primeros 20
+    page = request.args.get('page', 1, type=int)
+    page_size = request.args.get('page_size', 20, type=int)
+    
+    start = (page - 1) * page_size
+    end = start + page_size
+    
+    paginated = PRODUCTOS_CACHE[start:end]
+    
     return jsonify({
-        "status": "ok",
-        "database": db_type,
-        "time": time.time()
-    }), 200
+        'success': True,
+        'items': paginated,
+        'total': len(PRODUCTOS_CACHE),
+        'page': page,
+        'page_size': page_size
+    }), 200, {
+        'Cache-Control': 'public, max-age=3600'
+    }
 
 # ==================== LOGGING DE PETICIONES LENTAS ====================
 def register_hooks(app):

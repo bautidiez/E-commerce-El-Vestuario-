@@ -1,18 +1,20 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { ProductoService } from '../../services/producto.service';
 import { LazyLoadDirective } from '../../directives/image-lazy.directive';
-import { Observable, Subject, of, merge } from 'rxjs';
-import { takeUntil, map, catchError } from 'rxjs/operators';
+import { Observable, Subject, of, merge, forkJoin } from 'rxjs';
+import { takeUntil, map, catchError, tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-productos',
+  standalone: true,
   imports: [CommonModule, RouterModule, FormsModule, LazyLoadDirective],
   templateUrl: './productos.html',
-  styleUrl: './productos.css'
+  styleUrl: './productos.css',
+  changeDetection: ChangeDetectionStrategy.OnPush  // ⚡ CRÍTICO: Detectar cambios solo cuando necesario
 })
 export class ProductosComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
@@ -20,29 +22,23 @@ export class ProductosComponent implements OnInit, OnDestroy {
   productos: any[] = [];
   categorias: any[] = [];
   talles: any[] = [];
-  categoriaSeleccionada: number | null = null;
+  
   loading = true;
-  loadingTimeout: any = null;
+  loadingMore = false;
 
   // Paginación
   currentPage = 1;
   pageSize = 20;
   totalProducts = 0;
   hasMoreProducts = false;
-  loadingMore = false;
 
-  // Para título dinámico
+  // Título y filtros
   tituloActual = 'PRODUCTOS';
-
-  // Para navegación de sidebar
-  currentCategoryLevel: number = 0; // 0 = ninguna, 1 = principal, 2 = subcategoría
+  currentCategoryLevel: number = 0;
   parentCategory: any = null;
   currentCategory: any = null;
-
-  // Búsqueda
   busqueda = '';
 
-  // Filtros
   filtros = {
     categoria_id: null as number | null,
     destacados: false,
@@ -56,19 +52,15 @@ export class ProductosComponent implements OnInit, OnDestroy {
     ordenar_por: 'destacado' as string
   };
 
-  // Opciones de filtros disponibles
   coloresDisponibles: string[] = [];
   dorsalesDisponibles: string[] = [];
   numerosDisponibles: number[] = [];
   versionesDisponibles: string[] = ['Hincha', 'Jugador'];
 
-  // UI
   mostrarFiltros = false;
   precioMinInput = '';
   precioMaxInput = '';
-  categoriesMap = new Map<number, any>(); // Mapa flatten
-
-  // Category slug mapping
+  categoriesMap = new Map<number, any>();
   private categorySlugMap: { [key: string]: number } = {};
   private categoryIdToSlug: { [key: number]: string } = {};
 
@@ -81,26 +73,30 @@ export class ProductosComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit() {
-    console.log('🚀 [ProductosComponent] ngOnInit EJECUTADO');
+    console.log('🚀 [ProductosComponent] ngOnInit INICIADO');
 
-    // Load categories and talles first
-    this.loadCategorias().subscribe(() => {
-      console.log('✅ [ProductosComponent] loadCategorias COMPLETADO');
-
-      // ✅ FIX: Call handleRouteParams IMMEDIATELY on initial load
-      this.handleRouteParams();
-
-      // Then subscribe to route changes (params AND queryParams)
-      // This is crucial for switching between /productos and /productos?ofertas=true
-      merge(this.route.params, this.route.queryParams)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe(() => {
-          console.log('🔄 [ProductosComponent] Route (params/queryParams) CHANGE');
-          this.handleRouteParams();
-        });
+    // ⚡ OPTIMIZACIÓN: Cargar categorías Y talles EN PARALELO
+    forkJoin({
+      categorias: this.loadCategorias(),
+      talles: this.loadTalles()
+    }).subscribe({
+      next: () => {
+        console.log('✅ Categorías y Talles cargados EN PARALELO');
+        
+        // Ahora sí, cargar productos según la ruta
+        this.handleRouteParams();
+        
+        // Escuchar cambios de ruta
+        merge(this.route.params, this.route.queryParams)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe(() => this.handleRouteParams());
+      },
+      error: (err) => {
+        console.error('Error cargando setup inicial:', err);
+        this.loading = false;
+        this.cdr.markForCheck();
+      }
     });
-
-    this.loadTalles();
   }
 
   ngOnDestroy() {
@@ -109,11 +105,11 @@ export class ProductosComponent implements OnInit, OnDestroy {
   }
 
   private handleRouteParams() {
-    console.log('📍 [ProductosComponent] handleRouteParams EJECUTADO');
+    console.log('📍 Manejando parámetros de ruta');
+    
     const params = this.route.snapshot.params;
     const queryParams = this.route.snapshot.queryParams;
 
-    // Handle query params (búsqueda y ofertas)
     if (queryParams['busqueda']) {
       this.busqueda = queryParams['busqueda'];
     }
@@ -121,65 +117,32 @@ export class ProductosComponent implements OnInit, OnDestroy {
       this.filtros.destacados = false;
     }
 
-    // Determine category from params
-    // Routes: 'categoria/:slug', 'categoria/:parent/:slug', 'categoria/:grandparent/:parent/:slug'
-    // The last param is always the leaf category we want to filter by.
-
     const slug = params['slug'];
-    // const parentSlug = params['parent'];
-    // const grandparentSlug = params['grandparent'];
-
-    // Simplification: We only really need the 'slug' (the last one) to find the ID.
-    // However, if we want to validatte path, we could check parents.
-    // For now, trusting the unique slug or finding first match is enough for filtering.
-    // But if duplicate slugs exist (e.g. 'hombre' under 'Remeras' and 'Shorts'), we need context.
-
-    // Implementation: Try to match the leaf slug.
-    // TODO: Ideally use parent slugs to disambiguate if needed. 
-    // For now, getCategoryIdFromSlug returns the first match.
-
     if (slug) {
       const decodedSlug = decodeURIComponent(slug);
       const categoryId = this.getCategoryIdFromSlug(decodedSlug);
-
       if (categoryId) {
         this.filtros.categoria_id = categoryId;
-      } else {
-        console.warn('Slug not found:', slug, 'Decoded:', decodedSlug);
-        // Optionally try to find by ID if slug is numeric (fallback)
-        if (!isNaN(+slug)) {
-          this.filtros.categoria_id = +slug;
-        }
       }
-    }
-    // Fallback for old simple ID routes
-    else if (params['id']) {
+    } else if (params['id']) {
       this.filtros.categoria_id = +params['id'];
-    }
-    else {
+    } else {
       this.filtros.categoria_id = null;
     }
 
-    console.log('📍 Filtro categoría ID:', this.filtros.categoria_id);
-
     this.loadProductos();
-    this.actualizarTitulo(); // Will be called again after loadCategorias if not ready
+    this.actualizarTitulo();
     this.updateCategoryContext();
   }
 
   private getCategoryIdFromSlug(slug: string): number | null {
-    // 1. Try exact match (Primary strategy)
     if (this.categorySlugMap[slug] !== undefined) {
       return this.categorySlugMap[slug];
     }
-
-    // 2. Try normalized match
     const normalizedSlug = this.normalizeSlug(slug);
     if (this.categorySlugMap[normalizedSlug] !== undefined) {
       return this.categorySlugMap[normalizedSlug];
     }
-
-    // 3. Try case-insensitive scan (Fallback)
     const lowerSlug = slug.toLowerCase();
     const keys = Object.keys(this.categorySlugMap);
     for (const key of keys) {
@@ -187,26 +150,13 @@ export class ProductosComponent implements OnInit, OnDestroy {
         return this.categorySlugMap[key];
       }
     }
-
-    return null;
-  }
-
-  private getSubcategoryId(parentId: number, subcategorySlug: string): number | null {
-    const normalizedSlug = this.normalizeSlug(subcategorySlug);
-    const parentCategory = this.categorias.find(c => c.id === parentId);
-    if (parentCategory && parentCategory.subcategorias) {
-      const subcategory = parentCategory.subcategorias.find((sub: any) =>
-        this.normalizeSlug(sub.nombre) === normalizedSlug
-      );
-      return subcategory ? subcategory.id : null;
-    }
     return null;
   }
 
   private normalizeSlug(text: string): string {
     return text.toLowerCase()
       .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '') // Remove accents
+      .replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-+|-+$/g, '');
   }
@@ -224,11 +174,8 @@ export class ProductosComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Buscar la categoría seleccionada recursivamente
     const categoria = this.findCategoryById(categoriaId);
-
     if (categoria) {
-      // Build breadcrumb parts
       const parts = [categoria.nombre.toUpperCase()];
       let parentId = categoria.categoria_padre_id;
 
@@ -238,7 +185,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
           parts.unshift(parent.nombre.toUpperCase());
           parentId = parent.categoria_padre_id;
         } else {
-          break; // Safety break
+          break;
         }
       }
 
@@ -246,16 +193,14 @@ export class ProductosComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Si no se encuentra, usar PRODUCTOS por defecto
-    const slugParams = this.route.snapshot.params['slug'];
-    const mapSize = Object.keys(this.categorySlugMap).length;
-    this.tituloActual = `PRODUCTOS (ID:${categoriaId} Slug:${slugParams} Map:${mapSize})`;
+    this.tituloActual = 'PRODUCTOS';
   }
 
+  // ⚡ OPTIMIZACIÓN: Función principal de carga
   loadProductos() {
-    console.log('🔄 [ProductosComponent] loadProductos EJECUTADO');
+    console.log('🔄 Cargando productos...');
     this.loading = true;
-    this.currentPage = 1; // Reset a página 1
+    this.currentPage = 1;
 
     const filtrosEnviar: any = {};
     if (this.busqueda) filtrosEnviar.busqueda = this.busqueda;
@@ -270,69 +215,68 @@ export class ProductosComponent implements OnInit, OnDestroy {
     if (this.filtros.precio_max !== null) filtrosEnviar.precio_max = this.filtros.precio_max;
     if (this.filtros.ordenar_por) filtrosEnviar.ordenar_por = this.filtros.ordenar_por;
 
-    // Use snapshot instead of subscribe for one-time read
     const queryParams = this.route.snapshot.queryParams;
     if (queryParams['ofertas'] === 'true') {
       filtrosEnviar.ofertas = true;
     }
 
-    // Paginación (cargar 20 por página)
     filtrosEnviar.page = 1;
     filtrosEnviar.page_size = this.pageSize;
 
-    console.log('🔄 Filtros enviados:', filtrosEnviar);
-
-    // OPTIMIZACIÓN: Si no hay filtros complejos, usar el servicio de precarga
-    const isBasicLoad = !this.busqueda && !this.filtros.categoria_id && !this.filtros.color && !this.filtros.talle_id && !this.filtros.dorsal && this.filtros.ordenar_por === 'destacado';
+    // ⚡ Si es carga básica (sin filtros), usar caché precargada
+    const isBasicLoad = !this.busqueda && !this.filtros.categoria_id && 
+                        !this.filtros.color && !this.filtros.talle_id && 
+                        this.filtros.ordenar_por === 'destacado';
 
     if (isBasicLoad && this.currentPage === 1) {
-      this.productoService.cargarProductos().subscribe({
-        next: (productos) => {
+      this.productoService.cargarProductos().pipe(
+        tap((productos) => {
           this.productos = productos.slice(0, this.pageSize);
           this.totalProducts = productos.length;
           this.hasMoreProducts = this.productos.length < this.totalProducts;
           this.ordenarProductosAgotadosAlFinal();
           this.extraerOpcionesFiltros();
+        }),
+        catchError((err) => {
+          console.error('Error en precarga:', err);
+          return of([]);
+        }),
+        takeUntil(this.destroy$)
+      ).subscribe({
+        next: () => {
           this.loading = false;
-          this.cdr.detectChanges();
+          this.cdr.markForCheck(); // ⚡ Actualizar vista
         },
-        error: (err) => {
-          console.error('Error in preloaded load:', err);
+        complete: () => {
           this.loading = false;
-          this.cdr.detectChanges();
+          this.cdr.markForCheck();
         }
       });
       return;
     }
 
-    this.apiService.getProductos(filtrosEnviar).subscribe({
-      next: (data) => {
-        console.log('📦 [ProductosComponent] DATOS RECIBIDOS del API:', data);
-
-        // Manejar respuesta paginada o array directo
+    // Si hay filtros, usar API normal
+    this.apiService.getProductos(filtrosEnviar).pipe(
+      tap((data) => {
         this.productos = data.items || data;
         this.totalProducts = data.total || this.productos.length;
         this.hasMoreProducts = this.productos.length < this.totalProducts;
-
-        // Ordenar: agotados al final
         this.ordenarProductosAgotadosAlFinal();
-
-        console.log('📋 [ProductosComponent] PRODUCTOS ASIGNADOS:', this.productos.length, 'productos');
-        console.log('📋 Array productos:', this.productos);
-
         this.extraerOpcionesFiltros();
+      }),
+      catchError((error) => {
+        console.error('Error cargando productos:', error);
+        return of({ items: [], total: 0 });
+      }),
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: () => {
         this.loading = false;
-
-        console.log('✅ [ProductosComponent] Loading = false, vista debería actualizarse');
-
-        // 🔥 FORZAR Change Detection
-        this.cdr.detectChanges();
-        console.log('🔥 [ProductosComponent] detectChanges() EJECUTADO - Vista actualizada');
+        this.cdr.markForCheck();
       },
-      error: (error) => {
-        console.error('❌ [ProductosComponent] ERROR cargando productos:', error);
+      complete: () => {
         this.loading = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck(); // ⚡ Actualizar vista
       }
     });
   }
@@ -343,7 +287,11 @@ export class ProductosComponent implements OnInit, OnDestroy {
     this.loadingMore = true;
     this.currentPage++;
 
-    const filtrosEnviar: any = {};
+    const filtrosEnviar: any = {
+      page: this.currentPage,
+      page_size: this.pageSize
+    };
+
     if (this.busqueda) filtrosEnviar.busqueda = this.busqueda;
     if (this.filtros.categoria_id) filtrosEnviar.categoria_id = this.filtros.categoria_id;
     if (this.filtros.destacados) filtrosEnviar.destacados = true;
@@ -354,36 +302,25 @@ export class ProductosComponent implements OnInit, OnDestroy {
     if (this.filtros.version) filtrosEnviar.version = this.filtros.version;
     if (this.filtros.precio_min !== null) filtrosEnviar.precio_min = this.filtros.precio_min;
     if (this.filtros.precio_max !== null) filtrosEnviar.precio_max = this.filtros.precio_max;
-    if (this.filtros.ordenar_por) filtrosEnviar.ordenar_por = this.filtros.ordenar_por;
 
-    // Use snapshot instead of subscribe
-    const queryParams = this.route.snapshot.queryParams;
-    if (queryParams['ofertas'] === 'true') {
-      filtrosEnviar.ofertas = true;
-    }
-
-    // Paginación
-    filtrosEnviar.page = this.currentPage;
-    filtrosEnviar.page_size = this.pageSize;
-
-    this.apiService.getProductos(filtrosEnviar).subscribe({
-      next: (data) => {
+    this.apiService.getProductos(filtrosEnviar).pipe(
+      tap((data) => {
         const newProducts = data.items || data;
-        this.productos = [...this.productos, ...newProducts]; // APPEND
+        this.productos = [...this.productos, ...newProducts];
         this.totalProducts = data.total || this.productos.length;
         this.hasMoreProducts = this.productos.length < this.totalProducts;
-
-        // Ordenar: agotados al final (re-ordenar toda la lista)
         this.ordenarProductosAgotadosAlFinal();
-
         this.extraerOpcionesFiltros();
+      }),
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: () => {
         this.loadingMore = false;
-        this.cdr.detectChanges(); // Force UI update
+        this.cdr.markForCheck();
       },
-      error: (error) => {
-        console.error('Error cargando más productos:', error);
+      complete: () => {
         this.loadingMore = false;
-        this.cdr.detectChanges(); // Force UI update
+        this.cdr.markForCheck();
       }
     });
   }
@@ -392,68 +329,43 @@ export class ProductosComponent implements OnInit, OnDestroy {
     const colores = new Set<string>();
     const dorsales = new Set<string>();
     const numeros = new Set<number>();
-    const versiones = new Set<string>();
 
     this.productos.forEach(p => {
       if (p.color) colores.add(p.color);
       if (p.dorsal) dorsales.add(p.dorsal);
       if (p.numero !== null) numeros.add(p.numero);
-      if (p.version) versiones.add(p.version);
     });
 
     this.coloresDisponibles = Array.from(colores).sort();
     this.dorsalesDisponibles = Array.from(dorsales).sort();
     this.numerosDisponibles = Array.from(numeros).sort((a, b) => a - b);
-    // this.versionesDisponibles = Array.from(versiones).sort();
-    // Mantenemos las estáticas 'Hincha' y 'Jugador' siempre visibles
-    // O si queremos agregar dinámicas que no estén en la lista estática:
-    const versionesDinamicas = Array.from(versiones);
-    versionesDinamicas.forEach(v => {
-      if (!this.versionesDisponibles.includes(v)) {
-        this.versionesDisponibles.push(v);
-      }
-    });
-    this.versionesDisponibles.sort();
   }
 
   loadCategorias(): Observable<void> {
-    // Request a flat list (flat=true) to build our own tree reliably
     return this.apiService.getCategorias(true, undefined, true).pipe(
       map((data: any[]) => {
-        console.log('📦 [ProductosComponent] Categorías flat recibidas:', data.length);
-
-        // Build a Map for O(1) access
         const categoryMap = new Map();
         data.forEach((cat: any) => {
-          // Initialize/Reset subcategorias for our local tree building
           cat.subcategorias = [];
           categoryMap.set(cat.id, cat);
-
-          // ROBUST: Populate slug map directly from flat list
-          // This ensures we map EVERY category even if the tree structure fails
+          
           const slug = cat.slug ? cat.slug : this.normalizeSlug(cat.nombre);
           this.categorySlugMap[slug] = cat.id;
           this.categoryIdToSlug[cat.id] = slug;
         });
 
-        // Assemble the tree from the flat mapping
         const roots: any[] = [];
         data.forEach((cat: any) => {
           if (cat.categoria_padre_id) {
             const parent = categoryMap.get(cat.categoria_padre_id);
             if (parent) {
               parent.subcategorias.push(cat);
-            } else {
-              // If parent not found/active, treat as root or ignore? 
-              // Usually orphaned subcats should be ignored or root.
-              console.warn(`Orphaned category: ${cat.nombre} (Parent ID: ${cat.categoria_padre_id})`);
             }
           } else {
             roots.push(cat);
           }
         });
 
-        // Sort subcategories by name alphabetically
         data.forEach(cat => {
           if (cat.subcategorias) {
             cat.subcategorias.sort((a: any, b: any) => a.nombre.localeCompare(b.nombre));
@@ -461,77 +373,43 @@ export class ProductosComponent implements OnInit, OnDestroy {
         });
 
         this.categorias = roots.sort((a, b) => a.nombre.localeCompare(b.nombre));
-        this.buildCategoriesMap(this.categorias); // Call buildCategoriesMap here
-
-        // Note: buildSlugMap removed as we map during iteration above
-
-        // Actualizar el título y contexto
+        this.buildCategoriesMap(this.categorias);
         this.actualizarTitulo();
-        if (this.route.snapshot.params['id'] || this.route.snapshot.params['slug']) {
-          this.updateCategoryContext();
-        }
-
-        // 🔥 FORZAR Change Detection
-        this.cdr.detectChanges();
+        this.updateCategoryContext();
+        this.cdr.markForCheck();
       }),
       catchError((error) => {
-        console.error('Error cargando categorías:', error);
+        console.error('Error categorías:', error);
         return of(void 0);
       })
     );
   }
 
-  private buildSlugMap() {
-    const mapRecursive = (list: any[]) => {
-      list.forEach(cat => {
-        // Use the slug from the DB if available, otherwise normalize the name
-        // This is CRITICAL because the router links use cat.slug
-        const slug = cat.slug ? cat.slug : this.normalizeSlug(cat.nombre);
-
-        this.categorySlugMap[slug] = cat.id;
-        this.categoryIdToSlug[cat.id] = slug;
-
-        if (cat.subcategorias && cat.subcategorias.length > 0) {
-          mapRecursive(cat.subcategorias);
-        }
-      });
-    };
-
-    mapRecursive(this.categorias);
-  }
-
-  loadTalles() {
-    this.apiService.getTalles().subscribe({
-      next: (data) => {
+  loadTalles(): Observable<void> {
+    return this.apiService.getTalles().pipe(
+      tap((data) => {
         this.talles = data;
-      },
-      error: (error) => {
-        console.error('Error cargando talles:', error);
-      }
-    });
+        this.cdr.markForCheck();
+      }),
+      map(() => void 0),
+      catchError((error) => {
+        console.error('Error talles:', error);
+        return of(void 0);
+      })
+    );
   }
 
   filtrarPorCategoria(categoriaId: number | null) {
     this.filtros.categoria_id = categoriaId;
-
-    // Actualizar la URL para reflejar la categoría seleccionada
     if (categoriaId) {
       this.router.navigate(['/categoria', categoriaId]);
     } else {
       this.router.navigate(['/productos']);
     }
-
-    this.loadProductos();
-    this.actualizarTitulo();
-  }
-
-  toggleDestacados() {
-    this.filtros.destacados = !this.filtros.destacados;
     this.loadProductos();
   }
 
   aplicarFiltros() {
-    // Convertir precio inputs a números
     this.filtros.precio_min = this.precioMinInput ? parseFloat(this.precioMinInput) : null;
     this.filtros.precio_max = this.precioMaxInput ? parseFloat(this.precioMaxInput) : null;
     this.loadProductos();
@@ -578,12 +456,10 @@ export class ProductosComponent implements OnInit, OnDestroy {
   }
 
   getPrecioTransferencia(producto: any): number {
-    // 15% de descuento el resto, 10% para Shorts (ID 8) o sus descendientes
     let esShort = false;
     if (producto.categoria_id === 8) {
       esShort = true;
     } else {
-      // Chequear ancestros
       let cat = this.findCategoryById(producto.categoria_id);
       let attempts = 0;
       while (cat && attempts < 5) {
@@ -604,7 +480,6 @@ export class ProductosComponent implements OnInit, OnDestroy {
     return this.getPrecioFinal(producto) * porcentaje;
   }
 
-  // Obtener el mejor precio disponible (base, descuento directo o promoción)
   getPrecioFinal(producto: any): number {
     let mejorPrecio = producto.precio_descuento || producto.precio_base;
 
@@ -633,7 +508,6 @@ export class ProductosComponent implements OnInit, OnDestroy {
     return Math.round((1 - (precioFinal / precioBase)) * 100);
   }
 
-  // Obtener texto para el badge de promoción
   getBadgeText(producto: any): string {
     if (!producto.promociones || producto.promociones.length === 0) return '';
     const promo = producto.promociones[0];
@@ -648,19 +522,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
   }
 
   getCuotaSinInteres(producto: any): number {
-    // Dividir precio final en 3 cuotas sin interés
     return this.getPrecioFinal(producto) / 3;
-  }
-
-  getOrdenamientoTexto(): string {
-    const ordenamientos: any = {
-      'destacado': 'Destacado',
-      'mas_vendido': 'Más Vendido',
-      'alfabetico': 'Orden Alfabético',
-      'precio_asc': 'Precio: Menor a Mayor',
-      'precio_desc': 'Precio: Mayor a Menor'
-    };
-    return ordenamientos[this.filtros.ordenar_por] || 'Destacado';
   }
 
   updateCategoryContext() {
@@ -677,7 +539,6 @@ export class ProductosComponent implements OnInit, OnDestroy {
 
     if (cat) {
       this.currentCategory = cat;
-      // Calculate level based on parents
       let level = 1;
       let parentId = cat.categoria_padre_id;
       let parent = null;
@@ -686,7 +547,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
         level++;
         const p = this.findCategoryById(parentId);
         if (p) {
-          if (level === 2) this.parentCategory = p; // Immediate parent
+          if (level === 2) this.parentCategory = p;
           parentId = p.categoria_padre_id;
         } else {
           break;
@@ -694,7 +555,6 @@ export class ProductosComponent implements OnInit, OnDestroy {
       }
       this.currentCategoryLevel = level;
 
-      // If immediate parent is needed for "Back" button, find it direct
       if (cat.categoria_padre_id) {
         this.parentCategory = this.findCategoryById(cat.categoria_padre_id);
       } else {
@@ -704,25 +564,19 @@ export class ProductosComponent implements OnInit, OnDestroy {
   }
 
   getSidebarCategories(): any[] {
-    // Nivel 0 (Home productos): Mostrar raíces
     if (this.currentCategoryLevel === 0) {
       return this.categorias;
     }
 
-    // Si estamos en una categoría...
     if (this.currentCategory) {
-      // ¿Tiene subcategorías? Mostrarlas (Drill down)
       if (this.currentCategory.subcategorias && this.currentCategory.subcategorias.length > 0) {
         return this.currentCategory.subcategorias;
       }
 
-      // Si NO tiene subcategorías, es una hoja. 
-      // Mostrar los hermanos (subcategorías del padre) para no dejar el sidebar vacío
       if (this.parentCategory && this.parentCategory.subcategorias) {
         return this.parentCategory.subcategorias;
       }
 
-      // Si es una categoría raíz sin hijos (caso raro pero posible)
       if (this.currentCategoryLevel === 1) {
         return this.categorias;
       }
@@ -738,11 +592,9 @@ export class ProductosComponent implements OnInit, OnDestroy {
       return 'CATEGORÍAS';
     }
     if (this.currentCategory) {
-      // Si estamos mostrando los hijos de la actual, el titulo es la actual.
       if (this.currentCategory.subcategorias && this.currentCategory.subcategorias.length > 0) {
         return this.currentCategory.nombre.toUpperCase();
       }
-      // Si estamos mostrando hermanos, el título es el del padre.
       if (this.parentCategory) {
         return this.parentCategory.nombre.toUpperCase();
       }
@@ -759,7 +611,6 @@ export class ProductosComponent implements OnInit, OnDestroy {
     const pathParts = [slug];
     let parentId = category.categoria_padre_id;
 
-    // Walk up the tree to prepend parent slugs
     while (parentId) {
       const parent = this.findCategoryById(parentId);
       if (parent) {
@@ -797,7 +648,6 @@ export class ProductosComponent implements OnInit, OnDestroy {
         this.updateCategoryContext();
       });
     } else {
-      // Fallback
       this.router.navigate(['/categoria', categoriaId]);
     }
   }
@@ -806,17 +656,13 @@ export class ProductosComponent implements OnInit, OnDestroy {
     if (this.parentCategory) {
       this.navigateToCategory(this.parentCategory.id);
     } else {
-      // If no parent, go to root (Productos)
       this.router.navigate(['/productos']);
     }
   }
 
   private ordenarProductosAgotadosAlFinal() {
     this.productos.sort((a, b) => {
-      // Si ambos tienen el mismo estado, mantener orden relativo (estable)
       if (!!a.esta_agotado === !!b.esta_agotado) return 0;
-      // Si a está agotado, va después (1)
-      // Si b está agotado, a va antes (-1)
       return a.esta_agotado ? 1 : -1;
     });
   }
