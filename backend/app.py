@@ -1,4 +1,4 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 import sys
 
 # Evitar ejecución directa para prevenir errores de importación circular
