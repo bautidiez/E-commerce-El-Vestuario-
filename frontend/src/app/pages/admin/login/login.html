@@ -1,5 +1,12 @@
-<div class="login-page"
-  style="background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('/assets/portada3.png') center/cover no-repeat fixed !important;">
+<div class="login-page">
+  <!-- Portada optimizada con Lazy Load y Fallback -->
+  <img 
+      src="/assets/portada3.png" 
+      loading="lazy" 
+      class="bg-portada" 
+      onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 1200 400\'%3E%3Crect fill=\'%23333\' width=\'1200\' height=\'400\'/%3E%3C/svg%3E'"
+      alt="Portada"
+  >
   <div class="container">
     <div class="login-card">
       <div class="login-header">
