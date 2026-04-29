@@ -135,16 +135,21 @@
   background: linear-gradient(180deg, #f8f9ff 0%, #fff 100%);
 }
 
-.productos-titulo-gradient {
-  font-size: 3.5rem;
+.productos-titulo-bold {
+  font-size: 4rem;
   font-weight: 900;
   color: #000;
-  letter-spacing: 3px;
-  text-transform: uppercase;
+  letter-spacing: 1px;
   margin: 40px 0;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+  line-height: 1.1;
   display: inline-block;
   font-family: 'Inter', sans-serif;
+}
+
+.productos-titulo-bold span {
+  display: block;
+  color: #1a1a1a;
+  font-weight: 900;
 }
 
 .product-image-container {
