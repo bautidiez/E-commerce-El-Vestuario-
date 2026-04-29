@@ -392,11 +392,12 @@ export class ProductosComponent implements OnInit, OnDestroy {
     return this.apiService.getTalles().pipe(
       tap((data) => {
         this.talles = data;
+        console.log('✅ Talles cargados:', data.length);
         this.cdr.markForCheck();
       }),
-      map(() => void 0),
+      map(() => void 0),  // ⚡ Retorna void, no los datos
       catchError((error) => {
-        console.error('Error talles:', error);
+        console.error('❌ Error talles:', error);
         return of(void 0);
       })
     );
