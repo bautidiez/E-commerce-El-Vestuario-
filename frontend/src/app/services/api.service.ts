@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { shareReplay, tap } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -8,6 +9,10 @@ import { environment } from '../../environments/environment';
 })
 export class ApiService {
   private apiUrl = environment.apiUrl;
+
+  // ⚡ CACHE en Memoria para evitar peticiones duplicadas
+  private categoriasCache$: Observable<any> | null = null;
+  private tallesCache$: Observable<any> | null = null;
 
   constructor(private http: HttpClient) { }
 
@@ -272,10 +277,14 @@ export class ApiService {
     return this.http.put(url, data, { headers: this.getHeaders(url) });
   }
 
-  // Categorías
+  // Categorías con CACHE
   getCategorias(incluirSubcategorias: boolean = true, categoriaPadreId?: number, flat: boolean = false): Observable<any> {
-    const params = new URLSearchParams();
+    // Si ya existe la petición en curso o cacheada, retornarla
+    if (this.categoriasCache$ && !categoriaPadreId && incluirSubcategorias && !flat) {
+      return this.categoriasCache$;
+    }
 
+    const params = new URLSearchParams();
     params.set('incluir_subcategorias', incluirSubcategorias ? 'true' : 'false');
 
     if (categoriaPadreId !== undefined && categoriaPadreId !== null) {
@@ -293,7 +302,17 @@ export class ApiService {
     }
 
     const url = `${this.apiUrl}/categorias?${params.toString()}`;
-    return this.http.get(url, { headers: this.getHeaders(url) });
+    
+    const request = this.http.get(url, { headers: this.getHeaders(url) }).pipe(
+      shareReplay(1) // ⚡ Mantiene el resultado para subsiguientes llamadas
+    );
+
+    // Solo cachear la llamada principal (sin filtros específicos)
+    if (!categoriaPadreId && incluirSubcategorias && !flat) {
+      this.categoriasCache$ = request;
+    }
+
+    return request;
   }
 
   getCategoriasTree(): Observable<any> {
@@ -340,9 +359,17 @@ export class ApiService {
     return this.http.delete(url, { headers: this.getHeaders(url), params });
   }
 
-  // Talles
+  // Talles con CACHE
   getTalles(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/talles`);
+    if (this.tallesCache$) {
+      return this.tallesCache$;
+    }
+
+    this.tallesCache$ = this.http.get(`${this.apiUrl}/talles`).pipe(
+      shareReplay(1)
+    );
+
+    return this.tallesCache$;
   }
 
   // Colores
