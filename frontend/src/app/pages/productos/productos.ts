@@ -25,6 +25,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
   
   loading = true;
   loadingMore = false;
+  showNoProducts = false; // ⚡ Nuevo: Controlar delay del mensaje vacío
 
   // Paginación
   currentPage = 1;
@@ -202,6 +203,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
   // ⚡ OPTIMIZACIÓN: Función principal de carga
   loadProductos() {
     console.log('🔄 Cargando productos...');
+    this.showNoProducts = false;
     this.loading = true;
     this.currentPage = 1;
 
@@ -248,6 +250,17 @@ export class ProductosComponent implements OnInit, OnDestroy {
       ).subscribe({
         next: () => {
           this.loading = false;
+          
+          // ⚡ DELAY de 3 segundos para el mensaje de "No disponible"
+          if (this.productos.length === 0) {
+            setTimeout(() => {
+              this.showNoProducts = true;
+              this.cdr.markForCheck();
+            }, 3000);
+          } else {
+            this.showNoProducts = false;
+          }
+          
           this.cdr.markForCheck(); // ⚡ Actualizar vista
         },
         complete: () => {
@@ -275,6 +288,17 @@ export class ProductosComponent implements OnInit, OnDestroy {
     ).subscribe({
       next: () => {
         this.loading = false;
+
+        // ⚡ DELAY de 3 segundos para el mensaje de "No disponible"
+        if (this.productos.length === 0) {
+          setTimeout(() => {
+            this.showNoProducts = true;
+            this.cdr.markForCheck();
+          }, 3000);
+        } else {
+          this.showNoProducts = false;
+        }
+
         this.cdr.markForCheck();
       },
       complete: () => {

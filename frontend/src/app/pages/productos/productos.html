@@ -217,7 +217,7 @@
           <p>Cargando productos...</p>
         </div>
 
-        <div *ngIf="!loading && productos.length === 0" class="no-products">
+        <div *ngIf="!loading && productos.length === 0 && showNoProducts" class="no-products">
           <p>No se encontraron productos</p>
           <button class="btn-clear-filters" (click)="limpiarFiltros()" *ngIf="busqueda || filtros.categoria_id">Limpiar
             Filtros</button>

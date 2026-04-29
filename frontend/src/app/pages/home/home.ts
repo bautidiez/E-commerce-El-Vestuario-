@@ -18,6 +18,7 @@ export class HomeComponent implements OnInit {
   loading = true;
   newsletterNombre = '';
   newsletterEmail = '';
+  showNoProducts = false; // ⚡ Nuevo: Controlar delay del mensaje vacío
 
   constructor(
     private apiService: ApiService,
@@ -77,6 +78,17 @@ export class HomeComponent implements OnInit {
     this.loadCount++;
     if (this.loadCount >= 3) {
       this.loading = false;
+      
+      // ⚡ DELAY de 3 segundos para el mensaje de "No disponible"
+      if (this.productosDestacados.length === 0) {
+        setTimeout(() => {
+          this.showNoProducts = true;
+          this.cdr.detectChanges();
+        }, 3000);
+      } else {
+        this.showNoProducts = false;
+      }
+      
       this.cdr.detectChanges();
     }
   }

@@ -42,7 +42,7 @@
     <div class="container">
       <h2>Productos Destacados</h2>
       <div *ngIf="loading" class="loading">No disponible</div>
-      <div *ngIf="!loading && productosDestacados.length === 0" class="no-products">
+      <div *ngIf="!loading && productosDestacados.length === 0 && showNoProducts" class="no-products">
         No disponible
       </div>
       <div class="products-grid" *ngIf="!loading && productosDestacados.length > 0">
