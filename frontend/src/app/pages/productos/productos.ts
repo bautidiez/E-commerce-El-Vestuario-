@@ -14,7 +14,7 @@ import { takeUntil, map, catchError, tap } from 'rxjs/operators';
   imports: [CommonModule, RouterModule, FormsModule, LazyLoadDirective],
   templateUrl: './productos.html',
   styleUrl: './productos.css',
-  changeDetection: ChangeDetectionStrategy.OnPush  // ⚡ CRÍTICO: Detectar cambios solo cuando necesario
+  changeDetection: ChangeDetectionStrategy.OnPush  // ⚡ ULTRA PERFORMANCE: OnPush activated
 })
 export class ProductosComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
