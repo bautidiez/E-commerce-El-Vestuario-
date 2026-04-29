@@ -279,11 +279,17 @@ export class ApiService {
 
   // Categorías con CACHE
   getCategorias(incluirSubcategorias: boolean = true, categoriaPadreId?: number, flat: boolean = false): Observable<any> {
-    // Si ya existe la petición en curso o cacheada, retornarla
-    if (this.categoriasCache$ && !categoriaPadreId && incluirSubcategorias && !flat) {
+    console.log('📋 [ApiService.getCategorias] Llamado con:', { incluirSubcategorias, categoriaPadreId, flat });
+    
+    // ⚡ SI YA EXISTE EN CACHÉ, RETORNAR INMEDIATAMENTE (sin hacer petición)
+    if (this.categoriasCache$) {
+      console.log('✅ [ApiService] Retornando categorías desde CACHÉ (sin petición)');
       return this.categoriasCache$;
     }
 
+    // SI NO EXISTE EN CACHÉ, hacer la petición
+    console.log('🔄 [ApiService] Pidiendo categorías al servidor...');
+    
     const params = new URLSearchParams();
     params.set('incluir_subcategorias', incluirSubcategorias ? 'true' : 'false');
 
@@ -303,16 +309,13 @@ export class ApiService {
 
     const url = `${this.apiUrl}/categorias?${params.toString()}`;
     
-    const request = this.http.get(url, { headers: this.getHeaders(url) }).pipe(
-      shareReplay(1) // ⚡ Mantiene el resultado para subsiguientes llamadas
+    // ⚡ CRÍTICO: shareReplay(1) cachea el resultado AUTOMÁTICAMENTE
+    this.categoriasCache$ = this.http.get(url, { headers: this.getHeaders(url) }).pipe(
+      shareReplay(1),
+      tap(() => console.log('✅ [ApiService] Categorías recibidas y cacheadas'))
     );
 
-    // Solo cachear la llamada principal (sin filtros específicos)
-    if (!categoriaPadreId && incluirSubcategorias && !flat) {
-      this.categoriasCache$ = request;
-    }
-
-    return request;
+    return this.categoriasCache$;
   }
 
   getCategoriasTree(): Observable<any> {
