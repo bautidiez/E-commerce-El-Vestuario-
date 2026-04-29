@@ -75,7 +75,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
   ngOnInit() {
     console.log('🚀 [ProductosComponent] ngOnInit INICIADO');
 
-    // ⚡ OPTIMIZACIÓN: Cargar categorías Y talles EN PARALELO
+    // ⚡ CARGAR CATEGORÍAS Y TALLES EN PARALELO (no secuencial)
     forkJoin({
       categorias: this.loadCategorias(),
       talles: this.loadTalles()
@@ -89,10 +89,13 @@ export class ProductosComponent implements OnInit, OnDestroy {
         // Escuchar cambios de ruta
         merge(this.route.params, this.route.queryParams)
           .pipe(takeUntil(this.destroy$))
-          .subscribe(() => this.handleRouteParams());
+          .subscribe(() => {
+            console.log('🔄 Route params/queryParams CHANGED');
+            this.handleRouteParams();
+          });
       },
       error: (err) => {
-        console.error('Error cargando setup inicial:', err);
+        console.error('❌ Error setup inicial:', err);
         this.loading = false;
         this.cdr.markForCheck();
       }
