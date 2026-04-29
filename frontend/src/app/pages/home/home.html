@@ -41,7 +41,7 @@
   <section class="productos-destacados">
     <div class="container">
       <h2>Productos Destacados</h2>
-      <div *ngIf="loading" class="loading">No disponible</div>
+      <div *ngIf="loading" class="loading">Cargando...</div>
       <div *ngIf="!loading && productosDestacados.length === 0 && showNoProducts" class="no-products">
         No disponible
       </div>
