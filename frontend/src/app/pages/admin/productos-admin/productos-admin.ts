@@ -863,7 +863,7 @@ export class ProductosAdminComponent implements OnInit {
       if (principal) return this.apiService.getFormattedImageUrl(principal.url);
       return this.apiService.getFormattedImageUrl(producto.imagenes[0].url);
     }
-    return 'https://via.placeholder.com/150x150?text=Sin+imagen';
+    return "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Crect fill='%23ddd' width='150' height='150'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' font-family='sans-serif' font-size='14' fill='%23999'%3ESin imagen%3C/text%3E%3C/svg%3E";
   }
 
   getFormattedImageUrl(url: string | null | undefined): string {
