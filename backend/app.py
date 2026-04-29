@@ -413,7 +413,35 @@ def home():
         "endpoints": ["/api/health", "/api/productos", "/api/auth/login"]
     }), 200
 
-# La precarga se movió a store_public.py usando Flask-Caching para evitar bloqueos
+# ==================== PRECARGA DE PRODUCTOS ====================
+PRODUCTOS_CACHE = None
+
+@app.before_request
+def inicializar_precarga():
+    global PRODUCTOS_CACHE
+    # Solo precargar si no estamos en una ruta de salud o estáticos
+    from flask import request
+    if request.path.startswith('/api/health') or request.path.startswith('/static'):
+        return
+
+    if PRODUCTOS_CACHE is None:
+        try:
+            with app.app_context():
+                print("⏳ Precargando productos en memoria (CRÍTICO)...", flush=True)
+                from models import Producto
+                # Cargar los campos esenciales para el catálogo
+                PRODUCTOS_CACHE = db.session.query(
+                    Producto
+                ).filter_by(activo=True).limit(1000).all()
+                
+                # Serializar de una vez para que el retorno sea instantáneo
+                # Usamos to_dict() sin stock para el catálogo general para ahorrar RAM
+                PRODUCTOS_CACHE = [p.to_dict(include_stock=False) for p in PRODUCTOS_CACHE]
+                
+                print(f"✅ {len(PRODUCTOS_CACHE)} productos cargados en RAM")
+        except Exception as e:
+            print(f"❌ Error en precarga: {e}")
+            PRODUCTOS_CACHE = []
 
 # Health check con tipo de base de datos
 @app.route('/api/health')

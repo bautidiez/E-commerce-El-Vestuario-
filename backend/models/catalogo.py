@@ -277,20 +277,6 @@ class Producto(db.Model):
         todas = {p.id: p for p in (promos_directas + promos_cat + promos_global)}
         return list(todas.values())
 
-    def to_dict_light(self):
-        """Versión ultra-ligera para carga masiva inicial"""
-        return {
-            'id': self.id,
-            'nombre': self.nombre,
-            'precio_base': self.precio_base,
-            'precio_descuento': self.precio_descuento,
-            'precio_actual': self.get_precio_actual(),
-            'categoria_nombre': self.categoria.nombre if self.categoria else None,
-            'imagen_url': self.imagenes[0].url if self.imagenes else None,
-            'esta_agotado': self.esta_agotado(),
-            'en_oferta': (self.precio_descuento and self.precio_descuento > 0)
-        }
-
     def to_dict(self, include_stock=True, active_promos=None):
         # Si no se pasan promociones, se calculan (legacy support)
         promos_finales = active_promos if active_promos is not None else self.get_promociones_activas()

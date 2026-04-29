@@ -20,59 +20,80 @@ store_public_bp = Blueprint('store_public', __name__)
 
 # ==================== PRODUCTOS ====================
 
-@cache.memoize(timeout=3600)
-def get_all_productos_cached():
-    """Obtiene y serializa los productos más importantes de forma ultra-ligera"""
-    from models import Producto, Categoria
-    from sqlalchemy.orm import joinedload
-    
-    # Solo los 200 más recientes/relevantes para la carga inicial ultra-rápida
-    productos_db = Producto.query.options(
-        joinedload(Producto.categoria)
-    ).filter_by(activo=True).order_by(Producto.created_at.desc()).limit(200).all()
-    
-    return [p.to_dict_light() for p in productos_db]
-
 @store_public_bp.route('/api/productos', methods=['GET'])
+@cache.cached(timeout=3600, query_string=True)
 def get_productos():
-    """Obtener productos con filtros y paginación (público) - OPTIMIZADO V2"""
+    """Obtener productos con filtros y paginación (público) - OPTIMIZADO"""
+    # 1. Intentar usar la precarga global si no hay filtros complejos
     page = request.args.get('page', 1, type=int)
     page_size = request.args.get('page_size', 12, type=int)
     filters = request.args.to_dict()
     
-    # Quitar parámetros de paginación para ver si hay otros filtros
-    pure_filters = {k: v for k, v in filters.items() if k not in ['page', 'page_size']}
-    
-    # Si no hay filtros complejos, usar la caché de todos los productos
-    if not pure_filters:
-        all_products = get_all_productos_cached()
-        start = (page - 1) * page_size
-        end = start + page_size
-        items = all_products[start:end]
-        
-        return jsonify({
-            'items': items,
-            'productos': all_products if page == 1 else [], # Solo enviar la lista completa en la pág 1 para ahorrar ancho de banda
-            'total': len(all_products),
-            'page': page,
-            'page_size': page_size,
-            'pages': (len(all_products) + page_size - 1) // page_size
-        }), 200
+    # Si no hay filtros (solo paginación básica) y tenemos precarga, usarla
+    from app import PRODUCTOS_CACHE
+    if not filters or (len(filters) == 1 and ('page' in filters or 'page_size' in filters)) or (len(filters) == 2 and 'page' in filters and 'page_size' in filters):
+        if PRODUCTOS_CACHE:
+            start = (page - 1) * page_size
+            end = start + page_size
+            items = PRODUCTOS_CACHE[start:end]
+            return jsonify({
+                'items': items,
+                'productos': PRODUCTOS_CACHE, # Para compatibilidad con el nuevo service del usuario
+                'total': len(PRODUCTOS_CACHE),
+                'page': page,
+                'page_size': page_size,
+                'pages': (len(PRODUCTOS_CACHE) + page_size - 1) // page_size
+            }), 200
 
-    # Si hay filtros, usar el servicio normal (ProductService)
-    # Aquí podrías opcionalmente cachear por query string si quieres más velocidad
+    # 2. Si hay filtros, usar el servicio normal (pero cacheado por el decorador)
     pagination = ProductService.get_catalog(filters, page, page_size)
-    items_dict = [p.to_dict() for p in pagination.items]
+    productos_db = pagination.items
     
-    return jsonify({
+    # --- OPTIMIZACIÓN: Pre-fetch de promociones para evitar N+1 ---
+    from models.promociones import PromocionProducto
+    ahora = datetime.utcnow()
+    
+    # 1. Promociones Globales (una sola consulta)
+    global_promos = PromocionProducto.query.filter(
+        PromocionProducto.alcance == 'tienda',
+        PromocionProducto.activa == True,
+        PromocionProducto.fecha_inicio <= ahora,
+        or_(PromocionProducto.fecha_fin >= ahora, PromocionProducto.fecha_fin == None)
+    ).all()
+    
+    # 2. Promociones por Categoría (una sola consulta para todas las categorías en la página)
+    cat_ids = list(set([p.categoria_id for p in productos_db]))
+    category_promos_list = PromocionProducto.query.filter(
+        PromocionProducto.activa == True,
+        PromocionProducto.fecha_inicio <= ahora,
+        or_(PromocionProducto.fecha_fin >= ahora, PromocionProducto.fecha_fin == None),
+        PromocionProducto.categorias.any(Categoria.id.in_(cat_ids))
+    ).all()
+    
+    # Mapear promociones a sus categorías
+    cat_promos_map = {}
+    for promo in category_promos_list:
+        for cat in promo.categorias:
+            if cat.id not in cat_promos_map: cat_promos_map[cat.id] = []
+            cat_promos_map[cat.id].append(promo)
+
+    # 3. Serialización con contexto pre-cargado
+    items_dict = []
+    for p in productos_db:
+        # Calcular promos activas combinando directas, categoría y globales
+        active_promos = p.get_promociones_activas(global_promos=global_promos, category_promos=cat_promos_map)
+        items_dict.append(p.to_dict(active_promos=active_promos))
+    
+    result = {
         'items': items_dict,
-        'productos': items_dict,
+        'productos': items_dict, # Compatibilidad
         'total': pagination.total,
         'page': page,
         'page_size': page_size,
         'pages': pagination.pages
-    }), 200
-ult), 200
+    }
+    
+    return jsonify(result), 200
 
 @store_public_bp.route('/api/productos/<int:id>', methods=['GET'])
 def get_producto(id):
