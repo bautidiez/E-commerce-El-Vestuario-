@@ -17,8 +17,27 @@ export class ApiService {
 
   getFormattedImageUrl(url: string | null | undefined): string {
     if (!url) return 'assets/no-img.png';
+    
+    // Si es una URL externa (ej: Firebase, Cloudinary directo)
+    if (url.startsWith('http')) {
+      return this.optimizeWithCloudinary(url);
+    }
+
     const apiBase = this.apiUrl.replace('/api', '');
-    return `${apiBase}${url}`;
+    const fullUrl = `${apiBase}${url}`;
+    return this.optimizeWithCloudinary(fullUrl);
+  }
+
+  private optimizeWithCloudinary(url: string): string {
+    const cloudName = (environment as any).cloudinaryCloudName;
+    if (!cloudName) return url;
+
+    // Solo optimizar si no es ya una URL de Cloudinary
+    if (url.includes('cloudinary.com')) return url;
+
+    // Wrap con Cloudinary Fetch API
+    // Parámetros: w_600 (ancho), q_auto (calidad auto), f_auto (formato auto - WebP/AVIF)
+    return `https://res.cloudinary.com/${cloudName}/image/fetch/w_600,c_limit,q_auto,f_auto/${url}`;
   }
 
   private getHeaders(url: string = ''): HttpHeaders {

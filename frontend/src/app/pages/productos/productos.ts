@@ -3,12 +3,14 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
+import { ProductoService } from '../../services/producto.service';
+import { LazyLoadDirective } from '../../directives/image-lazy.directive';
 import { Observable, Subject, of, merge } from 'rxjs';
 import { takeUntil, map, catchError } from 'rxjs/operators';
 
 @Component({
   selector: 'app-productos',
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, LazyLoadDirective],
   templateUrl: './productos.html',
   styleUrl: './productos.css'
 })
@@ -72,6 +74,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
 
   constructor(
     private apiService: ApiService,
+    private productoService: ProductoService,
     private route: ActivatedRoute,
     private router: Router,
     private cdr: ChangeDetectorRef
@@ -278,6 +281,29 @@ export class ProductosComponent implements OnInit, OnDestroy {
     filtrosEnviar.page_size = this.pageSize;
 
     console.log('🔄 Filtros enviados:', filtrosEnviar);
+
+    // OPTIMIZACIÓN: Si no hay filtros complejos, usar el servicio de precarga
+    const isBasicLoad = !this.busqueda && !this.filtros.categoria_id && !this.filtros.color && !this.filtros.talle_id && !this.filtros.dorsal && this.filtros.ordenar_por === 'destacado';
+
+    if (isBasicLoad && this.currentPage === 1) {
+      this.productoService.cargarProductos().subscribe({
+        next: (productos) => {
+          this.productos = productos.slice(0, this.pageSize);
+          this.totalProducts = productos.length;
+          this.hasMoreProducts = this.productos.length < this.totalProducts;
+          this.ordenarProductosAgotadosAlFinal();
+          this.extraerOpcionesFiltros();
+          this.loading = false;
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Error in preloaded load:', err);
+          this.loading = false;
+          this.cdr.detectChanges();
+        }
+      });
+      return;
+    }
 
     this.apiService.getProductos(filtrosEnviar).subscribe({
       next: (data) => {

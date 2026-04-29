@@ -13,5 +13,6 @@ export const environment = {
     messagingSenderId: "875667453769",
     appId: "1:875667453769:web:702e0b8c13d8ee5b920c98",
     measurementId: "G-88L0PPFT2H"
-  }
+  },
+  cloudinaryCloudName: 'dedaat4en' // Ingresa tu cloud_name de Cloudinary aquí
 };

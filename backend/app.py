@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 import os
 import time
 import logging
-from extensions import jwt, mail, compress, cors, limiter
+from extensions import jwt, mail, compress, cors, limiter, cache
 import firebase_admin
 from firebase_admin import credentials
 
@@ -30,6 +30,8 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'tu-clave-secreta-cambia
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///instance/elvestuario.db')
 print(f"DEBUG: Using database URI: {app.config['SQLALCHEMY_DATABASE_URI']}")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['CACHE_TYPE'] = 'simple'
+app.config['CACHE_DEFAULT_TIMEOUT'] = 3600
 
 # Configurar pool de conexiones para mejor rendimiento
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
@@ -84,12 +86,19 @@ app.config['COMPRESS_LEVEL'] = 6  # Nivel de compresión (1-9, 6 es balance entr
 app.config['COMPRESS_MIN_SIZE'] = 500  # Comprimir respuestas > 500 bytes
 
 # Inicializar extensiones
-# Inicializar extensiones
 jwt.init_app(app)
 mail.init_app(app)
 cors.init_app(app)
 compress.init_app(app)
 limiter.init_app(app)
+cache.init_app(app)
+
+# Preloading logic
+@app.before_request
+def preload_cache():
+    if not cache.get('initial_data_loaded'):
+        # Add preloading logic here if needed
+        cache.set('initial_data_loaded', True, timeout=3600)
 
 # Inicializar Firebase
 firebase_creds_path = os.environ.get('FIREBASE_CREDENTIALS_PATH', 'backend/firebase-service-account.json')
@@ -403,6 +412,37 @@ def home():
         "message": "Backend de El Vestuario",
         "endpoints": ["/api/health", "/api/productos", "/api/auth/login"]
     }), 200
+
+# ==================== PRECARGA DE PRODUCTOS ====================
+PRODUCTOS_CACHE = None
+
+@app.before_request
+def inicializar_precarga():
+    global PRODUCTOS_CACHE
+    # Solo precargar si no estamos en una ruta de salud o estáticos
+    from flask import request
+    if request.path.startswith('/api/health') or request.path.startswith('/static'):
+        return
+
+    if PRODUCTOS_CACHE is None:
+        try:
+            with app.app_context():
+                print("⏳ Precargando productos en memoria (CRÍTICO)...", flush=True)
+                from models import Producto, Categoria
+                from sqlalchemy.orm import joinedload
+                # Cargar los campos esenciales para el catálogo con JOIN para evitar N+1
+                PRODUCTOS_CACHE = db.session.query(Producto).options(
+                    joinedload(Producto.categoria).joinedload(Categoria.categoria_padre)
+                ).filter_by(activo=True).limit(1000).all()
+                
+                # Serializar de una vez para que el retorno sea instantáneo
+                # Usamos to_dict() sin stock para el catálogo general para ahorrar RAM
+                PRODUCTOS_CACHE = [p.to_dict(include_stock=False) for p in PRODUCTOS_CACHE]
+                
+                print(f"✅ {len(PRODUCTOS_CACHE)} productos cargados en RAM")
+        except Exception as e:
+            print(f"❌ Error en precarga: {e}")
+            PRODUCTOS_CACHE = []
 
 # Health check con tipo de base de datos
 @app.route('/api/health')

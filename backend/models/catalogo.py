@@ -216,6 +216,9 @@ class Producto(db.Model):
         db.Index('idx_producto_categoria', 'categoria_id'),
         db.Index('idx_producto_activo', 'activo'),
         db.Index('idx_producto_destacado_activo', 'destacado', 'activo'),
+        db.Index('idx_producto_nombre', 'nombre'),
+        db.Index('idx_producto_precio', 'precio_base'),
+        db.Index('idx_categoria_precio', 'categoria_id', 'precio_base'),
     )
 
     def tiene_stock(self):

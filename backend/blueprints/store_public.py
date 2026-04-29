@@ -21,17 +21,31 @@ store_public_bp = Blueprint('store_public', __name__)
 # ==================== PRODUCTOS ====================
 
 @store_public_bp.route('/api/productos', methods=['GET'])
+@cache.cached(timeout=3600, query_string=True)
 def get_productos():
-    """Obtener productos con filtros y paginación (público) - REFACTORIZADO"""
-    # CACHE ACTIVADO
-    cache_key = f"productos:{request.query_string.decode()}"
-    cached_result = cache.get(cache_key)
-    if cached_result: return jsonify(cached_result), 200
-
+    """Obtener productos con filtros y paginación (público) - OPTIMIZADO"""
+    # 1. Intentar usar la precarga global si no hay filtros complejos
     page = request.args.get('page', 1, type=int)
     page_size = request.args.get('page_size', 12, type=int)
     filters = request.args.to_dict()
     
+    # Si no hay filtros (solo paginación básica) y tenemos precarga, usarla
+    from app import PRODUCTOS_CACHE
+    if not filters or (len(filters) == 1 and ('page' in filters or 'page_size' in filters)) or (len(filters) == 2 and 'page' in filters and 'page_size' in filters):
+        if PRODUCTOS_CACHE:
+            start = (page - 1) * page_size
+            end = start + page_size
+            items = PRODUCTOS_CACHE[start:end]
+            return jsonify({
+                'items': items,
+                'productos': PRODUCTOS_CACHE, # Para compatibilidad con el nuevo service del usuario
+                'total': len(PRODUCTOS_CACHE),
+                'page': page,
+                'page_size': page_size,
+                'pages': (len(PRODUCTOS_CACHE) + page_size - 1) // page_size
+            }), 200
+
+    # 2. Si hay filtros, usar el servicio normal (pero cacheado por el decorador)
     pagination = ProductService.get_catalog(filters, page, page_size)
     productos_db = pagination.items
     
@@ -72,13 +86,13 @@ def get_productos():
     
     result = {
         'items': items_dict,
+        'productos': items_dict, # Compatibilidad
         'total': pagination.total,
         'page': page,
         'page_size': page_size,
         'pages': pagination.pages
     }
     
-    cache.set(cache_key, result, ttl_seconds=300)
     return jsonify(result), 200
 
 @store_public_bp.route('/api/productos/<int:id>', methods=['GET'])

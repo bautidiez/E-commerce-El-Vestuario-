@@ -4,12 +4,14 @@ from flask_jwt_extended import JWTManager
 from flask_mail import Mail
 from flask_compress import Compress
 from flask_cors import CORS
+from flask_caching import Cache
 
 # Initialize extensions
 # Note: db is initialized in models.py to avoid heavy refactor of models for now
 jwt = JWTManager()
 mail = Mail()
 compress = Compress()
+cache = Cache()
 
 # Configure CORS - Allow all for easier cross-origin from Vercel
 cors = CORS(

@@ -226,7 +226,9 @@
         <div class="products-grid" *ngIf="!loading && productos.length > 0">
           <div class="product-card" *ngFor="let producto of productos" [routerLink]="['/productos', producto.id]">
             <div class="product-image-container">
-              <img [src]="getImagenPrincipal(producto)" [alt]="producto.nombre" class="product-image" loading="lazy">
+              <img [appLazy]="getImagenPrincipal(producto)" 
+                   src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 300'%3E%3Crect width='300' height='300' fill='%23f3f4f6'/%3E%3C/svg%3E"
+                   [alt]="producto.nombre" class="product-image">
               <div class="product-badge-destacado" *ngIf="producto.destacado">Destacado</div>
               <div class="product-badge-promo" *ngIf="producto.promociones && producto.promociones.length > 0">
                 {{ getBadgeText(producto) }}
