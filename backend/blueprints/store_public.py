@@ -22,18 +22,16 @@ store_public_bp = Blueprint('store_public', __name__)
 
 @cache.memoize(timeout=3600)
 def get_all_productos_cached():
-    """Obtiene y serializa TODOS los productos una sola vez"""
-    print("⏳ Generando caché de productos (Operación pesada - Solo una vez)...", flush=True)
+    """Obtiene y serializa los productos más importantes de forma ultra-ligera"""
     from models import Producto, Categoria
     from sqlalchemy.orm import joinedload
     
-    # Query optimizada con joins
+    # Solo los 200 más recientes/relevantes para la carga inicial ultra-rápida
     productos_db = Producto.query.options(
-        joinedload(Producto.categoria).joinedload(Categoria.categoria_padre)
-    ).filter_by(activo=True).all()
+        joinedload(Producto.categoria)
+    ).filter_by(activo=True).order_by(Producto.created_at.desc()).limit(200).all()
     
-    # Serializar (esto es lo que tarda, por eso lo cacheamos ya convertido)
-    return [p.to_dict(include_stock=False) for p in productos_db]
+    return [p.to_dict_light() for p in productos_db]
 
 @store_public_bp.route('/api/productos', methods=['GET'])
 def get_productos():
