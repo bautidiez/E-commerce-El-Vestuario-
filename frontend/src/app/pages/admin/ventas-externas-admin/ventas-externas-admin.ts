@@ -6,6 +6,7 @@ import { ApiService } from '../../../services/api.service';
 import { AuthService } from '../../../services/auth.service';
 import { Subject } from 'rxjs';
 import { takeUntil, debounceTime, distinctUntilChanged, switchMap, finalize } from 'rxjs/operators';
+import Swal from 'sweetalert2';
 
 interface VentaExterna {
     id: number;
