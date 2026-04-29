@@ -135,20 +135,16 @@
   background: linear-gradient(180deg, #f8f9ff 0%, #fff 100%);
 }
 
-.productos-titulo-icon {
-  font-size: 3.5rem;
-  font-weight: 900;
+.productos-titulo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 5rem;
+  font-weight: 700;
   color: #000;
   letter-spacing: 2px;
   text-transform: uppercase;
   margin: 40px 0;
   display: inline-block;
-  font-family: 'Inter', sans-serif;
-}
-
-.productos-titulo-icon .icon {
-  color: #d32f2f;
-  margin-right: 15px;
+  line-height: 1;
 }
 
 .product-image-container {
