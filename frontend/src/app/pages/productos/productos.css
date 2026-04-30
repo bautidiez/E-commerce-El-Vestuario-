@@ -55,22 +55,26 @@
 }
 
 .btn-back {
-  background: #f8f9fa;
-  border: 1px solid #e0e0e0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
   padding: 8px 16px;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 14px;
-  color: #333;
-  transition: all 0.3s;
-  width: 100%;
+  color: #475569;
+  transition: all 0.3s ease;
+  width: auto;
   font-weight: 600;
+  margin-bottom: 15px;
 }
 
 .btn-back:hover {
-  background: #e9ecef;
-  border-color: #667eea;
-  color: #667eea;
+  background: #e2e8f0;
+  color: #0f172a;
+  transform: translateX(-3px);
 }
 
 .sidebar-nav {
@@ -580,10 +584,13 @@
 
 .product-price-old {
   font-size: 16px;
-  color: #777;
+  color: #a0aec0;
   text-decoration: line-through;
+  text-decoration-color: #e63946; /* Strike-through en rojo sutil */
+  text-decoration-thickness: 2px;
   margin-bottom: 2px;
   font-weight: 400;
+  opacity: 0.8;
 }
 
 .product-price-row {
@@ -594,7 +601,7 @@
 }
 
 .product-price {
-  font-size: 36px;
+  font-size: 28px; /* Más pequeño en categorías */
   font-weight: 900;
   color: #000;
   line-height: 1.1;

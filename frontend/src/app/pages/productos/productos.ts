@@ -597,19 +597,15 @@ export class ProductosComponent implements OnInit, OnDestroy {
     }
 
     if (this.currentCategory) {
+      // Si la categoría actual tiene subcategorías, mostrarlas para seguir bajando
       if (this.currentCategory.subcategorias && this.currentCategory.subcategorias.length > 0) {
         return this.currentCategory.subcategorias;
       }
 
+      // Si no tiene subcategorías, mostrar sus hermanas (hijas del padre)
       if (this.parentCategory && this.parentCategory.subcategorias) {
         return this.parentCategory.subcategorias;
       }
-
-      if (this.currentCategoryLevel === 1) {
-        return this.categorias;
-      }
-
-      return [];
     }
 
     return this.categorias;
