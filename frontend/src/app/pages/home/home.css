@@ -511,19 +511,19 @@
   }
 }
 
-/* ⚡ OPTIMIZACIÓN: Grid de 3 productos centrados para Home */
+/* ⚡ OPTIMIZACIÓN: Grid de 3x2 productos para Home (Centrado) */
 .home-page .products-grid {
   display: grid !important;
-  grid-template-columns: repeat(3, minmax(300px, 400px)) !important;
-  justify-content: center !important;
-  gap: 40px !important;
-  padding: 40px 20px !important;
-  max-width: 1300px !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 30px !important;
+  max-width: 1100px !important;
   margin: 0 auto !important;
+  padding: 40px 0 !important;
+  justify-content: center !important;
 }
 
 .home-page .product-image {
-  height: 350px !important; /* Restaurar tamaño grande */
+  height: 350px !important; /* Más grande para 3 columnas */
 }
 
 .home-page .product-title {
@@ -532,17 +532,18 @@
 }
 
 .home-page .product-price {
-  font-size: 24px !important;
-}
-
-.home-page .price-transfer-amount {
   font-size: 22px !important;
 }
 
-/* Responsivo para el Grid de 6 */
-@media (max-width: 1400px) {
+.home-page .price-transfer-amount {
+  font-size: 20px !important;
+}
+
+/* Responsivo para el Grid de 3 */
+@media (max-width: 1100px) {
   .home-page .products-grid {
-    grid-template-columns: repeat(4, 1fr) !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 20px !important;
   }
 }
 

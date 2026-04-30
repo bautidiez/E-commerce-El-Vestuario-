@@ -35,7 +35,7 @@ export class HomeComponent implements OnInit {
     this.apiService.getProductos({ destacados: true }).subscribe({
       next: (data) => {
         const productos = data.items || data;
-        this.productosDestacados = productos.slice(0, 9);
+        this.productosDestacados = productos.slice(0, 6);
         this.checkAllLoaded();
       },
       error: (error) => {
@@ -49,7 +49,7 @@ export class HomeComponent implements OnInit {
     this.apiService.getProductos({ ofertas: true }).subscribe({
       next: (data) => {
         const productos = data.items || data;
-        this.productosOfertas = productos.slice(0, 9);
+        this.productosOfertas = productos.slice(0, 6);
         this.checkAllLoaded();
       },
       error: (error) => {
