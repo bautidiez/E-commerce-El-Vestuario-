@@ -57,24 +57,32 @@
 .btn-back {
   display: flex;
   align-items: center;
-  gap: 8px;
-  background: #f1f5f9;
-  border: 1px solid #e2e8f0;
-  padding: 8px 16px;
-  border-radius: 8px;
+  justify-content: center;
+  gap: 10px;
+  background: #0f172a; /* Color oscuro profesional */
+  color: #ffffff !important;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 6px; /* Rectangular con bordes suaves */
   cursor: pointer;
-  font-size: 14px;
-  color: #475569;
-  transition: all 0.3s ease;
-  width: auto;
-  font-weight: 600;
-  margin-bottom: 15px;
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%; /* Ocupa el ancho del sidebar para mejor control */
+  margin-bottom: 20px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .btn-back:hover {
-  background: #e2e8f0;
-  color: #0f172a;
-  transform: translateX(-3px);
+  background: #1e293b;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.back-icon {
+  font-size: 18px;
 }
 
 .sidebar-nav {
@@ -514,15 +522,18 @@
   background-size: cover;
   background-position: center;
   color: #fff;
-  padding: 6px 14px;
+  padding: 8px 16px; /* Ajuste para que el texto grande entre bien */
   border-radius: 4px;
-  font-size: 11px;
-  font-weight: 800;
+  font-size: 15px; /* TEXTO MÁS GRANDE */
+  font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   z-index: 2;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Badge Agotado - Centrado sobre imagen */

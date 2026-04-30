@@ -250,9 +250,6 @@
                     [class.discount-price]="producto.precio_descuento || (producto.promociones && producto.promociones.length > 0)">
                     ${{ getPrecioFinal(producto) | number:'1.0-0' }}
                   </span>
-                  <span class="discount-percent" *ngIf="getDescuentoPorcentaje(producto) > 0">
-                    -{{ getDescuentoPorcentaje(producto) }}%
-                  </span>
                 </div>
 
                 <!-- Precio con Transferencia -->
