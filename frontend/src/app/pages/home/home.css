@@ -511,23 +511,26 @@
   }
 }
 
-/* ⚡ OPTIMIZACIÓN EXTREMA: Para que los 6 productos entren en una sola pantalla sin scroll */
+/* ⚡ OPTIMIZACIÓN FINAL: Flexbox para centrar todo y evitar que se estiren */
 .home-page .products-grid {
-  display: grid !important;
-  grid-template-columns: repeat(3, 1fr) !important;
-  gap: 10px !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important; /* Centra los productos (incluso si hay menos de 3) */
+  gap: 15px !important;
   max-width: 1200px !important;
   margin: 0 auto !important;
-  padding: 5px 0 !important;
-  justify-content: center !important;
+  padding: 10px 0 !important;
 }
 
 .home-page .product-card {
+  width: 300px !important; /* Ancho fijo para que no se estiren */
+  flex: 0 1 300px !important;
   border-radius: 12px !important;
+  margin-bottom: 10px !important;
 }
 
 .home-page .product-image {
-  height: 150px !important; /* Imagen mínima para ahorrar espacio vertical */
+  height: 150px !important;
 }
 
 .home-page .product-info {
