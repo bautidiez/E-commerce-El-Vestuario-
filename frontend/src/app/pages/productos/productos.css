@@ -59,26 +59,28 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  background: #0f172a; /* Color oscuro profesional */
-  color: #ffffff !important;
+  background-image: url('/assets/fondo.png');
+  background-size: cover;
+  background-position: center;
+  color: #fff;
   border: none;
-  padding: 10px 24px;
-  border-radius: 6px; /* Rectangular con bordes suaves */
+  padding: 12px 20px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  width: 100%; /* Ocupa el ancho del sidebar para mejor control */
+  width: 100%;
   margin-bottom: 20px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
 }
 
 .btn-back:hover {
-  background: #1e293b;
   transform: translateY(-2px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+  filter: brightness(1.1);
 }
 
 .back-icon {
@@ -522,18 +524,16 @@
   background-size: cover;
   background-position: center;
   color: #fff;
-  padding: 8px 16px; /* Ajuste para que el texto grande entre bien */
-  border-radius: 4px;
-  font-size: 15px; /* TEXTO MÁS GRANDE */
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 16px !important; /* Más grande */
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   z-index: 2;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  line-height: 1;
 }
 
 /* Badge Agotado - Centrado sobre imagen */
@@ -594,14 +594,15 @@
 }
 
 .product-price-old {
+  font-family: 'Inter', sans-serif;
   font-size: 16px;
-  color: #a0aec0;
+  color: #94a3b8;
   text-decoration: line-through;
-  text-decoration-color: #e63946; /* Strike-through en rojo sutil */
-  text-decoration-thickness: 2px;
+  text-decoration-color: #ef4444; /* Rojo vibrante para el tachado */
+  text-decoration-thickness: 1px;
   margin-bottom: 2px;
-  font-weight: 400;
-  opacity: 0.8;
+  font-weight: 500;
+  letter-spacing: 0.5px;
 }
 
 .product-price-row {
