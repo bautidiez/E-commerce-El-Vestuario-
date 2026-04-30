@@ -578,27 +578,26 @@
   margin-bottom: 4px;
 }
 
-.precio-tachado {
+.product-price-old {
   font-size: 16px;
-  color: #777; /* Más oscuro para mejor visibilidad */
+  color: #777;
   text-decoration: line-through;
   margin-bottom: 2px;
   font-weight: 400;
 }
 
-/* 2. Precio Principal Container */
-.precio-principal-container {
+.product-price-row {
   display: flex;
   align-items: baseline;
-  gap: 8px;
-  margin-bottom: 4px;
+  gap: 10px;
+  margin-bottom: 8px;
 }
 
-.precio-principal {
+.product-price {
   font-size: 36px;
   font-weight: 900;
   color: #000;
-  line-height: 1;
+  line-height: 1.1;
 }
 
 /* Badge texto (-69% OFF) */
