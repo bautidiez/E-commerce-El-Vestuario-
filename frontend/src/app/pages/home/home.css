@@ -511,41 +511,53 @@
   }
 }
 
-/* ⚡ OPTIMIZACIÓN: Grid de 3x2 productos para Home (Centrado y Compacto para que entren los 6) */
+/* ⚡ OPTIMIZACIÓN EXTREMA: Para que los 6 productos entren en una sola pantalla sin scroll */
 .home-page .products-grid {
   display: grid !important;
   grid-template-columns: repeat(3, 1fr) !important;
-  gap: 15px !important; /* Gap más pequeño */
-  max-width: 1100px !important;
+  gap: 10px !important;
+  max-width: 1200px !important;
   margin: 0 auto !important;
-  padding: 10px 0 !important; /* Menos padding vertical */
+  padding: 5px 0 !important;
   justify-content: center !important;
 }
 
+.home-page .product-card {
+  border-radius: 12px !important;
+}
+
 .home-page .product-image {
-  height: 200px !important; /* Imagen mucho más compacta */
+  height: 150px !important; /* Imagen mínima para ahorrar espacio vertical */
+}
+
+.home-page .product-info {
+  padding: 8px !important; /* Padding mínimo */
 }
 
 .home-page .product-title {
-  font-size: 14px !important;
-  min-height: 35px !important;
-  margin-bottom: 5px !important;
+  font-size: 13px !important;
+  min-height: 30px !important;
+  margin-bottom: 2px !important;
+  line-height: 1.2 !important;
 }
 
 .home-page .product-price {
-  font-size: 18px !important;
-}
-
-.home-page .price-transfer-amount {
   font-size: 16px !important;
 }
 
-.home-page .price-transfer-label {
-  font-size: 10px !important;
+.home-page .price-transfer-amount {
+  font-size: 14px !important;
 }
 
+.home-page .price-transfer-label,
 .home-page .price-cuotas {
-  font-size: 10px !important;
+  font-size: 9px !important;
+  margin-top: 0 !important;
+}
+
+.home-page .product-price-container {
+  gap: 2px !important;
+  margin-top: 2px !important;
 }
 
 /* Responsivo para el Grid de 3 */
