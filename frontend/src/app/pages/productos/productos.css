@@ -578,12 +578,12 @@
   margin-bottom: 4px;
 }
 
-/* 1. Precio Tachado (Anterior) */
 .precio-tachado {
-  font-size: 14px;
-  color: #999;
+  font-size: 16px;
+  color: #777; /* Más oscuro para mejor visibilidad */
   text-decoration: line-through;
   margin-bottom: 2px;
+  font-weight: 400;
 }
 
 /* 2. Precio Principal Container */
