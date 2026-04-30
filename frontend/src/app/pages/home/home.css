@@ -511,29 +511,32 @@
   }
 }
 
-/* ⚡ OPTIMIZACIÓN: Grid de 6 productos para Home */
+/* ⚡ OPTIMIZACIÓN: Grid de 3 productos centrados para Home */
 .home-page .products-grid {
   display: grid !important;
-  grid-template-columns: repeat(6, 1fr) !important;
-  gap: 12px !important;
-  padding: 20px 10px !important;
+  grid-template-columns: repeat(3, minmax(300px, 400px)) !important;
+  justify-content: center !important;
+  gap: 40px !important;
+  padding: 40px 20px !important;
+  max-width: 1300px !important;
+  margin: 0 auto !important;
 }
 
 .home-page .product-image {
-  height: 200px !important;
+  height: 350px !important; /* Restaurar tamaño grande */
 }
 
 .home-page .product-title {
-  font-size: 14px !important;
-  min-height: 35px !important;
+  font-size: 18px !important;
+  min-height: 45px !important;
 }
 
 .home-page .product-price {
-  font-size: 18px !important;
+  font-size: 24px !important;
 }
 
 .home-page .price-transfer-amount {
-  font-size: 16px !important;
+  font-size: 22px !important;
 }
 
 /* Responsivo para el Grid de 6 */
