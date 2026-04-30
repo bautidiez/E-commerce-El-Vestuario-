@@ -546,8 +546,9 @@
 }
 
 .home-page .product-price {
-  font-size: 20px !important; /* Más grande */
-  font-weight: 800 !important;
+  font-size: 32px !important; /* Mucho más grande */
+  font-weight: 900 !important;
+  color: #000 !important;
 }
 
 .home-page .price-transfer-amount {
