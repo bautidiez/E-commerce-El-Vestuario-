@@ -104,219 +104,262 @@
     </div>
 
     <div *ngIf="mostrarFormulario" class="producto-form">
-      <h2>{{ productoEditando ? 'Editar Producto' : 'Nuevo Producto' }}</h2>
-      <form (ngSubmit)="guardar()" enctype="multipart/form-data">
-        <div class="form-group">
-          <label>Nombre *</label>
-          <div class="autocomplete-wrapper">
-            <input type="text" [(ngModel)]="nuevoProducto.nombre" name="nombre" (input)="buscarSugerenciasNombre()"
-              class="autocomplete-input" autocomplete="off" required>
-            <!-- Lista de sugerencias de nombre -->
-            <div class="autocomplete-dropdown" *ngIf="sugerenciasNombre.length > 0">
-              <div *ngFor="let prod of sugerenciasNombre" class="autocomplete-option"
-                (click)="seleccionarNombreSugerido(prod.nombre)">
-                {{ prod.nombre }}
-              </div>
-            </div>
-          </div>
+      <!-- Form Header -->
+      <div class="pf-header">
+        <div class="pf-header-icon">{{ productoEditando ? '✏️' : '➕' }}</div>
+        <div>
+          <h2 class="pf-title">{{ productoEditando ? 'Editar Producto' : 'Nuevo Producto' }}</h2>
+          <p class="pf-subtitle">{{ productoEditando ? 'Modificá los datos del producto' : 'Completá los campos para crear un producto' }}</p>
         </div>
+      </div>
 
-        <div class="form-group">
-          <label>Descripción</label>
-          <textarea [(ngModel)]="nuevoProducto.descripcion" name="descripcion" rows="4"></textarea>
-        </div>
+      <form (ngSubmit)="guardar()" enctype="multipart/form-data" class="pf-body">
 
-        <div class="form-row">
-          <div class="form-group">
-            <label>Precio Base *</label>
-            <input type="number" [(ngModel)]="nuevoProducto.precio_base" name="precio_base" step="0.01" min="0"
-              required>
+        <!-- ── SECCIÓN 1: Información General ── -->
+        <div class="form-card">
+          <div class="form-card-header">
+            <span class="form-card-icon">📋</span>
+            <h3 class="form-card-title">Información General</h3>
           </div>
-
-          <div class="form-group">
-            <label>Precio con Descuento</label>
-            <input type="number" [(ngModel)]="nuevoProducto.precio_descuento" name="precio_descuento" step="0.01"
-              min="0">
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Categoría Principal * (Remeras o Shorts)</label>
-            <select [(ngModel)]="categoriaPadreSeleccionada" name="categoria_padre" (change)="onCategoriaPadreChange()"
-              required>
-              <option [ngValue]="null">Seleccionar...</option>
-              <option *ngFor="let cat of categoriasPadre" [ngValue]="cat.id">
-                {{ cat.nombre }}
-              </option>
-            </select>
-          </div>
-
-          <!-- Nivel 2: Temporadas/Tipos (solo para Remeras) -->
-          <div class="form-group" *ngIf="mostrarSubcategorias && subcategoriasNivel1.length > 0">
-            <label>Tipo/Temporada *</label>
-            <select [(ngModel)]="subcategoriaNivel1Seleccionada" name="subcategoria_nivel1"
-              (change)="onSubcategoriaNivel1Change()" required>
-              <option [ngValue]="null">Seleccionar...</option>
-              <option *ngFor="let subcat of subcategoriasNivel1" [ngValue]="subcat.id">
-                {{ subcat.nombre }}
-              </option>
-            </select>
-          </div>
-
-          <div class="form-group" *ngIf="subcategoriaNivel1Seleccionada && subcategoriasNivel2.length > 0">
-            <label>Sub-Subcategoría (ej: Liga) *</label>
-            <select [(ngModel)]="nuevoProducto.categoria_id" name="categoria_id" required>
-              <option [ngValue]="null">Seleccionar...</option>
-              <option *ngFor="let liga of subcategoriasNivel2" [ngValue]="liga.id">
-                {{ liga.nombre }}
-              </option>
-            </select>
-          </div>
-
-          <!-- Mensaje si no hay más subcategorías -->
-          <div class="form-group" *ngIf="subcategoriaNivel1Seleccionada && subcategoriasNivel2.length === 0">
-            <p style="font-size: 14px; color: #28a745; font-style: italic; margin-top: 5px;">
-              ✓ Categoría lista para usar
-            </p>
-          </div>
-
-          <div class="form-group">
-            <label>Estado *</label>
-            <select [(ngModel)]="nuevoProducto.activo" name="activo" required>
-              <option [ngValue]="null">Seleccionar...</option>
-              <option [ngValue]="true">Activo</option>
-              <option [ngValue]="false">Inactivo</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Color</label>
-            <app-color-picker [selectedColor]="colorSeleccionado" (colorSelected)="onColorSelected($event)">
-            </app-color-picker>
-            <input type="hidden" [(ngModel)]="nuevoProducto.color" name="color">
-            <input type="hidden" [(ngModel)]="nuevoProducto.color_hex" name="color_hex">
-          </div>
-
-          <div class="form-group">
-            <label>Versión</label>
-            <select [(ngModel)]="nuevoProducto.version" name="version">
-              <option value="">Seleccionar...</option>
-              <option value="Hincha">Hincha</option>
-              <option value="Jugador">Jugador</option>
-            </select>
-          </div>
-        </div>
-
-
-        <!-- Producto Relacionado con BÚSQUEDA ESCRITA -->
-        <!-- Productos Relacionados (M:N) -->
-        <div class="form-group">
-          <label>Productos Relacionados (Variantes)</label>
-
-          <!-- CHIPS LIST -->
-          <div class="related-chips" *ngIf="productosRelacionadosSeleccionados.length > 0">
-            <div class="chip" *ngFor="let rel of productosRelacionadosSeleccionados; let i = index">
-              <span>{{ rel.nombre }}</span>
-              <span class="chip-color" *ngIf="rel.color" [style.background]="rel.color_hex || '#ccc'"></span>
-              <button type="button" class="btn-remove-chip" (click)="removerProductoRelacionado(i)">✕</button>
-            </div>
-          </div>
-
-          <div class="autocomplete-wrapper">
-            <input type="text" placeholder="Escribe para buscar y agregar (ej: Camiseta Suplente)"
-              [(ngModel)]="busquedaProductoRelacionado" (input)="buscarProductoRelacionado()" name="product_search"
-              class="autocomplete-input" autocomplete="off">
-
-            <!-- Lista de sugerencias -->
-            <div class="autocomplete-dropdown" *ngIf="productosRelacionadosFiltrados.length > 0">
-              <div *ngFor="let prod of productosRelacionadosFiltrados" class="autocomplete-option"
-                (click)="seleccionarProductoRelacionado(prod)">
-                {{ prod.nombre }} <span class="chip-color" *ngIf="prod.color"
-                  [style.background]="prod.color_hex || '#ccc'"></span>
-              </div>
-            </div>
-          </div>
-          <small>Agrega múltiples variantes (mismo diseño, distinto color).</small>
-        </div>
-
-        <div class="form-row">
-          <div class="form-group">
-            <label>Nombre</label>
-            <input type="text" [(ngModel)]="nuevoProducto.dorsal" name="dorsal" placeholder="Ej: Messi">
-          </div>
-
-          <div class="form-group">
-            <label>Número</label>
-            <input type="number" [(ngModel)]="nuevoProducto.numero" name="numero" min="0" placeholder="Ej: 10">
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label>
-            <input type="checkbox" [(ngModel)]="nuevoProducto.destacado" name="destacado">
-            Producto destacado
-          </label>
-        </div>
-
-        <!-- Imágenes -->
-        <div class="form-group">
-          <label>Imágenes del Producto</label>
-
-          <!-- Imágenes existentes (solo al editar) -->
-          <div *ngIf="productoEditando && imagenesExistentes.length > 0" class="imagenes-existentes">
-            <h4>Imágenes Actuales:</h4>
-            <div class="imagenes-grid">
-              <div *ngFor="let img of imagenesExistentes; let i = index" class="imagen-item" [class.principal]="img.es_principal">
-                <img [src]="getFormattedImageUrl(img.url)" [alt]="nuevoProducto.nombre">
-                <div class="imagen-badge" *ngIf="img.es_principal">Principal</div>
-                
-                <div class="imagen-overlay">
-                  <button type="button" class="btn-set-main" *ngIf="!img.es_principal" (click)="setImagenPrincipal(img)" title="Marcar como principal">⭐ Portada</button>
-                  <div class="reorder-btns">
-                    <button type="button" class="btn-nav" (click)="moverImagenExistente(i, -1)" [disabled]="i === 0">←</button>
-                    <button type="button" class="btn-nav" (click)="moverImagenExistente(i, 1)" [disabled]="i === imagenesExistentes.length - 1">→</button>
+          <div class="form-card-body">
+            <div class="form-group">
+              <label class="form-label">Nombre del Producto <span class="required">*</span></label>
+              <div class="autocomplete-wrapper">
+                <input type="text" [(ngModel)]="nuevoProducto.nombre" name="nombre" (input)="buscarSugerenciasNombre()"
+                  class="autocomplete-input form-input" autocomplete="off" required placeholder="Ej: Camiseta Argentina Titular">
+                <div class="autocomplete-dropdown" *ngIf="sugerenciasNombre.length > 0">
+                  <div *ngFor="let prod of sugerenciasNombre" class="autocomplete-option"
+                    (click)="seleccionarNombreSugerido(prod.nombre)">
+                    {{ prod.nombre }}
                   </div>
                 </div>
-                <button type="button" class="btn-eliminar-imagen" (click)="eliminarImagenExistente(img.id)">✕</button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Descripción</label>
+              <textarea [(ngModel)]="nuevoProducto.descripcion" name="descripcion" rows="3" class="form-input"
+                placeholder="Descripción opcional del producto..."></textarea>
+            </div>
+
+            <div class="form-group checkbox-group">
+              <label class="checkbox-label">
+                <input type="checkbox" [(ngModel)]="nuevoProducto.destacado" name="destacado" class="checkbox-input">
+                <span class="checkbox-custom"></span>
+                <span>Marcar como <strong>Producto Destacado</strong></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── SECCIÓN 2: Precios ── -->
+        <div class="form-card">
+          <div class="form-card-header">
+            <span class="form-card-icon">💲</span>
+            <h3 class="form-card-title">Precios</h3>
+          </div>
+          <div class="form-card-body">
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label">Precio Base <span class="required">*</span></label>
+                <div class="input-prefix-wrapper">
+                  <span class="input-prefix">$</span>
+                  <input type="number" [(ngModel)]="nuevoProducto.precio_base" name="precio_base" step="0.01" min="0"
+                    required class="form-input with-prefix" placeholder="0.00">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Precio con Descuento <span class="form-hint">(opcional)</span></label>
+                <div class="input-prefix-wrapper">
+                  <span class="input-prefix">$</span>
+                  <input type="number" [(ngModel)]="nuevoProducto.precio_descuento" name="precio_descuento" step="0.01"
+                    min="0" class="form-input with-prefix" placeholder="0.00">
+                </div>
               </div>
             </div>
           </div>
+        </div>
 
-          <!-- Subir nuevas imágenes -->
-          <div class="imagenes-upload">
-            <div class="drop-zone" [class.dragging]="isDragging" (dragover)="onDragOver($event)"
-              (dragleave)="onDragLeave($event)" (drop)="onFileDropped($event)" (click)="fileInput.click()">
-              <i>📷</i>
-              <p>Arrastra tus imágenes aquí o haz clic para seleccionar</p>
-              <input type="file" #fileInput multiple accept="image/*" (change)="onFileSelected($event)"
-                style="display: none;">
+        <!-- ── SECCIÓN 3: Categoría & Estado ── -->
+        <div class="form-card">
+          <div class="form-card-header">
+            <span class="form-card-icon">🗂️</span>
+            <h3 class="form-card-title">Categoría & Estado</h3>
+          </div>
+          <div class="form-card-body">
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label">Categoría Principal <span class="required">*</span></label>
+                <select [(ngModel)]="categoriaPadreSeleccionada" name="categoria_padre" (change)="onCategoriaPadreChange()"
+                  required class="form-input form-select">
+                  <option [ngValue]="null">Seleccionar...</option>
+                  <option *ngFor="let cat of categoriasPadre" [ngValue]="cat.id">{{ cat.nombre }}</option>
+                </select>
+              </div>
+
+              <div class="form-group" *ngIf="mostrarSubcategorias && subcategoriasNivel1.length > 0">
+                <label class="form-label">Tipo / Temporada <span class="required">*</span></label>
+                <select [(ngModel)]="subcategoriaNivel1Seleccionada" name="subcategoria_nivel1"
+                  (change)="onSubcategoriaNivel1Change()" required class="form-input form-select">
+                  <option [ngValue]="null">Seleccionar...</option>
+                  <option *ngFor="let subcat of subcategoriasNivel1" [ngValue]="subcat.id">{{ subcat.nombre }}</option>
+                </select>
+              </div>
+
+              <div class="form-group" *ngIf="subcategoriaNivel1Seleccionada && subcategoriasNivel2.length > 0">
+                <label class="form-label">Liga / Sub-Subcategoría <span class="required">*</span></label>
+                <select [(ngModel)]="nuevoProducto.categoria_id" name="categoria_id" required class="form-input form-select">
+                  <option [ngValue]="null">Seleccionar...</option>
+                  <option *ngFor="let liga of subcategoriasNivel2" [ngValue]="liga.id">{{ liga.nombre }}</option>
+                </select>
+              </div>
+
+              <div class="form-group" *ngIf="subcategoriaNivel1Seleccionada && subcategoriasNivel2.length === 0">
+                <div class="cat-ready-badge">✓ Categoría lista para usar</div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Estado <span class="required">*</span></label>
+                <select [(ngModel)]="nuevoProducto.activo" name="activo" required class="form-input form-select">
+                  <option [ngValue]="null">Seleccionar...</option>
+                  <option [ngValue]="true">Activo</option>
+                  <option [ngValue]="false">Inactivo</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── SECCIÓN 4: Atributos ── -->
+        <div class="form-card">
+          <div class="form-card-header">
+            <span class="form-card-icon">🎨</span>
+            <h3 class="form-card-title">Atributos del Producto</h3>
+          </div>
+          <div class="form-card-body">
+            <div class="form-row-2">
+              <div class="form-group">
+                <label class="form-label">Color</label>
+                <app-color-picker [selectedColor]="colorSeleccionado" (colorSelected)="onColorSelected($event)">
+                </app-color-picker>
+                <input type="hidden" [(ngModel)]="nuevoProducto.color" name="color">
+                <input type="hidden" [(ngModel)]="nuevoProducto.color_hex" name="color_hex">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Versión</label>
+                <select [(ngModel)]="nuevoProducto.version" name="version" class="form-input form-select">
+                  <option value="">Seleccionar...</option>
+                  <option value="Hincha">Hincha</option>
+                  <option value="Jugador">Jugador</option>
+                </select>
+
+                <div class="form-row-2" style="margin-top: 1rem;">
+                  <div class="form-group">
+                    <label class="form-label">Dorsal (Nombre)</label>
+                    <input type="text" [(ngModel)]="nuevoProducto.dorsal" name="dorsal" placeholder="Ej: Messi" class="form-input">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Número</label>
+                    <input type="number" [(ngModel)]="nuevoProducto.numero" name="numero" min="0" placeholder="Ej: 10" class="form-input">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── SECCIÓN 5: Variantes Relacionadas ── -->
+        <div class="form-card">
+          <div class="form-card-header">
+            <span class="form-card-icon">🔗</span>
+            <h3 class="form-card-title">Variantes Relacionadas</h3>
+          </div>
+          <div class="form-card-body">
+            <div class="related-chips" *ngIf="productosRelacionadosSeleccionados.length > 0">
+              <div class="chip" *ngFor="let rel of productosRelacionadosSeleccionados; let i = index">
+                <span class="chip-color" *ngIf="rel.color" [style.background]="rel.color_hex || '#ccc'"></span>
+                <span>{{ rel.nombre }}</span>
+                <button type="button" class="btn-remove-chip" (click)="removerProductoRelacionado(i)">✕</button>
+              </div>
             </div>
 
-            <!-- Preview de imágenes seleccionadas -->
-            <div *ngIf="imagenesPreview.length > 0" class="imagenes-preview">
-              <h4>Nuevas Imágenes (Se subirán al guardar):</h4>
+            <div class="autocomplete-wrapper">
+              <input type="text" placeholder="Escribe para buscar y agregar (ej: Camiseta Suplente)"
+                [(ngModel)]="busquedaProductoRelacionado" (input)="buscarProductoRelacionado()" name="product_search"
+                class="autocomplete-input form-input" autocomplete="off">
+              <div class="autocomplete-dropdown" *ngIf="productosRelacionadosFiltrados.length > 0">
+                <div *ngFor="let prod of productosRelacionadosFiltrados" class="autocomplete-option"
+                  (click)="seleccionarProductoRelacionado(prod)">
+                  <span class="chip-color" *ngIf="prod.color" [style.background]="prod.color_hex || '#ccc'"></span>
+                  {{ prod.nombre }}
+                </div>
+              </div>
+            </div>
+            <p class="form-hint-text">💡 Agrega múltiples variantes del mismo diseño con distinto color.</p>
+          </div>
+        </div>
+
+        <!-- ── SECCIÓN 6: Imágenes ── -->
+        <div class="form-card">
+          <div class="form-card-header">
+            <span class="form-card-icon">📸</span>
+            <h3 class="form-card-title">Imágenes del Producto</h3>
+          </div>
+          <div class="form-card-body">
+
+            <!-- Imágenes existentes -->
+            <div *ngIf="productoEditando && imagenesExistentes.length > 0" class="imagenes-existentes">
+              <p class="img-section-label">Imágenes actuales</p>
               <div class="imagenes-grid">
-                <div *ngFor="let preview of imagenesPreview; let i = index" class="imagen-item">
-                  <img [src]="preview" [alt]="'Preview ' + (i + 1)">
-                  <div class="imagen-badge" *ngIf="i === 0">Principal</div>
-                  <div class="imagen-controls">
-                    <button type="button" class="btn-control" (click)="moverImagenPreview(i, -1)" *ngIf="i > 0">←</button>
-                    <button type="button" class="btn-control" (click)="moverImagenPreview(i, 1)" *ngIf="i < imagenesPreview.length - 1">→</button>
+                <div *ngFor="let img of imagenesExistentes; let i = index" class="imagen-item" [class.principal]="img.es_principal">
+                  <img [src]="getFormattedImageUrl(img.url)" [alt]="nuevoProducto.nombre">
+                  <div class="imagen-badge" *ngIf="img.es_principal">⭐ Principal</div>
+                  <div class="imagen-overlay">
+                    <button type="button" class="btn-set-main" *ngIf="!img.es_principal" (click)="setImagenPrincipal(img)">⭐ Portada</button>
+                    <div class="reorder-btns">
+                      <button type="button" class="btn-nav" (click)="moverImagenExistente(i, -1)" [disabled]="i === 0">←</button>
+                      <button type="button" class="btn-nav" (click)="moverImagenExistente(i, 1)" [disabled]="i === imagenesExistentes.length - 1">→</button>
+                    </div>
                   </div>
-                  <button type="button" class="btn-eliminar-imagen" (click)="eliminarImagenPreview(i)">✕</button>
+                  <button type="button" class="btn-eliminar-imagen" (click)="eliminarImagenExistente(img.id)">✕</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Drop zone -->
+            <div class="imagenes-upload">
+              <div class="drop-zone" [class.dragging]="isDragging" (dragover)="onDragOver($event)"
+                (dragleave)="onDragLeave($event)" (drop)="onFileDropped($event)" (click)="fileInput.click()">
+                <span class="drop-zone-icon">📷</span>
+                <p class="drop-zone-text">Arrastrá tus imágenes aquí o <strong>hacé clic para seleccionar</strong></p>
+                <input type="file" #fileInput multiple accept="image/*" (change)="onFileSelected($event)" style="display: none;">
+              </div>
+
+              <div *ngIf="imagenesPreview.length > 0" class="imagenes-preview">
+                <p class="img-section-label">Nuevas imágenes (se subirán al guardar)</p>
+                <div class="imagenes-grid">
+                  <div *ngFor="let preview of imagenesPreview; let i = index" class="imagen-item">
+                    <img [src]="preview" [alt]="'Preview ' + (i + 1)">
+                    <div class="imagen-badge" *ngIf="i === 0">⭐ Principal</div>
+                    <div class="imagen-controls">
+                      <button type="button" class="btn-control" (click)="moverImagenPreview(i, -1)" *ngIf="i > 0">←</button>
+                      <button type="button" class="btn-control" (click)="moverImagenPreview(i, 1)" *ngIf="i < imagenesPreview.length - 1">→</button>
+                    </div>
+                    <button type="button" class="btn-eliminar-imagen" (click)="eliminarImagenPreview(i)">✕</button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
+        <!-- ── ACCIONES ── -->
         <div class="form-actions">
-          <button type="submit" class="btn btn-primary">Guardar</button>
-          <button type="button" class="btn btn-secondary" (click)="cancelar()">Cancelar</button>
+          <button type="button" class="btn btn-secondary" (click)="cancelar()">✕ Cancelar</button>
+          <button type="submit" class="btn btn-primary">💾 Guardar Producto</button>
         </div>
+
       </form>
     </div>
 
