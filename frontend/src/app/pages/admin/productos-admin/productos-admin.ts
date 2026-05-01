@@ -210,22 +210,34 @@ export class ProductosAdminComponent implements OnInit {
   loadCategorias() {
     this.apiService.getCategorias(true, undefined, true).subscribe({
       next: (data) => {
-        // Normalizar IDs a número y filtrar 'Ofertas'
-        this.categorias = data.map((c: any) => ({
-          ...c,
-          id: Number(c.id),
-          categoria_padre_id: c.categoria_padre_id ? Number(c.categoria_padre_id) : null
-        })).filter((c: any) => (c.nombre || '').trim().toLowerCase() !== 'ofertas');
+        // Normalizar y APLANAR la estructura si viene anidada (por culpa del caché del servicio)
+        const allCats: any[] = [];
+        const process = (items: any[]) => {
+          items.forEach(c => {
+            allCats.push({
+              ...c,
+              id: Number(c.id),
+              categoria_padre_id: c.categoria_padre_id ? Number(c.categoria_padre_id) : null
+            });
+            if (c.subcategorias && c.subcategorias.length > 0) {
+              process(c.subcategorias);
+            }
+          });
+        };
+        process(Array.isArray(data) ? data : [data]);
+
+        // Guardar lista plana sin 'Ofertas'
+        this.categorias = allCats.filter((c: any) => (c.nombre || '').trim().toLowerCase() !== 'ofertas');
+
+        console.log('[DEBUG] Total categorías (aplanadas):', this.categorias.length);
 
         // La estructura real es: Indumentaria (nivel 1) → Remeras/Shorts (nivel 2)
-        // Mostramos nivel 2 (Remeras, Shorts) como el primer selector del formulario
         this.categoriasPadre = this.categorias.filter((cat: any) => {
           const nombre = (cat.nombre || '').trim().toLowerCase();
-          // Nivel 2: tienen padre pero son las categorías principales de producto
           return cat.categoria_padre_id !== null && (nombre === 'remeras' || nombre === 'shorts');
         });
 
-        // Si no encontró con padre, intentar sin restricción de padre (fallback)
+        // Fallback: si no hay con padre, buscar cualquiera con ese nombre
         if (this.categoriasPadre.length === 0) {
           this.categoriasPadre = this.categorias.filter((cat: any) => {
             const nombre = (cat.nombre || '').trim().toLowerCase();
@@ -233,16 +245,55 @@ export class ProductosAdminComponent implements OnInit {
           });
         }
 
-        console.log('[DEBUG] categoriasPadre encontradas:', this.categoriasPadre.map((c:any) => `${c.nombre}(id:${c.id})`));
+        console.log('[DEBUG] Categorías Padre:', this.categoriasPadre.map(c => `${c.nombre}(${c.id})`));
+        
+        // IMPORTANTE: Si ya tenemos un producto cargado (Edición), forzar detección de sus subcategorías
+        if (this.nuevoProducto.categoria_id) {
+          this.detectarJerarquiaDesdeId(this.nuevoProducto.categoria_id);
+        }
+
         this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error cargando categorías:', error);
-        this.categoriasPadre = [];
-        this.categorias = [];
         this.cdr.detectChanges();
       }
     });
+  }
+
+  /**
+   * Reconstruye la jerarquía de dropdowns a partir de un ID de categoría final
+   */
+  private detectarJerarquiaDesdeId(id: number) {
+    const finalCat = this.categorias.find(c => Number(c.id) === Number(id));
+    if (!finalCat) return;
+
+    console.log('[DEBUG] Reconstruyendo jerarquía para:', finalCat.nombre);
+
+    if (finalCat.nivel === 4 || finalCat.nivel === 3) {
+      // Es una Liga o una Temporada
+      const padre = this.categorias.find(c => Number(c.id) === Number(finalCat.categoria_padre_id));
+      if (padre) {
+        if (padre.nivel === 3) {
+          // finalCat es Nivel 4 (Liga)
+          this.subcategoriaNivel1Seleccionada = padre.id;
+          this.categoriaPadreSeleccionada = padre.categoria_padre_id;
+        } else if (padre.nivel === 2) {
+          // finalCat es Nivel 3 (Temporada)
+          this.categoriaPadreSeleccionada = padre.id;
+          this.subcategoriaNivel1Seleccionada = finalCat.id;
+        }
+      }
+    } else if (finalCat.nivel === 2) {
+      this.categoriaPadreSeleccionada = finalCat.id;
+    }
+
+    // Ejecutar lógica de carga de hijos
+    if (this.categoriaPadreSeleccionada) this.onCategoriaPadreChange();
+    if (this.subcategoriaNivel1Seleccionada) this.onSubcategoriaNivel1Change();
+    
+    // Restaurar el ID original que se borra al resetear
+    this.nuevoProducto.categoria_id = id;
   }
 
   onColorSelected(colorObj: any) {

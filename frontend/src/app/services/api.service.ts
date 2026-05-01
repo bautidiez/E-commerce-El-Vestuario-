@@ -11,7 +11,7 @@ export class ApiService {
   private apiUrl = environment.apiUrl;
 
   // ⚡ CACHE en Memoria para evitar peticiones duplicadas
-  private categoriasCache$: Observable<any> | null = null;
+  private categoriasCacheMap: Map<string, Observable<any>> = new Map();
   private tallesCache$: Observable<any> | null = null;
 
   constructor(private http: HttpClient) { }
@@ -279,17 +279,13 @@ export class ApiService {
 
   // Categorías con CACHE
   getCategorias(incluirSubcategorias: boolean = true, categoriaPadreId?: number, flat: boolean = false): Observable<any> {
-    console.log('📋 [ApiService.getCategorias] Llamado con:', { incluirSubcategorias, categoriaPadreId, flat });
+    const cacheKey = `cats_${incluirSubcategorias}_${categoriaPadreId || 'all'}_${flat}`;
     
-    // ⚡ SI YA EXISTE EN CACHÉ, RETORNAR INMEDIATAMENTE (sin hacer petición)
-    if (this.categoriasCache$) {
-      console.log('✅ [ApiService] Retornando categorías desde CACHÉ (sin petición)');
-      return this.categoriasCache$;
+    // ⚡ SI YA EXISTE EN CACHÉ PARA ESTOS PARÁMETROS, RETORNAR
+    if (this.categoriasCacheMap.has(cacheKey)) {
+      return this.categoriasCacheMap.get(cacheKey)!;
     }
 
-    // SI NO EXISTE EN CACHÉ, hacer la petición
-    console.log('🔄 [ApiService] Pidiendo categorías al servidor...');
-    
     const params = new URLSearchParams();
     params.set('incluir_subcategorias', incluirSubcategorias ? 'true' : 'false');
 
@@ -309,13 +305,12 @@ export class ApiService {
 
     const url = `${this.apiUrl}/categorias?${params.toString()}`;
     
-    // ⚡ CRÍTICO: shareReplay(1) cachea el resultado AUTOMÁTICAMENTE
-    this.categoriasCache$ = this.http.get(url, { headers: this.getHeaders(url) }).pipe(
-      shareReplay(1),
-      tap(() => console.log('✅ [ApiService] Categorías recibidas y cacheadas'))
+    const request$ = this.http.get(url, { headers: this.getHeaders(url) }).pipe(
+      shareReplay(1)
     );
 
-    return this.categoriasCache$;
+    this.categoriasCacheMap.set(cacheKey, request$);
+    return request$;
   }
 
   getCategoriasTree(): Observable<any> {
