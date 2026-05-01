@@ -210,29 +210,30 @@ export class ProductosAdminComponent implements OnInit {
   loadCategorias() {
     this.apiService.getCategorias(true, undefined, true).subscribe({
       next: (data) => {
-        // Asegurar que todos los IDs sean números y filtrar 'Ofertas'
+        // Normalizar IDs a número y filtrar 'Ofertas'
         this.categorias = data.map((c: any) => ({
           ...c,
           id: Number(c.id),
           categoria_padre_id: c.categoria_padre_id ? Number(c.categoria_padre_id) : null
         })).filter((c: any) => (c.nombre || '').trim().toLowerCase() !== 'ofertas');
 
-        // SOLO Remeras y Shorts como padres principales
+        // La estructura real es: Indumentaria (nivel 1) → Remeras/Shorts (nivel 2)
+        // Mostramos nivel 2 (Remeras, Shorts) como el primer selector del formulario
         this.categoriasPadre = this.categorias.filter((cat: any) => {
           const nombre = (cat.nombre || '').trim().toLowerCase();
-          return !cat.categoria_padre_id && (nombre === 'remeras' || nombre === 'shorts');
+          // Nivel 2: tienen padre pero son las categorías principales de producto
+          return cat.categoria_padre_id !== null && (nombre === 'remeras' || nombre === 'shorts');
         });
 
-        console.log('Categorías padre filtradas:', this.categoriasPadre);
-        console.log('Total categorías cargadas (sin ofertas):', this.categorias.length);
-        console.log('--- DEBUG CATEGORÍAS ---');
-        console.log('Categorías Padre:', this.categoriasPadre.map(c => `${c.nombre}(${c.id})`));
-        console.log('Total Categorías:', this.categorias.length);
-        const l3_sample = this.categorias.find(c => {
-          const padre = this.categorias.find(p => p.id === c.categoria_padre_id);
-          return padre && padre.categoria_padre_id !== null;
-        });
-        console.log('Ejemplo Nivel 3 en memoria:', l3_sample ? `${l3_sample.nombre} -> ${l3_sample.categoria_padre_id}` : 'Ninguna');
+        // Si no encontró con padre, intentar sin restricción de padre (fallback)
+        if (this.categoriasPadre.length === 0) {
+          this.categoriasPadre = this.categorias.filter((cat: any) => {
+            const nombre = (cat.nombre || '').trim().toLowerCase();
+            return nombre === 'remeras' || nombre === 'shorts';
+          });
+        }
+
+        console.log('[DEBUG] categoriasPadre encontradas:', this.categoriasPadre.map((c:any) => `${c.nombre}(id:${c.id})`));
         this.cdr.detectChanges();
       },
       error: (error) => {
