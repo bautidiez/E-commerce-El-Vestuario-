@@ -153,6 +153,64 @@
   padding: 12px 25px;
   border-radius: 8px;
   font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-page {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #475569;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-page:hover:not(:disabled) {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #1e293b;
+}
+
+.btn-page.active {
+  background: #000;
+  border-color: #000;
+  color: #fff;
+}
+
+.btn-page:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-search:hover {
+  background: #1e293b;
+  transform: translateY(-1px);
+}
+
+.btn-clear {
+  background: #f1f5f9;
+  color: #475569;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid #e2e8f0;
+  transition: all 0.2s;
+}
+
+.btn-clear:hover {
+  background: #e2e8f0;
+  color: #1e293b;
 }
 
 .productos-list {
@@ -170,23 +228,34 @@ table {
 }
 
 table thead {
-  background: #cbd5e1;
+  background: #f8fafc;
 }
 
 table th {
-  padding: 15px;
+  padding: 18px 15px;
   text-align: left;
   font-weight: 700;
-  color: #1e293b;
-  border-bottom: 2px solid #e2e8f0;
+  color: #64748b;
+  border-bottom: 2px solid #f1f5f9;
   text-transform: uppercase;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.5px;
 }
 
 table td {
   padding: 15px;
   border-bottom: 1px solid #f1f5f9;
   vertical-align: middle;
+  color: #1e293b;
+  font-size: 0.9rem;
+}
+
+table tr {
+  transition: background 0.15s;
+}
+
+table tbody tr:hover {
+  background-color: #f8fafc;
 }
 
 tr.selected {
@@ -194,18 +263,21 @@ tr.selected {
 }
 
 .product-thumb {
-  width: 60px;
-  height: 60px;
+  width: 50px;
+  height: 50px;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid #e2e8f0;
+  background: #fff;
 }
 
 .status-badge {
-  padding: 5px 12px;
+  padding: 6px 12px;
   border-radius: 20px;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 
 .status-badge.active { background: #dcfce7; color: #166534; }
@@ -217,19 +289,22 @@ tr.selected {
 }
 
 .btn-edit, .btn-delete, .btn-stock {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.1rem;
   transition: all 0.2s;
+  cursor: pointer;
+  border: 1px solid #e2e8f0;
+  background: #fff;
 }
 
-.btn-edit:hover { background: #eff6ff; color: #2563eb; }
-.btn-delete:hover { background: #fef2f2; color: #ef4444; }
-.btn-stock:hover { background: #f0fdf4; color: #10b981; }
+.btn-edit:hover { background: #eff6ff; color: #2563eb; border-color: #bfdbfe; transform: translateY(-2px); }
+.btn-delete:hover { background: #fef2f2; color: #ef4444; border-color: #fecaca; transform: translateY(-2px); }
+.btn-stock:hover { background: #f0fdf4; color: #10b981; border-color: #bbf7d0; transform: translateY(-2px); }
 
 /* SWAL CUSTOM STYLES FOR BULK STOCK */
 .bulk-stock-container {
