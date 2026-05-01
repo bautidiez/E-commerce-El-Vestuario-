@@ -1,8 +1,8 @@
 from flask import Blueprint, request, jsonify, send_from_directory, current_app
-from extensions import limiter, mail
+from extensions import limiter, mail, cache
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask_mail import Message
-from cache_utils import cache, invalidate_cache, cached
+from cache_utils import invalidate_cache, cached
 from models import *
 from sqlalchemy import or_, and_, desc
 from sqlalchemy.orm import joinedload

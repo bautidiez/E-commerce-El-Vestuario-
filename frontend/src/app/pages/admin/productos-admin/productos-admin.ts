@@ -296,6 +296,7 @@ export class ProductosAdminComponent implements OnInit {
       this.subcategoriasNivel1 = this.categorias.filter((cat: any) =>
         cat.categoria_padre_id === selectedId
       );
+      console.log(`[DEBUG] Subcategorias Nivel 1 cargadas para ID ${selectedId}:`, this.subcategoriasNivel1.length);
 
       if (this.subcategoriasNivel1.length === 0) {
         this.nuevoProducto.categoria_id = selectedId;
@@ -319,7 +320,7 @@ export class ProductosAdminComponent implements OnInit {
         cat.categoria_padre_id === selectedId
       );
 
-      console.log(`Buscando L3 para PadreID ${selectedId}. Encontrados: ${this.subcategoriasNivel2.length}`);
+      console.log(`[DEBUG] Subcategorias Nivel 2 cargadas para ID ${selectedId}:`, this.subcategoriasNivel2.length);
       if (this.subcategoriasNivel2.length > 0) {
         console.log('Primeras L3:', this.subcategoriasNivel2.slice(0, 2).map(c => c.nombre));
       }

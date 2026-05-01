@@ -89,7 +89,8 @@ app.config['COMPRESS_MIN_SIZE'] = 500  # Comprimir respuestas > 500 bytes
 # Inicializar extensiones
 jwt.init_app(app)
 mail.init_app(app)
-cors.init_app(app)
+from flask_cors import CORS
+CORS(app, resources={r"/*": {"origins": "*"}})
 compress.init_app(app)
 limiter.init_app(app)
 cache.init_app(app)
@@ -411,7 +412,7 @@ def precarga_productos_background():
     global PRODUCTOS_CACHE, PRECARGA_EN_CURSO, PRECARGA_COMPLETADA_EN
     
     try:
-        print("⏳ [PRECARGA] Iniciando en background thread...", flush=True)
+        print("[PRECARGA] Iniciando en background thread...", flush=True)
         PRECARGA_EN_CURSO = True
         
         with app.app_context():
@@ -426,11 +427,11 @@ def precarga_productos_background():
             PRODUCTOS_CACHE = [p.to_dict(include_stock=False) for p in productos]
             PRECARGA_COMPLETADA_EN = time.time()
             
-            print(f"✅ [PRECARGA] {len(PRODUCTOS_CACHE)} productos listos en RAM", flush=True)
+            print(f"[PRECARGA] {len(PRODUCTOS_CACHE)} productos listos en RAM", flush=True)
             PRECARGA_EN_CURSO = False
             
     except Exception as e:
-        print(f"❌ [PRECARGA] Error: {e}", flush=True)
+        print(f"[PRECARGA] Error: {e}", flush=True)
         PRECARGA_EN_CURSO = False
         PRODUCTOS_CACHE = []
 
@@ -444,7 +445,7 @@ def iniciar_precarga_si_no_existe(response):
         # Iniciar en thread daemon (no bloquea nada)
         thread = Thread(target=precarga_productos_background, daemon=True)
         thread.start()
-        print("🚀 [PRECARGA] Iniciada en background thread", flush=True)
+        print("[PRECARGA] Iniciada en background thread", flush=True)
     
     return response
 
@@ -452,7 +453,7 @@ def iniciar_precarga_si_no_existe(response):
 
 @app.route('/api/health')
 def health_check():
-    """⚡ Responde inmediatamente sin tocar BD"""
+    """Responde inmediatamente sin tocar BD"""
     db_type = "PostgreSQL" if app.config['SQLALCHEMY_DATABASE_URI'].startswith('postgres') else "SQLite"
     return jsonify({
         "status": "ok",
@@ -480,7 +481,7 @@ def home():
 @app.route('/api/productos/precargados', methods=['GET'])
 @cache.cached(timeout=3600)
 def get_productos_precargados():
-    """⚡ ULTRA RÁPIDO: Retorna desde caché en RAM (<10ms)"""
+    """ULTRA RÁPIDO: Retorna desde caché en RAM (<10ms)"""
     
     if PRODUCTOS_CACHE is None:
         # Si la precarga aún no terminó, retornar vacío (Angular espera)
