@@ -292,11 +292,11 @@ export class ProductosAdminComponent implements OnInit {
     if (selectedId) {
       this.mostrarSubcategorias = true;
 
-      // Cargar subcategorías de nivel 1 (Temporadas/Tipos)
+      // Usar Number() en ambos lados para evitar fallo por string vs number
       this.subcategoriasNivel1 = this.categorias.filter((cat: any) =>
-        cat.categoria_padre_id === selectedId
+        Number(cat.categoria_padre_id) === selectedId
       );
-      console.log(`[DEBUG] Subcategorias Nivel 1 cargadas para ID ${selectedId}:`, this.subcategoriasNivel1.length);
+      console.log(`[DEBUG] Subcategorias Nivel 1 para ID ${selectedId}:`, this.subcategoriasNivel1.length, this.subcategoriasNivel1.map((c:any)=>c.nombre));
 
       if (this.subcategoriasNivel1.length === 0) {
         this.nuevoProducto.categoria_id = selectedId;
@@ -304,6 +304,7 @@ export class ProductosAdminComponent implements OnInit {
     } else {
       this.mostrarSubcategorias = false;
     }
+    this.cdr.detectChanges();
   }
 
   onSubcategoriaNivel1Change() {
@@ -315,20 +316,18 @@ export class ProductosAdminComponent implements OnInit {
     this.nuevoProducto.categoria_id = null;
 
     if (selectedId) {
-      // Cargar sub-subcategorías (Ligas)
+      // Usar Number() en ambos lados para evitar fallo por string vs number
       this.subcategoriasNivel2 = this.categorias.filter((cat: any) =>
-        cat.categoria_padre_id === selectedId
+        Number(cat.categoria_padre_id) === selectedId
       );
 
-      console.log(`[DEBUG] Subcategorias Nivel 2 cargadas para ID ${selectedId}:`, this.subcategoriasNivel2.length);
-      if (this.subcategoriasNivel2.length > 0) {
-        console.log('Primeras L3:', this.subcategoriasNivel2.slice(0, 2).map(c => c.nombre));
-      }
+      console.log(`[DEBUG] Subcategorias Nivel 2 para ID ${selectedId}:`, this.subcategoriasNivel2.length, this.subcategoriasNivel2.map((c:any)=>c.nombre));
 
       if (this.subcategoriasNivel2.length === 0) {
         this.nuevoProducto.categoria_id = selectedId;
       }
     }
+    this.cdr.detectChanges();
   }
 
   nuevo() {
