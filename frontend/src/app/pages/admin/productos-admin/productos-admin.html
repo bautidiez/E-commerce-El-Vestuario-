@@ -187,45 +187,47 @@
             <h3 class="form-card-title">Categoría & Estado</h3>
           </div>
           <div class="form-card-body">
-            <div class="form-row-2">
-              <div class="form-group">
-                <label class="form-label">Categoría Principal <span class="required">*</span></label>
-                <select [(ngModel)]="categoriaPadreSeleccionada" name="categoria_padre" (change)="onCategoriaPadreChange()"
-                  required class="form-input form-select">
-                  <option [ngValue]="null">Seleccionar...</option>
-                  <option *ngFor="let cat of categoriasPadre" [ngValue]="cat.id">{{ cat.nombre }}</option>
-                </select>
-              </div>
+            <!-- Fila 1: Categoría Principal -->
+            <div class="form-group">
+              <label class="form-label">Categoría Principal <span class="required">*</span></label>
+              <select [(ngModel)]="categoriaPadreSeleccionada" name="categoria_padre" (change)="onCategoriaPadreChange()"
+                required class="form-input form-select">
+                <option [ngValue]="null">Seleccionar...</option>
+                <option *ngFor="let cat of categoriasPadre" [ngValue]="cat.id">{{ cat.nombre }}</option>
+              </select>
+            </div>
 
-              <div class="form-group" *ngIf="mostrarSubcategorias && subcategoriasNivel1.length > 0">
-                <label class="form-label">Tipo / Temporada <span class="required">*</span></label>
-                <select [(ngModel)]="subcategoriaNivel1Seleccionada" name="subcategoria_nivel1"
-                  (change)="onSubcategoriaNivel1Change()" required class="form-input form-select">
-                  <option [ngValue]="null">Seleccionar...</option>
-                  <option *ngFor="let subcat of subcategoriasNivel1" [ngValue]="subcat.id">{{ subcat.nombre }}</option>
-                </select>
-              </div>
+            <!-- Fila 2: Subcategoría (Nivel 1) -->
+            <div class="form-group fade-in" *ngIf="categoriaPadreSeleccionada && subcategoriasNivel1.length > 0">
+              <label class="form-label">Tipo / Temporada <span class="required">*</span></label>
+              <select [(ngModel)]="subcategoriaNivel1Seleccionada" name="subcategoria_nivel1"
+                (change)="onSubcategoriaNivel1Change()" required class="form-input form-select">
+                <option [ngValue]="null">Seleccionar...</option>
+                <option *ngFor="let subcat of subcategoriasNivel1" [ngValue]="subcat.id">{{ subcat.nombre }}</option>
+              </select>
+            </div>
 
-              <div class="form-group" *ngIf="subcategoriaNivel1Seleccionada && subcategoriasNivel2.length > 0">
-                <label class="form-label">Liga / Sub-Subcategoría <span class="required">*</span></label>
-                <select [(ngModel)]="nuevoProducto.categoria_id" name="categoria_id" required class="form-input form-select">
-                  <option [ngValue]="null">Seleccionar...</option>
-                  <option *ngFor="let liga of subcategoriasNivel2" [ngValue]="liga.id">{{ liga.nombre }}</option>
-                </select>
-              </div>
+            <!-- Fila 3: Sub-Subcategoría (Nivel 2) -->
+            <div class="form-group fade-in" *ngIf="subcategoriaNivel1Seleccionada && subcategoriasNivel2.length > 0">
+              <label class="form-label">Liga / Sub-Subcategoría <span class="required">*</span></label>
+              <select [(ngModel)]="nuevoProducto.categoria_id" name="categoria_id" required class="form-input form-select">
+                <option [ngValue]="null">Seleccionar...</option>
+                <option *ngFor="let liga of subcategoriasNivel2" [ngValue]="liga.id">{{ liga.nombre }}</option>
+              </select>
+            </div>
 
-              <div class="form-group" *ngIf="subcategoriaNivel1Seleccionada && subcategoriasNivel2.length === 0">
-                <div class="cat-ready-badge">✓ Categoría lista para usar</div>
-              </div>
+            <div class="form-group" *ngIf="subcategoriaNivel1Seleccionada && subcategoriasNivel2.length === 0">
+              <div class="cat-ready-badge">✓ Categoría lista para usar</div>
+            </div>
 
-              <div class="form-group">
-                <label class="form-label">Estado <span class="required">*</span></label>
-                <select [(ngModel)]="nuevoProducto.activo" name="activo" required class="form-input form-select">
-                  <option [ngValue]="null">Seleccionar...</option>
-                  <option [ngValue]="true">Activo</option>
-                  <option [ngValue]="false">Inactivo</option>
-                </select>
-              </div>
+            <!-- Fila 4: Estado -->
+            <div class="form-group" style="margin-top: 1.5rem; border-top: 1px solid #f1f5f9; padding-top: 1.25rem;">
+              <label class="form-label">Estado del Producto <span class="required">*</span></label>
+              <select [(ngModel)]="nuevoProducto.activo" name="activo" required class="form-input form-select" style="max-width: 250px;">
+                <option [ngValue]="null">Seleccionar...</option>
+                <option [ngValue]="true">Activo</option>
+                <option [ngValue]="false">Inactivo</option>
+              </select>
             </div>
           </div>
         </div>
@@ -266,37 +268,6 @@
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-
-        <!-- ── SECCIÓN 5: Variantes Relacionadas ── -->
-        <div class="form-card">
-          <div class="form-card-header">
-            <span class="form-card-icon">🔗</span>
-            <h3 class="form-card-title">Variantes Relacionadas</h3>
-          </div>
-          <div class="form-card-body">
-            <div class="related-chips" *ngIf="productosRelacionadosSeleccionados.length > 0">
-              <div class="chip" *ngFor="let rel of productosRelacionadosSeleccionados; let i = index">
-                <span class="chip-color" *ngIf="rel.color" [style.background]="rel.color_hex || '#ccc'"></span>
-                <span>{{ rel.nombre }}</span>
-                <button type="button" class="btn-remove-chip" (click)="removerProductoRelacionado(i)">✕</button>
-              </div>
-            </div>
-
-            <div class="autocomplete-wrapper">
-              <input type="text" placeholder="Escribe para buscar y agregar (ej: Camiseta Suplente)"
-                [(ngModel)]="busquedaProductoRelacionado" (input)="buscarProductoRelacionado()" name="product_search"
-                class="autocomplete-input form-input" autocomplete="off">
-              <div class="autocomplete-dropdown" *ngIf="productosRelacionadosFiltrados.length > 0">
-                <div *ngFor="let prod of productosRelacionadosFiltrados" class="autocomplete-option"
-                  (click)="seleccionarProductoRelacionado(prod)">
-                  <span class="chip-color" *ngIf="prod.color" [style.background]="prod.color_hex || '#ccc'"></span>
-                  {{ prod.nombre }}
-                </div>
-              </div>
-            </div>
-            <p class="form-hint-text">💡 Agrega múltiples variantes del mismo diseño con distinto color.</p>
           </div>
         </div>
 
