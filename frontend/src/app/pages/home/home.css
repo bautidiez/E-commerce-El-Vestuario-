@@ -531,7 +531,16 @@
 }
 
 .home-page .product-image {
-  height: 180px !important; /* Imagen un poco más alta para mejor proporción */
+  height: 220px !important;
+  width: 100% !important;
+  object-fit: contain !important; /* Asegura que la prenda se vea completa */
+  background: #f9f9f9 !important; /* Fondo suave para uniformidad */
+  padding: 10px !important;
+  transition: transform 0.5s ease;
+}
+
+.home-page .product-card:hover .product-image {
+  transform: scale(1.05); /* Efecto de zoom suave al pasar el mouse */
 }
 
 .home-page .product-info {
