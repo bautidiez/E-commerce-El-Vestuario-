@@ -181,9 +181,16 @@ export class ProductosAdminComponent implements OnInit {
 
     // Cargar subcategorías disponibles basadas en la categoría seleccionada
     if (this.filtroCategoria) {
-      this.subcategoriasDisponibles = this.categorias.filter((cat: any) =>
-        cat.categoria_padre_id === this.filtroCategoria
+      const filtered = this.categorias.filter((cat: any) =>
+        Number(cat.categoria_padre_id) === Number(this.filtroCategoria)
       );
+      const seenNames = new Set<string>();
+      this.subcategoriasDisponibles = filtered.filter(cat => {
+        const name = (cat.nombre || '').trim().toLowerCase();
+        if (seenNames.has(name)) return false;
+        seenNames.add(name);
+        return true;
+      });
     } else {
       this.subcategoriasDisponibles = [];
     }
@@ -197,9 +204,16 @@ export class ProductosAdminComponent implements OnInit {
 
     // Cargar sub-subcategorías disponibles
     if (this.filtroSubcategoria) {
-      this.subsubcategoriasDisponibles = this.categorias.filter((cat: any) =>
-        cat.categoria_padre_id === this.filtroSubcategoria
+      const filtered = this.categorias.filter((cat: any) =>
+        Number(cat.categoria_padre_id) === Number(this.filtroSubcategoria)
       );
+      const seenNames = new Set<string>();
+      this.subsubcategoriasDisponibles = filtered.filter(cat => {
+        const name = (cat.nombre || '').trim().toLowerCase();
+        if (seenNames.has(name)) return false;
+        seenNames.add(name);
+        return true;
+      });
     } else {
       this.subsubcategoriasDisponibles = [];
     }
@@ -351,11 +365,18 @@ export class ProductosAdminComponent implements OnInit {
     if (selectedId) {
       this.mostrarSubcategorias = true;
 
-      // Usar Number() en ambos lados para evitar fallo por string vs number
-      this.subcategoriasNivel1 = this.categorias.filter((cat: any) =>
-        Number(cat.categoria_padre_id) === selectedId
-      );
-      console.log(`[DEBUG] Subcategorias Nivel 1 para ID ${selectedId}:`, this.subcategoriasNivel1.length, this.subcategoriasNivel1.map((c:any)=>c.nombre));
+      // Usar un Set para evitar duplicados por nombre
+      const seenNames = new Set<string>();
+      this.subcategoriasNivel1 = this.categorias
+        .filter((cat: any) => Number(cat.categoria_padre_id) === selectedId)
+        .filter((cat: any) => {
+          const name = (cat.nombre || '').trim().toLowerCase();
+          if (seenNames.has(name)) return false;
+          seenNames.add(name);
+          return true;
+        });
+
+      console.log(`[DEBUG] Subcategorias Nivel 1 únicas para ID ${selectedId}:`, this.subcategoriasNivel1.length, this.subcategoriasNivel1.map((c: any) => c.nombre));
 
       if (this.subcategoriasNivel1.length === 0) {
         this.nuevoProducto.categoria_id = selectedId;
@@ -375,12 +396,18 @@ export class ProductosAdminComponent implements OnInit {
     this.nuevoProducto.categoria_id = null;
 
     if (selectedId) {
-      // Usar Number() en ambos lados para evitar fallo por string vs number
-      this.subcategoriasNivel2 = this.categorias.filter((cat: any) =>
-        Number(cat.categoria_padre_id) === selectedId
-      );
+      // Usar un Set para evitar duplicados por nombre
+      const seenNames = new Set<string>();
+      this.subcategoriasNivel2 = this.categorias
+        .filter((cat: any) => Number(cat.categoria_padre_id) === selectedId)
+        .filter((cat: any) => {
+          const name = (cat.nombre || '').trim().toLowerCase();
+          if (seenNames.has(name)) return false;
+          seenNames.add(name);
+          return true;
+        });
 
-      console.log(`[DEBUG] Subcategorias Nivel 2 para ID ${selectedId}:`, this.subcategoriasNivel2.length, this.subcategoriasNivel2.map((c:any)=>c.nombre));
+      console.log(`[DEBUG] Subcategorias Nivel 2 únicas para ID ${selectedId}:`, this.subcategoriasNivel2.length, this.subcategoriasNivel2.map((c: any) => c.nombre));
 
       if (this.subcategoriasNivel2.length === 0) {
         this.nuevoProducto.categoria_id = selectedId;
