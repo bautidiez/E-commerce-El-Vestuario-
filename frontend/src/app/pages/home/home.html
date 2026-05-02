@@ -45,7 +45,7 @@
       <div *ngIf="!loading && productosDestacados.length === 0 && showNoProducts" class="no-products">
         No disponible
       </div>
-      <div class="products-grid" *ngIf="!loading && productosDestacados.length > 0">
+      <div class="products-grid featured-grid" *ngIf="!loading && productosDestacados.length > 0">
         <div class="product-card" *ngFor="let producto of productosDestacados"
           [routerLink]="['/productos', producto.id]">
           <div class="product-image-container">
