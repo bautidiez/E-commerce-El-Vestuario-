@@ -558,21 +558,20 @@
 }
 
 .home-page .product-info {
-  padding: 12px 10px !important; /* Más aire pero controlado */
+  padding: 8px 10px 12px 10px !important; /* Padding muy controlado */
   display: flex !important;
   flex-direction: column !important;
   align-items: center !important;
   text-align: center !important;
-  flex-grow: 1 !important;
-  justify-content: space-between !important;
+  gap: 2px !important; /* Espacio mínimo entre elementos */
 }
 
 .home-page .product-title {
   font-size: 13px !important;
   font-weight: 600 !important;
   color: #555 !important;
-  margin-bottom: 10px !important;
-  line-height: 1.4 !important;
+  margin-bottom: 5px !important; /* Menos margen */
+  line-height: 1.2 !important;
   text-transform: uppercase;
   letter-spacing: 0.5px !important;
 }
@@ -581,20 +580,22 @@
   font-size: 26px !important;
   font-weight: 900 !important;
   color: #1a1a1a !important;
-  margin-bottom: 2px !important;
+  margin-bottom: 0px !important;
+  line-height: 1 !important;
 }
 
 .home-page .price-transfer-amount {
   font-size: 18px !important;
   font-weight: 800 !important;
   color: #e74c3c !important;
+  line-height: 1 !important;
 }
 
 .home-page .price-transfer-label {
   font-size: 9px !important;
   color: #e74c3c !important;
   font-weight: 700 !important;
-  margin-bottom: 4px !important;
+  margin-bottom: 2px !important;
 }
 
 .home-page .price-cuotas {
@@ -604,7 +605,7 @@
   background: #f0fff4 !important;
   padding: 2px 8px !important;
   border-radius: 10px !important;
-  margin-top: 5px !important;
+  margin-top: 2px !important;
 }
 
 .home-page .product-price-container {
