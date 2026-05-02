@@ -230,13 +230,20 @@ export class ProductosAdminComponent implements OnInit {
         const process = (items: any[]) => {
           if (!items || !Array.isArray(items)) return;
           items.forEach(c => {
+            if (!c || !c.id) return;
             const id = Number(c.id);
+            if (isNaN(id)) return;
+
             if (!catsMap.has(id)) {
-              catsMap.set(id, {
+              // Limpiar subcategorías para evitar anidamiento redundante en la lista plana
+              const cleanCat = {
                 ...c,
                 id: id,
-                categoria_padre_id: c.categoria_padre_id ? Number(c.categoria_padre_id) : null
-              });
+                nombre: (c.nombre || '').trim(),
+                categoria_padre_id: c.categoria_padre_id ? Number(c.categoria_padre_id) : null,
+                subcategorias: [] 
+              };
+              catsMap.set(id, cleanCat);
             }
             if (c.subcategorias && c.subcategorias.length > 0) {
               process(c.subcategorias);
@@ -246,23 +253,48 @@ export class ProductosAdminComponent implements OnInit {
         
         process(Array.isArray(data) ? data : [data]);
         
-        // Convertir Map a Array y filtrar 'Ofertas'
-        this.categorias = Array.from(catsMap.values())
+        // --- FILTRO DE UNICIDAD GLOBAL POR NOMBRE Y PADRE ---
+        // Si existen categorías con el mismo nombre bajo el mismo padre, quedarnos solo con la primera
+        const finalCatsMap = new Map<string, any>();
+        Array.from(catsMap.values()).forEach(cat => {
+          const key = `${cat.categoria_padre_id}_${cat.nombre.toLowerCase()}`;
+          if (!finalCatsMap.has(key)) {
+            finalCatsMap.set(key, cat);
+          }
+        });
+
+        this.categorias = Array.from(finalCatsMap.values())
           .filter((c: any) => (c.nombre || '').trim().toLowerCase() !== 'ofertas');
 
-        console.log('[DEBUG] Total categorías únicas:', this.categorias.length);
+        console.log('[DEBUG] Total categorías únicas finales:', this.categorias.length);
 
         // La estructura real es: Indumentaria (nivel 1) → Remeras/Shorts (nivel 2)
-        this.categoriasPadre = this.categorias.filter((cat: any) => {
+        const filteredPadres = this.categorias.filter((cat: any) => {
           const nombre = (cat.nombre || '').trim().toLowerCase();
           return cat.categoria_padre_id !== null && (nombre === 'remeras' || nombre === 'shorts');
         });
 
+        // Asegurar que categorías padre sean únicas por nombre
+        const seenPadreNames = new Set<string>();
+        this.categoriasPadre = filteredPadres.filter(cat => {
+          const name = (cat.nombre || '').trim().toLowerCase();
+          if (seenPadreNames.has(name)) return false;
+          seenPadreNames.add(name);
+          return true;
+        });
+
         // Fallback: si no hay con padre, buscar cualquiera con ese nombre
         if (this.categoriasPadre.length === 0) {
-          this.categoriasPadre = this.categorias.filter((cat: any) => {
+          const fallbackPadres = this.categorias.filter((cat: any) => {
             const nombre = (cat.nombre || '').trim().toLowerCase();
             return nombre === 'remeras' || nombre === 'shorts';
+          });
+          const seenFallbackNames = new Set<string>();
+          this.categoriasPadre = fallbackPadres.filter(cat => {
+            const name = (cat.nombre || '').trim().toLowerCase();
+            if (seenFallbackNames.has(name)) return false;
+            seenFallbackNames.add(name);
+            return true;
           });
         }
 

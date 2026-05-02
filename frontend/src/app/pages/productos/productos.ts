@@ -386,15 +386,19 @@ export class ProductosComponent implements OnInit, OnDestroy {
           if (cat.categoria_padre_id) {
             const parent = categoryMap.get(cat.categoria_padre_id);
             if (parent) {
-              // Evitar duplicados: check if ID already exists in subcategorias
-              const exists = parent.subcategorias.some((s: any) => s.id === cat.id);
+              // Evitar duplicados por ID o por NOMBRE bajo el mismo padre
+              const exists = parent.subcategorias.some((s: any) => 
+                s.id === cat.id || s.nombre.toLowerCase().trim() === cat.nombre.toLowerCase().trim()
+              );
               if (!exists) {
                 parent.subcategorias.push(cat);
               }
             }
           } else {
-            // Evitar duplicados en roots
-            const exists = roots.some((r: any) => r.id === cat.id);
+            // Evitar duplicados en roots por ID o por NOMBRE
+            const exists = roots.some((r: any) => 
+              r.id === cat.id || r.nombre.toLowerCase().trim() === cat.nombre.toLowerCase().trim()
+            );
             if (!exists) {
               roots.push(cat);
             }
