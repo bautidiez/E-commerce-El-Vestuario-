@@ -210,26 +210,33 @@ export class ProductosAdminComponent implements OnInit {
   loadCategorias() {
     this.apiService.getCategorias(true, undefined, true).subscribe({
       next: (data) => {
-        // Normalizar y APLANAR la estructura si viene anidada (por culpa del caché del servicio)
-        const allCats: any[] = [];
+        // Usar un Map para evitar DUPLICADOS por ID durante el aplanamiento
+        const catsMap = new Map<number, any>();
+        
         const process = (items: any[]) => {
+          if (!items || !Array.isArray(items)) return;
           items.forEach(c => {
-            allCats.push({
-              ...c,
-              id: Number(c.id),
-              categoria_padre_id: c.categoria_padre_id ? Number(c.categoria_padre_id) : null
-            });
+            const id = Number(c.id);
+            if (!catsMap.has(id)) {
+              catsMap.set(id, {
+                ...c,
+                id: id,
+                categoria_padre_id: c.categoria_padre_id ? Number(c.categoria_padre_id) : null
+              });
+            }
             if (c.subcategorias && c.subcategorias.length > 0) {
               process(c.subcategorias);
             }
           });
         };
+        
         process(Array.isArray(data) ? data : [data]);
+        
+        // Convertir Map a Array y filtrar 'Ofertas'
+        this.categorias = Array.from(catsMap.values())
+          .filter((c: any) => (c.nombre || '').trim().toLowerCase() !== 'ofertas');
 
-        // Guardar lista plana sin 'Ofertas'
-        this.categorias = allCats.filter((c: any) => (c.nombre || '').trim().toLowerCase() !== 'ofertas');
-
-        console.log('[DEBUG] Total categorías (aplanadas):', this.categorias.length);
+        console.log('[DEBUG] Total categorías únicas:', this.categorias.length);
 
         // La estructura real es: Indumentaria (nivel 1) → Remeras/Shorts (nivel 2)
         this.categoriasPadre = this.categorias.filter((cat: any) => {
