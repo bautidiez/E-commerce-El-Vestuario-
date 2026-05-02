@@ -183,16 +183,13 @@ export class PromocionesAdminComponent implements OnInit {
   loadCategorias() {
     this.apiService.getCategoriasTree().subscribe({
       next: (data: any[]) => {
-        console.log('DEBUG: Árbol de categorías para promociones:', data);
-        if (!data || data.length === 0) {
-          console.warn('DEBUG: No se recibieron categorías');
-        }
+        console.log('DEBUG: Árbol de categorías limpio para promociones:', data);
         this.categorias = data;
         this.cdr.detectChanges();
       },
       error: (error: any) => {
         console.error('Error cargando árbol de categorías:', error);
-        // Fallback: tratar de cargar plano si el árbol falla
+        // Fallback usando getCategorias plano (que también vendrá limpio)
         this.apiService.getCategorias(true, undefined, true).subscribe(data => {
             if (data) {
                 this.categorias = data;

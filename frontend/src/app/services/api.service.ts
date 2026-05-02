@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
-import { shareReplay, tap } from 'rxjs/operators';
+import { shareReplay, tap, map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -306,6 +306,7 @@ export class ApiService {
     const url = `${this.apiUrl}/categorias?${params.toString()}`;
     
     const request$ = this.http.get(url, { headers: this.getHeaders(url) }).pipe(
+      map(data => this.deduplicateCategories(data, flat)),
       shareReplay(1)
     );
 
@@ -315,7 +316,76 @@ export class ApiService {
 
   getCategoriasTree(): Observable<any> {
     const url = `${this.apiUrl}/categorias/tree`;
-    return this.http.get(url, { headers: this.getHeaders(url) });
+    return this.http.get(url, { headers: this.getHeaders(url) }).pipe(
+      map(data => this.deduplicateCategories(data, false)),
+      shareReplay(1)
+    );
+  }
+
+  /**
+   * 🧹 LIMPIEZA GLOBAL DE CATEGORÍAS
+   * Elimina duplicados por ID y por Nombre+Padre para evitar redundancias en la UI.
+   */
+  private deduplicateCategories(data: any, flat: boolean): any {
+    if (!data) return data;
+    const items = Array.isArray(data) ? data : [data];
+    
+    const catsMap = new Map<number, any>();
+    
+    const process = (nodes: any[]) => {
+      if (!nodes || !Array.isArray(nodes)) return;
+      nodes.forEach(n => {
+        const id = Number(n.id);
+        if (isNaN(id)) return;
+
+        if (!catsMap.has(id)) {
+          const cleanNode = {
+            ...n,
+            id: id,
+            nombre: (n.nombre || '').trim(),
+            categoria_padre_id: n.categoria_padre_id ? Number(n.categoria_padre_id) : null,
+            subcategorias: flat ? [] : (n.subcategorias || [])
+          };
+          
+          // Si no es flat, procesar hijos de forma recursiva (pero mantener la estructura)
+          if (!flat && cleanNode.subcategorias.length > 0) {
+            cleanNode.subcategorias = this.deduplicateCategories(cleanNode.subcategorias, false);
+          }
+          
+          catsMap.set(id, cleanNode);
+        }
+      });
+    };
+
+    process(items);
+
+    // Si es flat, aplicamos filtro de unicidad por Nombre + Padre
+    if (flat) {
+      const finalMap = new Map<string, any>();
+      Array.from(catsMap.values()).forEach(c => {
+        const key = `${c.categoria_padre_id}_${c.nombre.toLowerCase()}`;
+        if (!finalMap.has(key)) {
+          finalMap.set(key, c);
+        }
+      });
+      return Array.from(finalMap.values());
+    }
+
+    // Si es árbol, ya se procesó recursivamente arriba
+    // Solo nos aseguramos de no devolver duplicados en la raíz
+    const rootsMap = new Map<string, any>();
+    items.forEach(item => {
+      const id = Number(item.id);
+      if (catsMap.has(id)) {
+        const c = catsMap.get(id);
+        const key = `${c.categoria_padre_id}_${c.nombre.toLowerCase()}`;
+        if (!rootsMap.has(key)) {
+          rootsMap.set(key, c);
+        }
+      }
+    });
+
+    return Array.from(rootsMap.values());
   }
 
   createCategoria(categoria: any): Observable<any> {
