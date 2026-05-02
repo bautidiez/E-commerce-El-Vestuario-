@@ -524,57 +524,95 @@
 }
 
 .home-page .product-card {
-  width: 260px !important; /* Un poco más angostas para que queden más juntas */
-  flex: 0 1 260px !important;
-  border-radius: 12px !important;
-  margin-bottom: 8px !important;
+  width: 250px !important; /* Ligeramente más angosta para elegancia */
+  flex: 0 1 250px !important;
+  border-radius: 15px !important; /* Bordes más redondeados y modernos */
+  margin-bottom: 12px !important;
+  background: #fff !important;
+  border: 1px solid #efefef !important;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.05) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.home-page .product-card:hover {
+  transform: translateY(-8px) !important;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.12) !important;
+  border-color: #ddd !important;
 }
 
 .home-page .product-image {
-  height: 220px !important;
+  height: 240px !important; /* Más presencia de la imagen */
   width: 100% !important;
-  object-fit: contain !important; /* Asegura que la prenda se vea completa */
-  background: #f9f9f9 !important; /* Fondo suave para uniformidad */
-  padding: 10px !important;
-  transition: transform 0.5s ease;
+  object-fit: contain !important;
+  background: #ffffff !important; /* Fondo blanco puro para resaltar productos */
+  padding: 15px !important;
+  transition: transform 0.6s ease !important;
+  border-bottom: 1px solid #f5f5f5 !important;
 }
 
 .home-page .product-card:hover .product-image {
-  transform: scale(1.05); /* Efecto de zoom suave al pasar el mouse */
+  transform: scale(1.08) !important;
 }
 
 .home-page .product-info {
-  padding: 6px 8px !important; /* Padding más compacto */
+  padding: 12px 10px !important; /* Más aire pero controlado */
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+  flex-grow: 1 !important;
+  justify-content: space-between !important;
 }
 
 .home-page .product-title {
-  font-size: 14px !important; /* Más pequeño */
-  min-height: auto !important; /* Menos altura fija */
-  margin-bottom: 4px !important;
-  line-height: 1.2 !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #555 !important;
+  margin-bottom: 10px !important;
+  line-height: 1.4 !important;
   text-transform: uppercase;
+  letter-spacing: 0.5px !important;
 }
 
 .home-page .product-price {
-  font-size: 24px !important; /* Tamaño más equilibrado */
+  font-size: 26px !important;
   font-weight: 900 !important;
-  color: #000 !important;
+  color: #1a1a1a !important;
+  margin-bottom: 2px !important;
 }
 
 .home-page .price-transfer-amount {
-  font-size: 16px !important; 
+  font-size: 18px !important;
   font-weight: 800 !important;
+  color: #e74c3c !important;
 }
 
-.home-page .price-transfer-label,
+.home-page .price-transfer-label {
+  font-size: 9px !important;
+  color: #e74c3c !important;
+  font-weight: 700 !important;
+  margin-bottom: 4px !important;
+}
+
 .home-page .price-cuotas {
   font-size: 10px !important;
-  margin-top: 1px !important;
+  color: #27ae60 !important;
+  font-weight: 600 !important;
+  background: #f0fff4 !important;
+  padding: 2px 8px !important;
+  border-radius: 10px !important;
+  margin-top: 5px !important;
 }
 
 .home-page .product-price-container {
-  gap: 2px !important;
-  margin-top: 2px !important;
+  gap: 0px !important;
+  margin-top: 0px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
 }
 
 /* Responsivo para el Grid */
