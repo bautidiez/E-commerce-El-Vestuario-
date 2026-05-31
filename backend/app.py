@@ -185,11 +185,11 @@ scheduler.add_job(
     replace_existing=True
 )
 
-# 2. Procesamiento de Newsletter cada 1 hora
+# 2. Procesamiento de Newsletter cada 6 horas
 scheduler.add_job(
     func=process_scheduled_newsletters,
     trigger="interval",
-    hours=1,
+    hours=6,
     args=[app],
     id='process_newsletters',
     name='Enviar newsletters programados',
