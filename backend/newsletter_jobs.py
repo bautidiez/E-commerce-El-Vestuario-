@@ -29,19 +29,28 @@ def process_scheduled_newsletters(app):
                 elif item.tipo == 'semanal':
                     # dia_semana: 0=Lunes, 6=Domingo
                     current_day = now_arg.weekday()
-                    current_time = now_arg.strftime("%H:%M")
                     
-                    if current_day == item.dia_semana and current_time == item.hora_envio:
-                        # Evitar doble envío en el mismo día
-                        if not item.last_run_at or item.last_run_at.date() < now_utc.date():
-                            should_send = True
+                    if current_day == item.dia_semana:
+                        try:
+                            # hora_envio es HH:MM
+                            h, m = map(int, item.hora_envio.split(':'))
+                            scheduled_time_today = now_arg.replace(hour=h, minute=m, second=0, microsecond=0)
+                            if now_arg >= scheduled_time_today:
+                                # Evitar doble envío en el mismo día
+                                if not item.last_run_at or item.last_run_at.date() < now_utc.date():
+                                    should_send = True
+                        except Exception:
+                            # Fallback en caso de formato inesperado
+                            current_time = now_arg.strftime("%H:%M")
+                            if current_time == item.hora_envio:
+                                if not item.last_run_at or item.last_run_at.date() < now_utc.date():
+                                    should_send = True
                 
                 elif item.tipo == 'mensual':
                     # Posición del mes (1=primero, 5=último) y día de la semana
                     current_day = now_arg.weekday()
-                    current_time = now_arg.strftime("%H:%M")
                     
-                    if current_day == item.dia_semana and current_time == item.hora_envio:
+                    if current_day == item.dia_semana:
                         # Calcular posición actual
                         pos = (now_arg.day - 1) // 7 + 1
                         
@@ -54,8 +63,19 @@ def process_scheduled_newsletters(app):
                                 es_ultimo = True
                         
                         if pos == item.posicion_mes or (item.posicion_mes == 5 and es_ultimo):
-                            if not item.last_run_at or item.last_run_at.date() < now_utc.date():
-                                should_send = True
+                            try:
+                                h, m = map(int, item.hora_envio.split(':'))
+                                scheduled_time_today = now_arg.replace(hour=h, minute=m, second=0, microsecond=0)
+                                if now_arg >= scheduled_time_today:
+                                    # Evitar doble envío en el mismo día
+                                    if not item.last_run_at or item.last_run_at.date() < now_utc.date():
+                                        should_send = True
+                            except Exception:
+                                # Fallback en caso de formato inesperado
+                                current_time = now_arg.strftime("%H:%M")
+                                if current_time == item.hora_envio:
+                                    if not item.last_run_at or item.last_run_at.date() < now_utc.date():
+                                        should_send = True
                 
                 if should_send:
                     print(f"DEBUG SCHEDULER: Ejecutando newsletter programado ID {item.id} - {item.asunto}")
