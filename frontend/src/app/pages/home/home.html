@@ -92,7 +92,7 @@
   <section class="ofertas-section" *ngIf="mostrarSeccionOfertas">
     <div class="container">
       <h2>Ofertas Imperdibles</h2>
-      <div class="products-grid">
+      <div class="products-grid featured-grid">
         <div class="product-card" *ngFor="let producto of productosOfertas" [routerLink]="['/productos', producto.id]">
           <div class="product-image-container">
             <img [src]="getImagenPrincipal(producto)" [alt]="producto.nombre" class="product-image" loading="lazy">
